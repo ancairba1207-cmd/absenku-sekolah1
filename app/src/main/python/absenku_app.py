@@ -103,11 +103,29 @@ class SupabaseDB:
             return RemoteResult([RemoteRow(x) for x in self._delete('siswa', {'id':f'eq.{params[0]}'} )])
         if u.startswith('DELETE FROM TENAGA'):
             return RemoteResult([RemoteRow(x) for x in self._delete('tenaga', {'id':f'eq.{params[0]}'} )])
+        # simple users lookup
+        if u == 'SELECT USERNAME FROM USERS ORDER BY ID LIMIT 1':
+            rows = self._get('users', {'select':'username','order':'id.asc','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
         # login
         if 'FROM USERS WHERE USERNAME=? AND PASSWORD=?' in u:
             rows=self._get('users', {'select':'*','username':f'eq.{params[0]}','password':f'eq.{params[1]}','limit':'1'})
             return RemoteResult([RemoteRow(x) for x in rows])
-        # count queries
+        # count queries - generic COUNT(*) compatibility
+        m_count = __import__('re').match(r'^SELECT COUNT\(\*\) FROM ([A-Z_]+)(?: WHERE (.*))?$', u)
+        if m_count:
+            table = m_count.group(1).lower()
+            where = m_count.group(2) or ''
+            params_list = list(params)
+            query = {'select':'id','limit':'10000'}
+            if 'TANGGAL BETWEEN ? AND ?' in where and len(params_list) >= 2:
+                query['gte.tanggal'] = params_list[0]; query['lte.tanggal'] = params_list[1]
+            elif 'TANGGAL=?' in where and 'STATUS=' in where and len(params_list) >= 1:
+                query['tanggal'] = f'eq.{params_list[0]}'
+                if len(params_list) >= 2:
+                    query['status'] = f'eq.{params_list[1]}'
+            rows = self._get(table, query)
+            return RemoteResult([(len(rows),)])
         if u == 'SELECT COUNT(*) FROM SISWA':
             rows=self._get('siswa', {'select':'id','limit':'1000'})
             return RemoteResult([(len(rows),)])
@@ -183,14 +201,14 @@ def add_column(c, table, column, definition):
     return None
 
 def init_db():
-    # Tabel dibuat di Supabase SQL Editor. Jangan membuat startup aplikasi
-    # bergantung pada jaringan; cukup buat admin jika tabel users masih kosong.
-    c=db()
+    # Jangan gunakan SQL/SQLite untuk startup. Pastikan akun admin ada
+    # langsung melalui REST Supabase sehingga startup APK tidak bergantung
+    # pada parser SQL kompatibilitas.
+    c = db()
     try:
-        rows = c.execute('SELECT username FROM users ORDER BY id LIMIT 1').fetchall()
+        rows = c._get('users', {'select':'id,username','limit':'1'})
         if not rows:
-            c.execute('INSERT INTO users(username,password,role) VALUES(?,?,?)', (ADMIN_USER, ADMIN_PASS, 'admin'))
-            c.commit()
+            c._post('users', {'username': ADMIN_USER, 'password': ADMIN_PASS, 'role': 'admin'})
     finally:
         c.close()
 
