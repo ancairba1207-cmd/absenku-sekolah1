@@ -97,14 +97,13 @@ class SupabaseDB:
             'Authorization': 'Bearer ' + SUPABASE_KEY,
             'Content-Type': content_type,
             'Content-Length': str(len(data)),
-            'Cache-Control': '3600',
-            'x-upsert': 'true'
+            'Cache-Control': '3600'
         }
 
         last_error = None
         for attempt in range(3):
             try:
-                r = self.requests.put(
+                r = self.requests.post(
                     url,
                     headers=h,
                     data=data,
@@ -113,7 +112,7 @@ class SupabaseDB:
                 if r.ok:
                     return SUPABASE_URL.rstrip('/') + f'/storage/v1/object/public/{bucket}/{path}'
 
-                last_error = f"Supabase Storage PUT {r.status_code}: {r.text[:300]}"
+                last_error = f"Supabase Storage POST {r.status_code}: {r.text[:300]}"
 
             except Exception as e:
                 last_error = f"{type(e).__name__}: {e}"
