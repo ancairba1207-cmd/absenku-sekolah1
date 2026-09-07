@@ -1113,6 +1113,13 @@ let scanner=null, processing=false;
 function show(t,ok){{document.getElementById('hasil').innerHTML='<div class="'+(ok?'ok':'warn')+'">'+t+'</div>';}}
 function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
 function doubleScanFeedback(){{try{{AndroidPrint.doubleScanFeedback();}}catch(e){{try{{navigator.vibrate([0,180,100,180]);}}catch(_){{}}}}}}
+function pulangFeedback(){{
+  try{{
+    const audio=new Audio('/static/sound_pulang.mp3');
+    audio.volume=1.0;
+    audio.play().catch(()=>{{}});
+  }}catch(e){{}}
+}}
 function showScanResult(ok,title,name,time,msg){{
  const ov=document.getElementById('scanOverlay'),p=document.getElementById('scanPopup');
  if(!ov)return;
@@ -1131,7 +1138,7 @@ function startScanner(){{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
-      .then(r=>r.json()).then(d=>{{if(d.ok) successFeedback(); else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback(); showScanResult(d.ok,d.ok?'ABSENSI BERHASIL':((d.message||'').toLowerCase().includes('sudah tercatat')?'⚠️ QR SUDAH DI-SCAN!':'SCAN DITOLAK'),d.nama||'',d.jam||'',d.message||''); show(d.message,d.ok); if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
+      .then(r=>r.json()).then(d=>{{if(d.ok) {{ successFeedback(); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback(); showScanResult(d.ok,d.ok?'ABSENSI BERHASIL':((d.message||'').toLowerCase().includes('sudah tercatat')?'⚠️ QR SUDAH DI-SCAN!':'SCAN DITOLAK'),d.nama||'',d.jam||'',d.message||''); show(d.message,d.ok); if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
       .catch(()=>{{show('Gagal menghubungi server.',false);document.getElementById('scan-status').textContent='Gagal';}})
       .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
   }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
