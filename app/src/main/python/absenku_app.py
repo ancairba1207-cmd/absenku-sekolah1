@@ -835,7 +835,7 @@ def export_excel():
         from openpyxl.drawing.image import Image as XLImage
         from io import BytesIO
         from flask import send_file
-    except ImportError: return "Modul Excel belum terpasang. Jalankan: pip install openpyxl",500
+    except Exception as e: return f"ERROR DOWNLOAD EXCEL: {type(e).__name__}: {e}",500
     c=db()
     try:
         siswa=c._get("absensi", {
