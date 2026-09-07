@@ -113,7 +113,7 @@ class SupabaseDB:
         u=q.upper()
         # INSERT
         if u.startswith('INSERT INTO SISWA'):
-            vals=dict(zip(['nis','nama','kelas','qr','orang_tua','whatsapp','hubungan'], params))
+            vals=dict(zip(['nis','nama','kelas','qr','orang_tua','whatsapp','hubungan','foto'], params))
             return RemoteResult([RemoteRow(x) for x in self._post('siswa', vals)])
         if u.startswith('INSERT INTO TENAGA'):
             vals=dict(zip(['nip','nama','jabatan','qr'], params))
