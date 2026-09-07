@@ -177,10 +177,29 @@ class SupabaseDB:
             return RemoteResult([RemoteRow(x) for x in rows])
         # reports
         if 'FROM ABSENSI WHERE TANGGAL BETWEEN ? AND ?' in u:
-            rows=self._get('absensi', {'select':'tanggal,jam,nama,kelas,status','gte.tanggal':params[0],'lte.tanggal':params[1],'order':'tanggal.desc,nama.asc,kelas.asc,jam.asc','limit':'10000'})
+            rows=self._get(
+                'absensi',
+                {
+                    'select':'tanggal,jam,nama,kelas,status',
+                    'gte.tanggal':params[0],
+                    'lte.tanggal':params[1],
+                    'order':'tanggal.desc,nama.asc,kelas.asc,jam.asc',
+                    'limit':'10000'
+                }
+            )
             return RemoteResult([RemoteRow(x) for x in rows])
+
         if 'FROM ABSENSI_TENAGA WHERE TANGGAL BETWEEN ? AND ?' in u:
-            rows=self._get('absensi_tenaga', {'select':'tanggal,jam,nama,jabatan,status','gte.tanggal':params[0],'lte.tanggal':params[1],'order':'tanggal.desc,nama.asc,jam.asc','limit':'10000'})
+            rows=self._get(
+                'absensi_tenaga',
+                {
+                    'select':'tanggal,jam,nama,jabatan,status',
+                    'gte.tanggal':params[0],
+                    'lte.tanggal':params[1],
+                    'order':'tanggal.desc,nama.asc,jam.asc',
+                    'limit':'10000'
+                }
+            )
             return RemoteResult([RemoteRow(x) for x in rows])
         raise NotImplementedError('Supabase SQL belum didukung: '+q)
     def commit(self): pass
@@ -252,6 +271,16 @@ input,select{{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10p
 @media(max-width:650px){{header{{padding:14px 10px;border-radius:0 0 18px 18px}} .logo{{width:68px;height:68px}} header h1{{font-size:18px}} header p{{font-size:12px}} main{{padding:8px}} .card{{padding:12px;border-radius:14px}} .grid{{grid-template-columns:1fr 1fr;gap:8px}} .stat{{padding:10px;font-size:12px}} .stat b{{font-size:21px}} .btn{{padding:11px 8px;font-size:13px}} table{{font-size:11px}}}}
 @media(max-width:380px){{.grid{{grid-template-columns:1fr}} .stat{{padding:11px}} header h1{{font-size:17px}} .nav a{{font-size:12px;padding:8px 9px}} .card{{padding:10px}} input,select{{font-size:16px}} #reader{{max-width:100vw;margin-left:auto;margin-right:auto}}}}
 @media(min-width:651px){{main{{max-width:1100px;padding:18px}} .card{{padding:18px}} .grid{{grid-template-columns:repeat(4,minmax(0,1fr))}} #reader{{max-width:560px}}}}
+.scan-overlay{{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.48)}}
+.scan-overlay.show{{display:flex}}
+.scan-popup{{width:min(92vw,520px);background:white;border-radius:24px;padding:26px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.28);transform:scale(.72);animation:popIn .28s ease-out forwards}}
+.scan-popup .icon{{font-size:64px}}
+.scan-popup h2{{margin:8px 0;font-size:26px}}
+.scan-popup p{{margin:5px 0;font-size:17px}}
+.scan-popup.success h2{{color:#15803d}}
+.scan-popup.error h2{{color:#b91c1c}}
+@keyframes popIn{{to{{transform:scale(1)}}}}
+@media(max-width:480px){{.scan-popup{{padding:22px 16px}}.scan-popup .icon{{font-size:52px}}.scan-popup h2{{font-size:22px}}.scan-popup p{{font-size:15px}}}}
 @media print{{body{{background:white!important}} header,nav,.btn,button,.small{{display:none!important}} main{{padding:0!important}} .card{{box-shadow:none!important;border:0!important;margin:0!important}} table{{min-width:0!important;display:table!important;font-size:11px!important}} #reader{{display:none!important}}}}
 </style></head><body>
 <header><img class="logo" src="data:image/png;base64,{LOGO_B64}" alt="Logo Sekolah"><h1>{SEKOLAH}</h1><p>ABSENKU SEKOLAH • Siswa • Guru • Tendik</p></header>
@@ -476,12 +505,24 @@ def qr_staff(tid):
 @login_required
 def scan():
     status=request.args.get("status","Masuk"); status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><h2>📷 Scan Siswa {status}</h2><div id="reader"></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div><div id="hasil"></div></div>
+    body=f"""<div class="card"><h2>📷 Scan Siswa {status}</h2><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div><div id="hasil"></div></div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
 let scanner=null, processing=false;
 function show(t,ok){{document.getElementById('hasil').innerHTML='<div class="'+(ok?'ok':'warn')+'">'+t+'</div>';}}
 function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
+function doubleScanFeedback(){{try{{AndroidPrint.doubleScanFeedback();}}catch(e){{try{{navigator.vibrate([0,180,100,180]);}}catch(_){{}}}}}}
+function showScanResult(ok,title,name,time,msg){{
+ const ov=document.getElementById('scanOverlay'),p=document.getElementById('scanPopup');
+ if(!ov)return;
+ p.className='scan-popup '+(ok?'success':'error');
+ document.getElementById('scanIcon').textContent=ok?'✅':'⚠️';
+ document.getElementById('scanTitle').textContent=title;
+ document.getElementById('scanName').textContent=name||msg||'';
+ document.getElementById('scanTime').textContent=time?('🕐 '+time):'';
+ ov.classList.remove('show');void ov.offsetWidth;ov.classList.add('show');
+ setTimeout(()=>ov.classList.remove('show'),2300);
+}}
 function startScanner(){{
   scanner=new Html5Qrcode('reader');
   const config={{fps:10,qrbox:(w,h)=>{{const q=Math.floor(Math.min(w,h)*0.68);return {{width:q,height:q}};}}}};
@@ -489,7 +530,7 @@ function startScanner(){{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
-      .then(r=>r.json()).then(d=>{{if(d.ok) successFeedback(); show(d.message,d.ok); if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
+      .then(r=>r.json()).then(d=>{{if(d.ok) successFeedback(); else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback(); showScanResult(d.ok,d.ok?'ABSENSI BERHASIL':((d.message||'').toLowerCase().includes('sudah tercatat')?'⚠️ QR SUDAH DI-SCAN!':'SCAN DITOLAK'),d.nama||'',d.jam||'',d.message||''); show(d.message,d.ok); if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
       .catch(()=>{{show('Gagal menghubungi server.',false);document.getElementById('scan-status').textContent='Gagal';}})
       .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
   }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
@@ -518,12 +559,24 @@ def proses_scan():
 @login_required
 def scan_tenaga():
     status=request.args.get("status","Masuk");status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><h2>📷 Scan Guru/Tendik {status}</h2><div id="reader"></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div><div id="hasil"></div></div>
+    body=f"""<div class="card"><h2>📷 Scan Guru/Tendik {status}</h2><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div><div id="hasil"></div></div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
 let scanner=null,processing=false;
 function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
-function startScanner(){{scanner=new Html5Qrcode('reader');const config={{fps:10,qrbox:(w,h)=>{{const q=Math.floor(Math.min(w,h)*0.68);return {{width:q,height:q}};}}}};scanner.start({{facingMode:{{exact:'environment'}}}},config,(x)=>{{if(processing)return;processing=true;document.getElementById('scan-status').textContent='QR terbaca, memproses...';fetch('/proses_scan_tenaga?kode='+encodeURIComponent(x)+'&status='+encodeURIComponent({status!r})).then(r=>r.json()).then(d=>{{if(d.ok) successFeedback();document.getElementById('hasil').innerHTML='<div class="'+(d.ok?'ok':'warn')+'">'+d.message+'</div>';document.getElementById('scan-status').textContent=d.ok?'✅ Scan berhasil':'⚠️ Silakan coba lagi';}}).catch(()=>{{document.getElementById('hasil').innerHTML='<div class="warn">Gagal menghubungi server.</div>';}}).finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));}},()=>{{}}).catch(()=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});}}
+function doubleScanFeedback(){{try{{AndroidPrint.doubleScanFeedback();}}catch(e){{try{{navigator.vibrate([0,180,100,180]);}}catch(_){{}}}}}}
+function showScanResult(ok,title,name,time,msg){{
+ const ov=document.getElementById('scanOverlay'),p=document.getElementById('scanPopup');
+ if(!ov)return;
+ p.className='scan-popup '+(ok?'success':'error');
+ document.getElementById('scanIcon').textContent=ok?'✅':'⚠️';
+ document.getElementById('scanTitle').textContent=title;
+ document.getElementById('scanName').textContent=name||msg||'';
+ document.getElementById('scanTime').textContent=time?('🕐 '+time):'';
+ ov.classList.remove('show');void ov.offsetWidth;ov.classList.add('show');
+ setTimeout(()=>ov.classList.remove('show'),2300);
+}}
+function startScanner(){{scanner=new Html5Qrcode('reader');const config={{fps:10,qrbox:(w,h)=>{{const q=Math.floor(Math.min(w,h)*0.68);return {{width:q,height:q}};}}}};scanner.start({{facingMode:{{exact:'environment'}}}},config,(x)=>{{if(processing)return;processing=true;document.getElementById('scan-status').textContent='QR terbaca, memproses...';fetch('/proses_scan_tenaga?kode='+encodeURIComponent(x)+'&status='+encodeURIComponent({status!r})).then(r=>r.json()).then(d=>{{if(d.ok) successFeedback();else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();showScanResult(d.ok,d.ok?'ABSENSI BERHASIL':((d.message||'').toLowerCase().includes('sudah tercatat')?'⚠️ QR SUDAH DI-SCAN!':'SCAN DITOLAK'),d.nama||'',d.jam||'',d.message||'');document.getElementById('hasil').innerHTML='<div class="'+(d.ok?'ok':'warn')+'">'+d.message+'</div>';document.getElementById('scan-status').textContent=d.ok?'✅ Scan berhasil':'⚠️ Silakan coba lagi';}}).catch(()=>{{document.getElementById('hasil').innerHTML='<div class="warn">Gagal menghubungi server.</div>';}}).finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));}},()=>{{}}).catch(()=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});}}
 startScanner();
 </script>"""
     return page("Scan Guru",body)
