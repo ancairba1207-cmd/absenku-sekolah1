@@ -613,18 +613,33 @@ def tes_supabase():
 def laporan():
     today=date.today()
     period=request.args.get("period","harian")
-    dari=request.args.get("dari","").strip(); sampai=request.args.get("sampai","").strip()
+    dari=request.args.get("dari","").strip()
+    sampai=request.args.get("sampai","").strip()
+
     if dari and sampai:
         try:
-            d1=date.fromisoformat(dari); d2=date.fromisoformat(sampai)
-            if d1>d2: d1,d2=d2,d1
-        except ValueError: d1=d2=today
-    elif period=="mingguan": d1=today-timedelta(days=6); d2=today
-    elif period=="bulanan": d1=today.replace(day=1); d2=today
-    else: d1=d2=today
-    a=d1.strftime("%Y-%m-%d"); b=d2.strftime("%Y-%m-%d")
-    c=db()
+            d1=date.fromisoformat(dari)
+            d2=date.fromisoformat(sampai)
+            if d1>d2:
+                d1,d2=d2,d1
+        except ValueError:
+            d1=d2=today
+    elif period=="mingguan":
+        d1=today-timedelta(days=6)
+        d2=today
+    elif period=="bulanan":
+        d1=today.replace(day=1)
+        d2=today
+    else:
+        d1=d2=today
+
+    a=d1.strftime("%Y-%m-%d")
+    b=d2.strftime("%Y-%m-%d")
+
+    c=None
     try:
+        c=db()
+
         siswa=c._get("absensi", {
             "select":"tanggal,jam,nama,kelas,status",
             "gte.tanggal":a,
@@ -641,41 +656,141 @@ def laporan():
             "limit":"10000"
         })
 
-        kelas_raw=c._get("siswa", {
+        siswa_kelas=c._get("siswa", {
             "select":"kelas",
             "order":"kelas.asc",
             "limit":"10000"
         })
 
-        kelas_count={}
-        for k in kelas_raw:
-            kk=(k.get("kelas") or "").strip()
-            if kk:
-                kelas_count[kk]=kelas_count.get(kk,0)+1
+    except Exception as e:
+        if c:
+            try:
+                c.close()
+            except:
+                pass
+        return page("Laporan Error", f"""<div class="card">
+        <h2>❌ Laporan Tidak Dapat Dibuka</h2>
+        <div class="warn"><b>Error:</b><br><small>{escape(str(e))}</small></div>
+        <a class="btn gray" href="/">Kembali</a>
+        </div>"""),500
 
-        kelas=[{"kelas":k,"total":v} for k,v in sorted(kelas_count.items(), key=lambda x:x[0].lower())]
     finally:
-        c.close()
+        if c:
+            try:
+                c.close()
+            except:
+                pass
+
     def group(rows,staff=False):
         m={}
         for x in rows:
-            key=(x["tanggal"],x["nama"],x["jabatan"] if staff else x["kelas"])
-            if key not in m: m[key]={"tanggal":x["tanggal"],"nama":x["nama"],"jabatan":x["jabatan"] if staff else "","kelas":x["kelas"] if not staff else "","masuk":"-","pulang":"-"}
-            if x["status"]=="Masuk": m[key]["masuk"]=x["jam"]
-            elif x["status"]=="Pulang": m[key]["pulang"]=x["jam"]
-        return sorted(m.values(),key=lambda z:(z["tanggal"],z["nama"]),reverse=True)
-    srrows=group(siswa); trrows=group(tenaga,True)
-    sr="".join(f'<tr><td>{escape(x["tanggal"])}</td><td>{escape(x["nama"])}</td><td>{escape(x["kelas"])}</td><td>{escape(x["masuk"])}</td><td>{escape(x["pulang"])}</td></tr>' for x in srrows)
-    tr="".join(f'<tr><td>{escape(x["tanggal"])}</td><td>{escape(x["nama"])}</td><td>{escape(x["jabatan"])}</td><td>{escape(x["masuk"])}</td><td>{escape(x["pulang"])}</td></tr>' for x in trrows)
-    cr="".join(f'<tr><td>{escape(x["kelas"])}</td><td>{x["total"]}</td></tr>' for x in kelas)
-    body=f'''<div class="card"><h2>📊 Laporan Absensi</h2>
-<a class="btn" href="/laporan?period=harian">Hari Ini</a><a class="btn green" href="/laporan?period=mingguan">7 Hari</a><a class="btn orange" href="/laporan?period=bulanan">Bulan Ini</a>
-<div class="card" style="margin-top:12px;background:#f8fafc"><h3>📅 Pilih Periode</h3><form method="get"><label>Dari tanggal</label><input type="date" name="dari" value="{a}" required><label>Sampai tanggal</label><input type="date" name="sampai" value="{b}" required><button class="btn purple" type="submit">🔎 Tampilkan Periode</button></form><p class="small">Bisa memilih beberapa bulan sekaligus atau rentang tahun.</p></div>
-<button type="button" class="btn gray" onclick="AndroidPrint.printPage()">🖨️ PRINT LAPORAN</button><a class="btn green" href="/export_excel?dari={a}&sampai={b}">📥 DOWNLOAD</a><p class="small">Periode: {a} sampai {b}</p></div>
-<div class="card"><h3>👨‍🎓 Absensi Siswa</h3><table><tr><th>Tanggal</th><th>Nama</th><th>Kelas</th><th>Jam Masuk</th><th>Jam Pulang</th></tr>{sr or '<tr><td colspan="5">Kosong</td></tr>'}</table></div>
-<div class="card"><h3>👨‍🏫 Absensi Guru/Tendik</h3><table><tr><th>Tanggal</th><th>Nama</th><th>Jabatan</th><th>Jam Masuk</th><th>Jam Pulang</th></tr>{tr or '<tr><td colspan="5">Kosong</td></tr>'}</table></div>
-<div class="card"><h3>📚 Jumlah Siswa per Kelas</h3><table><tr><th>Kelas</th><th>Jumlah</th></tr>{cr or '<tr><td colspan="2">Kosong</td></tr>'}</table></div>'''
+            tanggal=str(x.get("tanggal") or "")
+            nama=str(x.get("nama") or "")
+            jabatan=str(x.get("jabatan") or "") if staff else ""
+            kelas=str(x.get("kelas") or "") if not staff else ""
+            status=str(x.get("status") or "")
+            jam=str(x.get("jam") or "-")
+
+            key=(tanggal,nama,jabatan if staff else kelas)
+
+            if key not in m:
+                m[key]={
+                    "tanggal":tanggal,
+                    "nama":nama,
+                    "jabatan":jabatan,
+                    "kelas":kelas,
+                    "masuk":"-",
+                    "pulang":"-"
+                }
+
+            if status=="Masuk":
+                m[key]["masuk"]=jam
+            elif status=="Pulang":
+                m[key]["pulang"]=jam
+
+        return sorted(
+            m.values(),
+            key=lambda z:(z["tanggal"],z["nama"]),
+            reverse=True
+        )
+
+    srrows=group(siswa)
+    trrows=group(tenaga,True)
+
+    kelas_count={}
+    for x in siswa_kelas:
+        k=str(x.get("kelas") or "").strip()
+        if k:
+            kelas_count[k]=kelas_count.get(k,0)+1
+
+    kelas=[
+        {"kelas":k,"total":v}
+        for k,v in sorted(kelas_count.items(),key=lambda x:x[0].lower())
+    ]
+
+    sr="".join(
+        f'<tr><td>{escape(x["tanggal"])}</td><td>{escape(x["nama"])}</td><td>{escape(x["kelas"])}</td><td>{escape(x["masuk"])}</td><td>{escape(x["pulang"])}</td></tr>'
+        for x in srrows
+    )
+
+    tr="".join(
+        f'<tr><td>{escape(x["tanggal"])}</td><td>{escape(x["nama"])}</td><td>{escape(x["jabatan"])}</td><td>{escape(x["masuk"])}</td><td>{escape(x["pulang"])}</td></tr>'
+        for x in trrows
+    )
+
+    cr="".join(
+        f'<tr><td>{escape(x["kelas"])}</td><td>{x["total"]}</td></tr>'
+        for x in kelas
+    )
+
+    body=f'''<div class="card">
+    <h2>📊 Laporan Absensi</h2>
+    <a class="btn" href="/laporan?period=harian">Hari Ini</a>
+    <a class="btn green" href="/laporan?period=mingguan">7 Hari</a>
+    <a class="btn orange" href="/laporan?period=bulanan">Bulan Ini</a>
+
+    <div class="card" style="margin-top:12px;background:#f8fafc">
+    <h3>📅 Pilih Periode</h3>
+    <form method="get">
+    <label>Dari tanggal</label>
+    <input type="date" name="dari" value="{a}" required>
+    <label>Sampai tanggal</label>
+    <input type="date" name="sampai" value="{b}" required>
+    <button class="btn purple" type="submit">🔎 Tampilkan Periode</button>
+    </form>
+    </div>
+
+    <button type="button" class="btn gray" onclick="window.print()">🖨️ PRINT LAPORAN</button>
+    <a class="btn green" href="/export_excel?dari={a}&sampai={b}">📥 DOWNLOAD</a>
+    <p class="small">Periode: {a} sampai {b}</p>
+    </div>
+
+    <div class="card">
+    <h3>👨‍🎓 Absensi Siswa</h3>
+    <table>
+    <tr><th>Tanggal</th><th>Nama</th><th>Kelas</th><th>Jam Masuk</th><th>Jam Pulang</th></tr>
+    {sr or '<tr><td colspan="5">Kosong</td></tr>'}
+    </table>
+    </div>
+
+    <div class="card">
+    <h3>👨‍🏫 Absensi Guru/Tendik</h3>
+    <table>
+    <tr><th>Tanggal</th><th>Nama</th><th>Jabatan</th><th>Jam Masuk</th><th>Jam Pulang</th></tr>
+    {tr or '<tr><td colspan="5">Kosong</td></tr>'}
+    </table>
+    </div>
+
+    <div class="card">
+    <h3>📚 Jumlah Siswa per Kelas</h3>
+    <table>
+    <tr><th>Kelas</th><th>Jumlah</th></tr>
+    {cr or '<tr><td colspan="2">Kosong</td></tr>'}
+    </table>
+    </div>'''
+
     return page("Laporan",body)
+
 
 @app.route("/export_excel")
 @login_required
