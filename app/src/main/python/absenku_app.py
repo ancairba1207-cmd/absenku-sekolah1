@@ -90,6 +90,19 @@ class SupabaseDB:
         if not r.ok:
             raise RuntimeError(f"Supabase PATCH {r.status_code}: {r.text[:300]}")
         return r.json()
+    def _upload_storage(self, bucket, path, data, content_type):
+        url = SUPABASE_URL.rstrip('/') + f'/storage/v1/object/{bucket}/{path}'
+        h = {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': content_type,
+            'x-upsert': 'true'
+        }
+        r = self.requests.post(url, headers=h, data=data, timeout=30)
+        if not r.ok:
+            raise RuntimeError(f"Supabase Storage POST {r.status_code}: {r.text[:300]}")
+        return SUPABASE_URL.rstrip('/') + f'/storage/v1/object/public/{bucket}/{path}'
+
     def _delete(self, table, filters):
         r=self.requests.delete(self._url(table), headers=self.headers, params=filters, timeout=20)
         if not r.ok:
@@ -376,6 +389,25 @@ def home():
 
 @app.route("/siswa", methods=["GET","POST"])
 @login_required
+def upload_foto_siswa(file):
+    if not file or not file.filename:
+        return ""
+    nama_file = (file.filename.rsplit("/", 1)[-1]).strip()
+    ext = nama_file.rsplit(".", 1)[-1].lower() if "." in nama_file else ""
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        raise ValueError("Format foto harus JPG, JPEG, PNG, atau WEBP.")
+    data = file.read()
+    if len(data) > 6 * 1024 * 1024:
+        raise ValueError("Ukuran foto maksimal 6 MB.")
+    import uuid
+    nama_storage = f"siswa/{uuid.uuid4().hex}.{ext}"
+    content_type = file.mimetype or "image/jpeg"
+    c = db()
+    try:
+        return c._upload_storage("foto-siswa", nama_storage, data, content_type)
+    finally:
+        c.close()
+
 def siswa():
     if request.method == "POST":
         nis=request.form.get("nis","").strip(); nama=request.form.get("nama","").strip()
@@ -383,8 +415,9 @@ def siswa():
         ortu=request.form.get("orang_tua","").strip(); wa=request.form.get("whatsapp","").strip()
         hubungan=request.form.get("hubungan","").strip()
         try:
-            c=db(); c.execute("""INSERT INTO siswa(nis,nama,kelas,qr,orang_tua,whatsapp,hubungan)
-                VALUES(?,?,?,?,?,?,?)""",(nis,nama,kelas,qr,ortu,wa,hubungan)); c.commit(); c.close()
+            foto_url = upload_foto_siswa(request.files.get("foto"))
+            c=db(); c.execute("""INSERT INTO siswa(nis,nama,kelas,qr,orang_tua,whatsapp,hubungan,foto)
+                VALUES(?,?,?,?,?,?,?,?)""",(nis,nama,kelas,qr,ortu,wa,hubungan,foto_url)); c.commit(); c.close()
         except sqlite3.IntegrityError:
             return page("Siswa", '<div class="warn">NIS atau QR sudah digunakan.</div><a class="btn gray" href="/siswa">Kembali</a>')
         except Exception as e:
@@ -402,11 +435,13 @@ def siswa():
 <td>{escape(s["orang_tua"] or "-")}</td><td>{escape(s["whatsapp"] or "-")}</td>
 <td class="actions"><a href="/edit_siswa/{s["id"]}">✏️</a> <a href="/hapus_siswa/{s["id"]}" onclick="return confirm('Hapus siswa ini?')">🗑️</a> <a href="/qr/{s["id"]}">QR</a> {wa_btn}</td></tr>"""
     body=f"""<div class="card"><h2>👨‍🎓 Data Siswa</h2>
-<form method="post"><label>NIS</label><input name="nis" required>
+<form method="post" enctype="multipart/form-data"><label>NIS</label><input name="nis" required>
 <label>Nama</label><input name="nama" required><label>Kelas</label><input name="kelas" required>
 <label>Kode QR</label><input name="qr" placeholder="Kosongkan = NIS">
 <label>Nama Orang Tua</label><input name="orang_tua"><label>Nomor WhatsApp</label><input name="whatsapp" placeholder="628xxxxxxxxxx">
 <label>Hubungan</label><select name="hubungan"><option>Ayah</option><option>Ibu</option><option>Wali</option></select>
+<label>Foto Siswa</label><input type="file" name="foto" accept="image/jpeg,image/png,image/webp">
+<small>Pilih foto JPG, PNG, atau WEBP. Maksimal 6 MB.</small>
 <button class="btn green">➕ Simpan Siswa</button></form></div>
 <div class="card"><table><tr><th>NIS</th><th>Nama</th><th>Kelas</th><th>Orang Tua</th><th>WhatsApp</th><th>Aksi</th></tr>
 {rows or '<tr><td colspan="6">Belum ada siswa.</td></tr>'}</table></div>"""
@@ -500,14 +535,174 @@ def hapus_tenaga(tid):
 
 def qr_page(item, staff=False):
     code=escape(item["qr"] or (item["nip"] if staff else item["nis"]))
-    nama=escape(item["nama"]); sub=escape(item["jabatan"] if staff else item["kelas"])
+    nama=escape(item["nama"])
+    identitas=escape(item["nip"] if staff else item["nis"])
+    sub=escape(item["jabatan"] if staff else item["kelas"])
+    label="Guru/Tendik" if staff else "Siswa"
     back="/tenaga" if staff else "/siswa"
-    body=f"""<div class="card" style="text-align:center"><h2>🪪 QR {"Guru/Tendik" if staff else "Siswa"}</h2>
-<h3>{nama}</h3><p>{sub}</p><div id="qrcode" style="display:inline-block;margin:15px"></div>
-<p class="small">Kode: {code}</p><button class="btn" onclick="AndroidPrint.printPage()">🖨 Cetak</button></div>
-<a class="btn gray" href="{back}">⬅ Kembali</a>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script>new QRCode(document.getElementById("qrcode"),{{text:{code!r},width:240,height:240}});</script>"""
+
+    body=f"""
+    <style>
+    .qr-card-print {{
+        width: 360px;
+        margin: 20px auto;
+        padding: 22px;
+        background: white;
+        border: 2px solid #d1d5db;
+        border-radius: 18px;
+        text-align: center;
+        box-shadow: 0 4px 16px rgba(0,0,0,.12);
+        box-sizing: border-box;
+    }}
+
+    .qr-logo-print {{
+        width: 78px;
+        height: 78px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 8px;
+    }}
+
+    .qr-school-name {{
+        font-size: 21px;
+        font-weight: 800;
+        margin: 4px 0;
+    }}
+
+    .qr-card-title {{
+        font-size: 14px;
+        font-weight: 700;
+        margin: 3px 0 14px;
+        color: #555;
+        text-transform: uppercase;
+    }}
+
+    .qr-photo {{
+        width: 120px;
+        height: 145px;
+        margin: 0 auto 12px;
+        border: 2px solid #9ca3af;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f4f6;
+        color: #6b7280;
+        font-size: 13px;
+        overflow: hidden;
+    }}
+
+    .qr-photo img {{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }}
+
+    .qr-name {{
+        font-size: 21px;
+        font-weight: 800;
+        margin: 8px 0 4px;
+    }}
+
+    .qr-info {{
+        font-size: 14px;
+        margin: 3px 0;
+    }}
+
+    .qr-code-box {{
+        margin: 15px auto 8px;
+        display: flex;
+        justify-content: center;
+    }}
+
+    .qr-code-text {{
+        font-size: 12px;
+        color: #555;
+        word-break: break-all;
+    }}
+
+    @media print {{
+        body {{
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }}
+
+        header, nav, .btn, button, .small {{
+            display: none !important;
+        }}
+
+        main {{
+            padding: 0 !important;
+            margin: 0 !important;
+        }}
+
+        .qr-card-print {{
+            width: 360px !important;
+            margin: 15px auto !important;
+            padding: 18px !important;
+            border: 2px solid #000 !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+        }}
+
+        .qr-logo-print {{
+            width: 70px !important;
+            height: 70px !important;
+        }}
+
+        .qr-photo {{
+            width: 105px !important;
+            height: 130px !important;
+        }}
+
+        .qr-code-box {{
+            margin: 10px auto 6px !important;
+        }}
+
+        @page {{
+            size: A4 portrait;
+            margin: 10mm;
+        }}
+    }}
+    </style>
+
+    <div class="qr-card-print">
+        <img class="qr-logo-print"
+             src="data:image/png;base64,{LOGO_B64}"
+             alt="Logo Sekolah">
+
+        <div class="qr-school-name">{SEKOLAH}</div>
+        <div class="qr-card-title">Kartu QR {label}</div>
+
+        <div class="qr-photo">
+            {f'<img src="{escape(item.get("foto") or "")}" alt="Foto {label}">' if item.get("foto") else f'<span>FOTO {label.upper()}</span>'}
+        </div>
+
+        <div class="qr-name">{nama}</div>
+        <div class="qr-info"><b>{"NIP" if staff else "NIS"}:</b> {identitas}</div>
+        <div class="qr-info"><b>{"Jabatan" if staff else "Kelas"}:</b> {sub}</div>
+
+        <div id="qrcode" class="qr-code-box"></div>
+        <div class="qr-code-text">Kode QR: {code}</div>
+    </div>
+
+    <div style="text-align:center;margin-top:15px">
+        <button class="btn" onclick="AndroidPrint.printPage()">🖨 Cetak Kartu</button>
+        <a class="btn gray" href="{back}">⬅ Kembali</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+    new QRCode(document.getElementById("qrcode"), {{
+        text: {code!r},
+        width: 190,
+        height: 190
+    }});
+    </script>
+    """
+
     return page("QR",body)
 
 

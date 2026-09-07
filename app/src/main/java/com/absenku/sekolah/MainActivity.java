@@ -3,6 +3,7 @@ package com.absenku.sekolah;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.ToneGenerator;
@@ -19,6 +20,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.ValueCallback;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -29,6 +31,8 @@ import com.chaquo.python.Python;
 public class MainActivity extends Activity {
     private WebView webView;
     private static final int CAMERA_REQ = 1001;
+    private static final int FILE_CHOOSER_REQ = 1002;
+    private ValueCallback<android.net.Uri[]> filePathCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,35 @@ public class MainActivity extends Activity {
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> request.grant(request.getResources()));
             }
+
+            @Override
+            public boolean onShowFileChooser(
+                    WebView webView,
+                    ValueCallback<android.net.Uri[]> filePathCallback,
+                    FileChooserParams fileChooserParams) {
+
+                if (MainActivity.this.filePathCallback != null) {
+                    MainActivity.this.filePathCallback.onReceiveValue(null);
+                }
+
+                MainActivity.this.filePathCallback = filePathCallback;
+
+                try {
+                    Intent intent = fileChooserParams.createIntent();
+                    intent.setType("image/*");
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
+                    startActivityForResult(intent, FILE_CHOOSER_REQ);
+                    return true;
+                } catch (Exception e) {
+                    MainActivity.this.filePathCallback = null;
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Tidak dapat membuka galeri",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return false;
+                }
+            }
         });
 
         new Thread(() -> {
@@ -73,6 +106,28 @@ public class MainActivity extends Activity {
                     "text/html", "UTF-8"));
             }
         }).start();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FILE_CHOOSER_REQ) {
+            if (filePathCallback == null) return;
+
+            android.net.Uri[] results = null;
+
+            if (resultCode == RESULT_OK && data != null) {
+                android.net.Uri uri = data.getData();
+
+                if (uri != null) {
+                    results = new android.net.Uri[]{uri};
+                }
+            }
+
+            filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
+        }
     }
 
     private class AndroidBridge {
