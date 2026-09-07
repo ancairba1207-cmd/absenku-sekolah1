@@ -132,7 +132,7 @@ class SupabaseDB:
             vals=dict(zip(['nis','nama','kelas','qr','orang_tua','whatsapp','hubungan','foto'], params))
             return RemoteResult([RemoteRow(x) for x in self._post('siswa', vals)])
         if u.startswith('INSERT INTO TENAGA'):
-            vals=dict(zip(['nip','nama','jabatan','qr'], params))
+            vals=dict(zip(['nip','nama','jabatan','qr','foto'], params))
             return RemoteResult([RemoteRow(x) for x in self._post('tenaga', vals)])
         if u.startswith('INSERT INTO ABSENSI_TENAGA'):
             vals=dict(zip(['nip','nama','jabatan','tanggal','jam','status'], params))
@@ -496,14 +496,35 @@ def hapus_siswa(sid):
     return redirect(url_for("siswa"))
 
 
+def upload_foto_tenaga(file):
+    if not file or not file.filename:
+        return ""
+    nama_file = (file.filename.rsplit("/", 1)[-1]).strip()
+    ext = nama_file.rsplit(".", 1)[-1].lower() if "." in nama_file else ""
+    if ext not in ("jpg", "jpeg", "png", "webp"):
+        raise ValueError("Format foto harus JPG, JPEG, PNG, atau WEBP.")
+    data = file.read()
+    if len(data) > 6 * 1024 * 1024:
+        raise ValueError("Ukuran foto maksimal 6 MB.")
+    import uuid
+    nama_storage = f"tenaga/{uuid.uuid4().hex}.{ext}"
+    content_type = file.mimetype or "image/jpeg"
+    c = db()
+    try:
+        return c._upload_storage("foto-tenaga", nama_storage, data, content_type)
+    finally:
+        c.close()
+
+
 @app.route("/tenaga", methods=["GET","POST"])
 @login_required
 def tenaga():
     if request.method=="POST":
         nip=request.form.get("nip","").strip(); nama=request.form.get("nama","").strip()
         jab=request.form.get("jabatan","").strip(); qr=request.form.get("qr","").strip() or nip
+        foto_url = upload_foto_tenaga(request.files.get("foto"))
         try:
-            c=db(); c.execute("INSERT INTO tenaga(nip,nama,jabatan,qr) VALUES(?,?,?,?)",(nip,nama,jab,qr)); c.commit(); c.close()
+            c=db(); c.execute("INSERT INTO tenaga(nip,nama,jabatan,qr,foto) VALUES(?,?,?,?,?)",(nip,nama,jab,qr,foto_url)); c.commit(); c.close()
         except sqlite3.IntegrityError:
             return page("Guru/Tendik",'<div class="warn">NIP atau QR sudah digunakan.</div>')
         except Exception as e:
@@ -515,9 +536,9 @@ def tenaga():
     rows="".join(f"""<tr><td>{escape(t['nip'])}</td><td>{escape(t['nama'])}</td><td>{escape(t['jabatan'])}</td>
 <td class="actions"><a href="/edit_tenaga/{t['id']}">✏️</a> <a href="/hapus_tenaga/{t['id']}" onclick="return confirm('Hapus data ini?')">🗑️</a> <a href="/qr_tenaga/{t['id']}">QR</a></td></tr>""" for t in data)
     body=f"""<div class="card"><h2>👨‍🏫 Guru & Tenaga Pendidik</h2>
-<form method="post"><label>NIP/ID</label><input name="nip" required><label>Nama</label><input name="nama" required>
+<form method="post" enctype="multipart/form-data"><label>NIP/ID</label><input name="nip" required><label>Nama</label><input name="nama" required>
 <label>Jabatan</label><input name="jabatan" placeholder="Guru/TU/Kepala Sekolah/Operator" required>
-<label>Kode QR</label><input name="qr" placeholder="Kosongkan = NIP"><button class="btn green">➕ Simpan</button></form></div>
+<label>Kode QR</label><input name="qr" placeholder="Kosongkan = NIP"><label>Foto Guru/Tendik</label><input type="file" name="foto" accept="image/jpeg,image/png,image/webp"><small>Pilih foto JPG, PNG, atau WEBP. Maksimal 6 MB.</small><button class="btn green">➕ Simpan</button></form></div>
 <div class="card"><table><tr><th>NIP/ID</th><th>Nama</th><th>Jabatan</th><th>Aksi</th></tr>
 {rows or '<tr><td colspan="4">Belum ada data.</td></tr>'}</table></div>"""
     return page("Guru/Tendik",body)
@@ -529,12 +550,22 @@ def edit_tenaga(tid):
     c=db(); t=c.execute("SELECT * FROM tenaga WHERE id=?",(tid,)).fetchone(); c.close()
     if not t:return "Data tidak ditemukan",404
     if request.method=="POST":
-        vals=(request.form.get("nip","").strip(),request.form.get("nama","").strip(),request.form.get("jabatan","").strip(),request.form.get("qr","").strip() or request.form.get("nip","").strip(),tid)
+        nip=request.form.get("nip","").strip()
+        nama=request.form.get("nama","").strip()
+        jab=request.form.get("jabatan","").strip()
+        qr=request.form.get("qr","").strip() or nip
+        foto_baru=upload_foto_tenaga(request.files.get("foto"))
+        if foto_baru:
+            vals=(nip,nama,jab,qr,foto_baru,tid)
+            sql="UPDATE tenaga SET nip=?,nama=?,jabatan=?,qr=?,foto=? WHERE id=?"
+        else:
+            vals=(nip,nama,jab,qr,tid)
+            sql="UPDATE tenaga SET nip=?,nama=?,jabatan=?,qr=? WHERE id=?"
         c=db()
-        try:c.execute("UPDATE tenaga SET nip=?,nama=?,jabatan=?,qr=? WHERE id=?",vals);c.commit()
+        try:c.execute(sql,vals);c.commit()
         except sqlite3.IntegrityError:c.close();return page("Edit Guru",'<div class="warn">NIP atau QR sudah digunakan.</div>')
         c.close();return redirect(url_for("tenaga"))
-    body=f"""<div class="card"><h2>✏️ Edit Guru/Tendik</h2><form method="post">
+    body=f"""<div class="card"><h2>✏️ Edit Guru/Tendik</h2><form method="post" enctype="multipart/form-data">
 <label>NIP/ID</label><input name="nip" value="{escape(t['nip'])}" required>
 <label>Nama</label><input name="nama" value="{escape(t['nama'])}" required>
 <label>Jabatan</label><input name="jabatan" value="{escape(t['jabatan'])}" required>
@@ -554,6 +585,7 @@ def qr_page(item, staff=False):
     nama=escape(item["nama"])
     identitas=escape(item["nip"] if staff else item["nis"])
     sub=escape(item["jabatan"] if staff else item["kelas"])
+    foto=escape(item.get("foto") or "")
     label="Guru/Tendik" if staff else "Siswa"
     back="/tenaga" if staff else "/siswa"
 
