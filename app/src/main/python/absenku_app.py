@@ -114,6 +114,9 @@ class SupabaseDB:
         if u == 'SELECT COUNT(*) FROM TENAGA':
             rows=self._get('tenaga', {'select':'id','limit':'1000'})
             return RemoteResult([(len(rows),)])
+        if u == 'SELECT COUNT(*) FROM USERS':
+            rows=self._get('users', {'select':'id','limit':'1000'})
+            return RemoteResult([(len(rows),)])
         if 'SELECT COUNT(*) FROM ABSENSI WHERE TANGGAL=? AND STATUS=' in u:
             status=params[1]; rows=self._get('absensi', {'select':'id','tanggal':f'eq.{params[0]}','status':f'eq.{status}','limit':'1000'})
             return RemoteResult([(len(rows),)])
@@ -180,10 +183,12 @@ def add_column(c, table, column, definition):
     return None
 
 def init_db():
-    # Tabel dibuat di Supabase SQL Editor. Di sini hanya memastikan akun admin awal ada.
+    # Tabel dibuat di Supabase SQL Editor. Jangan membuat startup aplikasi
+    # bergantung pada jaringan; cukup buat admin jika tabel users masih kosong.
     c=db()
     try:
-        if c.execute('SELECT COUNT(*) FROM users').fetchone()[0] == 0:
+        rows = c.execute('SELECT username FROM users ORDER BY id LIMIT 1').fetchall()
+        if not rows:
             c.execute('INSERT INTO users(username,password,role) VALUES(?,?,?)', (ADMIN_USER, ADMIN_PASS, 'admin'))
             c.commit()
     finally:
