@@ -105,19 +105,20 @@ def page(title, body):
 header{{background:linear-gradient(135deg,#2563eb,#4f46e5);color:white;padding:20px;border-radius:0 0 25px 25px;text-align:center}}
 .logo{{width:88px;height:88px;object-fit:contain;background:white;border-radius:50%;padding:4px;box-shadow:0 4px 12px rgba(0,0,0,.2)}}
 header h1{{margin:4px 0;font-size:22px}} header p{{margin:0;opacity:.9}}
-main{{max-width:1000px;margin:auto;padding:16px}} .nav{{display:flex;gap:7px;overflow:auto;padding:10px 0}}
-.nav a{{white-space:nowrap;background:white;color:#1e40af;padding:9px 11px;border-radius:10px;text-decoration:none;font-size:13px}}
-.card{{background:white;padding:18px;border-radius:18px;margin:12px 0;box-shadow:0 4px 18px rgba(0,0,0,.07)}}
-.grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}}
-.stat{{padding:16px;border-radius:15px;background:#eff6ff}} .stat b{{font-size:28px}}
-.btn{{display:block;width:100%;padding:13px;border:0;border-radius:12px;background:#2563eb;color:white;text-decoration:none;text-align:center;font-weight:bold;margin-top:8px;cursor:pointer}}
+main{{width:100%;max-width:1000px;margin:auto;padding:12px}} .nav{{display:flex;gap:7px;overflow-x:auto;padding:8px 0;scrollbar-width:none}} .nav::-webkit-scrollbar{{display:none}}
+.nav a{{flex:0 0 auto;white-space:nowrap;background:white;color:#1e40af;padding:9px 11px;border-radius:10px;text-decoration:none;font-size:13px}}
+.card{{background:white;padding:15px;border-radius:16px;margin:10px 0;box-shadow:0 4px 18px rgba(0,0,0,.07);overflow:hidden}}
+.grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.stat{{padding:13px;border-radius:14px;background:#eff6ff;min-width:0}} .stat b{{font-size:25px}}
+.btn{{display:block;width:100%;padding:12px;border:0;border-radius:12px;background:#2563eb;color:white;text-decoration:none;text-align:center;font-weight:bold;margin-top:7px;cursor:pointer}}
 .green{{background:#16a34a}} .orange{{background:#ea580c}} .red{{background:#dc2626}} .gray{{background:#475569}} .purple{{background:#7c3aed}}
-input,select{{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;margin:5px 0 11px;font-size:16px}}
-table{{width:100%;border-collapse:collapse;font-size:13px}} th,td{{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}}
+input,select{{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10px;margin:5px 0 10px;font-size:16px}}
+.table-wrap{{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}} table{{width:100%;border-collapse:collapse;font-size:13px;min-width:620px;display:block;overflow-x:auto}} th,td{{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}}
 .small{{font-size:13px;color:#64748b}} .ok{{background:#dcfce7;color:#166534;padding:12px;border-radius:10px}}
 .warn{{background:#fef3c7;color:#92400e;padding:12px;border-radius:10px}}
 .actions a{{margin-right:5px}} .actions{{white-space:nowrap}}
-@media(max-width:650px){{.grid{{grid-template-columns:1fr}} table{{font-size:11px}}}}
+@media(max-width:650px){{header{{padding:14px 10px;border-radius:0 0 18px 18px}} .logo{{width:68px;height:68px}} header h1{{font-size:18px}} header p{{font-size:12px}} main{{padding:8px}} .card{{padding:12px;border-radius:14px}} .grid{{grid-template-columns:1fr 1fr;gap:8px}} .stat{{padding:10px;font-size:12px}} .stat b{{font-size:21px}} .btn{{padding:11px 8px;font-size:13px}} table{{font-size:11px}}}}
+@media(max-width:380px){{.grid{{grid-template-columns:1fr}} .stat{{padding:11px}}}}
 </style></head><body>
 <header><img class="logo" src="data:image/png;base64,{LOGO_B64}" alt="Logo Sekolah"><h1>{SEKOLAH}</h1><p>ABSENKU SEKOLAH • Siswa • Guru • Tendik</p></header>
 <main>{nav}{body}</main></body></html>"""
