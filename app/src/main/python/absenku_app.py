@@ -175,6 +175,12 @@ class SupabaseDB:
                 q['gte.tanggal']=params[0]; q['lte.tanggal']=params[1]; pi=2
             elif 'TANGGAL=?' in where and len(params)>=1:
                 q['tanggal']=f'eq.{params[0]}'; pi=1
+
+        # Filter kelas untuk Guru
+        if 'KELAS=?' in where and len(params)>pi:
+            q['kelas']=f'eq.{params[pi]}'
+            pi += 1
+
             # Support both parameterized and literal status filters.
             if 'STATUS=?' in where and len(params)>pi:
                 q['status']=f'eq.{params[pi]}'
@@ -375,6 +381,9 @@ def login():
         if row:
             session["user"] = row["username"]
             session["role"] = row["role"]
+            session["kelas"] = row["kelas"] or ""
+            if row["role"] == "guru":
+                return redirect(url_for("dashboard_guru"))
             return redirect(request.args.get("next") or "/")
         msg = '<div class="warn">Username atau password salah.</div>'
     body = f"""<div class="card"><h2>🔐 Login Admin/Guru</h2>{msg}
@@ -384,7 +393,6 @@ def login():
 <button class="btn" type="submit">Masuk</button></form>
 <p class="small">Login awal: admin / admin123. Segera ganti pada server produksi.</p></div>"""
     return page("Login", body)
-
 
 @app.route("/logout")
 def logout():
@@ -397,9 +405,34 @@ def logout():
 def dashboard_guru():
     c = db()
     today = datetime.now().strftime("%Y-%m-%d")
-    total = c.execute("SELECT COUNT(*) FROM siswa").fetchone()[0]
-    masuk = c.execute("SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Masuk'", (today,)).fetchone()[0]
-    pulang = c.execute("SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Pulang'", (today,)).fetchone()[0]
+    kelas_guru = (session.get("kelas") or "").strip()
+
+    if session.get("role") == "guru" and kelas_guru:
+        total = c.execute(
+            "SELECT COUNT(*) FROM siswa WHERE kelas=?",
+            (kelas_guru,)
+        ).fetchone()[0]
+
+        masuk = c.execute(
+            "SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Masuk' AND kelas=?",
+            (today, kelas_guru)
+        ).fetchone()[0]
+
+        pulang = c.execute(
+            "SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Pulang' AND kelas=?",
+            (today, kelas_guru)
+        ).fetchone()[0]
+    else:
+        total = c.execute("SELECT COUNT(*) FROM siswa").fetchone()[0]
+        masuk = c.execute(
+            "SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Masuk'",
+            (today,)
+        ).fetchone()[0]
+        pulang = c.execute(
+            "SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Pulang'",
+            (today,)
+        ).fetchone()[0]
+
     c.close()
 
     belum = max(total - masuk, 0)
@@ -436,31 +469,67 @@ def laporan_siswa_harian():
     if not tanggal:
         tanggal = datetime.now().strftime("%Y-%m-%d")
 
+    kelas_guru = (session.get("kelas") or "").strip()
+
     c = db()
-    rows = c.execute("""
-        SELECT
-            s.nis,
-            s.nama,
-            s.kelas,
-            MAX(CASE WHEN a.status='Masuk' THEN a.jam END) AS jam_masuk,
-            MAX(CASE WHEN a.status='Pulang' THEN a.jam END) AS jam_pulang
-        FROM siswa s
-        LEFT JOIN absensi a
-            ON a.nis = s.nis
-            AND a.tanggal = ?
-        GROUP BY s.nis, s.nama, s.kelas
-        ORDER BY s.kelas, s.nama
-    """, (tanggal,)).fetchall()
+
+    # Ambil daftar siswa sederhana agar kompatibel dengan SupabaseDB
+    if session.get("role") == "guru" and kelas_guru:
+        siswa_rows = c.execute(
+            "SELECT * FROM siswa ORDER BY kelas,nama"
+        ).fetchall()
+        siswa_rows = [r for r in siswa_rows if (r["kelas"] or "").strip() == kelas_guru]
+    else:
+        siswa_rows = c.execute(
+            "SELECT * FROM siswa ORDER BY kelas,nama"
+        ).fetchall()
+
+    # Ambil absensi pada tanggal yang dipilih
+    absensi_rows = c.execute(
+        "SELECT * FROM absensi WHERE tanggal=?",
+        (tanggal,)
+    ).fetchall()
+
     c.close()
 
+    absensi_map = {}
+
+    for a in absensi_rows:
+        nis = str(a["nis"])
+        status = a["status"]
+
+        if nis not in absensi_map:
+            absensi_map[nis] = {}
+
+        if status == "Masuk":
+            absensi_map[nis]["masuk"] = a["jam"]
+
+        elif status == "Pulang":
+            absensi_map[nis]["pulang"] = a["jam"]
+
     data = []
-    for r in rows:
-        jam_masuk = r["jam_masuk"] or "-"
-        jam_pulang = r["jam_pulang"] or "-"
-        status = "Hadir" if r["jam_masuk"] else "Belum Hadir"
-        data.append((r["nis"], r["nama"], r["kelas"], jam_masuk, jam_pulang, status))
+
+    for srow in siswa_rows:
+        nis = str(srow["nis"])
+        info = absensi_map.get(nis, {})
+
+        jam_masuk = info.get("masuk") or "-"
+        jam_pulang = info.get("pulang") or "-"
+        status = "Hadir" if info.get("masuk") else "Belum Hadir"
+
+        data.append(
+            (
+                nis,
+                srow["nama"],
+                srow["kelas"],
+                jam_masuk,
+                jam_pulang,
+                status
+            )
+        )
 
     trs = ""
+
     for i, row in enumerate(data, 1):
         trs += f"""
         <tr>
@@ -474,9 +543,11 @@ def laporan_siswa_harian():
         </tr>
         """
 
+    label_kelas = f" — Kelas {escape(kelas_guru)}" if session.get("role") == "guru" and kelas_guru else ""
+
     body = f"""
     <div class="card">
-        <h2>📅 Laporan Harian Siswa</h2>
+        <h2>📅 Laporan Harian Siswa{label_kelas}</h2>
 
         <form method="get" class="form">
             <label>Tanggal</label>
@@ -485,22 +556,22 @@ def laporan_siswa_harian():
         </form>
 
         <div style="overflow:auto;margin-top:15px">
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>NIS</th>
-                    <th>Nama</th>
-                    <th>Kelas</th>
-                    <th>Jam Masuk</th>
-                    <th>Jam Pulang</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {trs if trs else '<tr><td colspan="7">Belum ada data siswa.</td></tr>'}
-            </tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>NIS</th>
+                        <th>Nama</th>
+                        <th>Kelas</th>
+                        <th>Jam Masuk</th>
+                        <th>Jam Pulang</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {trs if trs else '<tr><td colspan="7">Belum ada data siswa.</td></tr>'}
+                </tbody>
+            </table>
         </div>
     </div>
     """
@@ -514,31 +585,57 @@ def laporan_siswa_bulanan():
     if not bulan:
         bulan = datetime.now().strftime("%Y-%m")
 
+    kelas_guru = (session.get("kelas") or "").strip()
+
     c = db()
-    rows = c.execute("""
-        SELECT
-            s.nis,
-            s.nama,
-            s.kelas,
-            COUNT(DISTINCT CASE WHEN a.status='Masuk' THEN a.tanggal END) AS hadir,
-            COUNT(DISTINCT CASE WHEN a.status='Pulang' THEN a.tanggal END) AS pulang
-        FROM siswa s
-        LEFT JOIN absensi a
-            ON a.nis = s.nis
-            AND substr(a.tanggal, 1, 7) = ?
-        GROUP BY s.nis, s.nama, s.kelas
-        ORDER BY s.kelas, s.nama
-    """, (bulan,)).fetchall()
+
+    # Ambil siswa sesuai kelas Guru
+    siswa_rows = c.execute(
+        "SELECT * FROM siswa ORDER BY kelas,nama"
+    ).fetchall()
+
+    if session.get("role") == "guru" and kelas_guru:
+        siswa_rows = [
+            r for r in siswa_rows
+            if (r["kelas"] or "").strip() == kelas_guru
+        ]
+
+    # Ambil seluruh absensi dan hitung di Python
+    absensi_rows = c.execute(
+        "SELECT * FROM absensi"
+    ).fetchall()
+
     c.close()
 
+    rekap = {}
+
+    for a in absensi_rows:
+        nis = str(a["nis"])
+        tanggal = str(a["tanggal"] or "")
+
+        if not tanggal.startswith(bulan):
+            continue
+
+        if nis not in rekap:
+            rekap[nis] = {"hadir": set(), "pulang": set()}
+
+        if a["status"] == "Masuk":
+            rekap[nis]["hadir"].add(tanggal)
+
+        elif a["status"] == "Pulang":
+            rekap[nis]["pulang"].add(tanggal)
+
     trs = ""
-    for i, r in enumerate(rows, 1):
-        hadir = r["hadir"] or 0
-        pulang = r["pulang"] or 0
+
+    for i, r in enumerate(siswa_rows, 1):
+        nis = str(r["nis"])
+        hadir = len(rekap.get(nis, {}).get("hadir", set()))
+        pulang = len(rekap.get(nis, {}).get("pulang", set()))
+
         trs += f"""
         <tr>
             <td>{i}</td>
-            <td>{escape(r["nis"])}</td>
+            <td>{escape(nis)}</td>
             <td>{escape(r["nama"])}</td>
             <td>{escape(r["kelas"] or "-")}</td>
             <td>{hadir}</td>
@@ -546,9 +643,11 @@ def laporan_siswa_bulanan():
         </tr>
         """
 
+    label_kelas = f" — Kelas {escape(kelas_guru)}" if session.get("role") == "guru" and kelas_guru else ""
+
     body = f"""
     <div class="card">
-        <h2>📊 Laporan Bulanan Siswa</h2>
+        <h2>📊 Laporan Bulanan Siswa{label_kelas}</h2>
 
         <form method="get" class="form">
             <label>Bulan</label>
@@ -557,21 +656,21 @@ def laporan_siswa_bulanan():
         </form>
 
         <div style="overflow:auto;margin-top:15px">
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>NIS</th>
-                    <th>Nama</th>
-                    <th>Kelas</th>
-                    <th>Hari Hadir</th>
-                    <th>Hari Pulang</th>
-                </tr>
-            </thead>
-            <tbody>
-                {trs if trs else '<tr><td colspan="6">Belum ada data siswa.</td></tr>'}
-            </tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>NIS</th>
+                        <th>Nama</th>
+                        <th>Kelas</th>
+                        <th>Hari Hadir</th>
+                        <th>Hari Pulang</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {trs if trs else '<tr><td colspan="6">Belum ada data siswa.</td></tr>'}
+                </tbody>
+            </table>
         </div>
     </div>
     """
