@@ -16,61 +16,178 @@ ADMIN_USER = "admin"
 ADMIN_PASS = "admin123"  # Ganti setelah login pertama.
 
 
-def db():
-    c = sqlite3.connect(DB)
-    c.row_factory = sqlite3.Row
-    return c
+SUPABASE_URL = "https://iupyxnlribregalaziew.supabase.co"
+SUPABASE_KEY = "sb_publishable_Hk2T89INiUVmPT53HlEA9A_VBKaTtAp"
 
+class RemoteRow(dict):
+    def __getattr__(self, name):
+        return self[name]
+
+class RemoteResult:
+    def __init__(self, rows=None):
+        self.rows = rows or []
+    def fetchone(self):
+        return self.rows[0] if self.rows else None
+    def fetchall(self):
+        return self.rows
+
+class SupabaseDB:
+    def __init__(self):
+        import requests
+        self.requests = requests
+        self.base = SUPABASE_URL.rstrip('/') + '/rest/v1/'
+        self.headers = {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    def _url(self, table):
+        return self.base + table
+    def _get(self, table, params=None):
+        r=self.requests.get(self._url(table), headers=self.headers, params=params or {}, timeout=20)
+        if not r.ok:
+            raise RuntimeError(f"Supabase GET {r.status_code}: {r.text[:300]}")
+        return r.json()
+    def _post(self, table, payload):
+        h=dict(self.headers); h['Prefer']='return=representation'
+        r=self.requests.post(self._url(table), headers=h, json=payload, timeout=20)
+        if r.status_code in (409, 422):
+            raise sqlite3.IntegrityError(r.text)
+        if not r.ok:
+            raise RuntimeError(f"Supabase POST {r.status_code}: {r.text[:300]}")
+        return r.json()
+    def _patch(self, table, filters, payload):
+        h=dict(self.headers); h['Prefer']='return=representation'
+        r=self.requests.patch(self._url(table), headers=h, params=filters, json=payload, timeout=20)
+        if r.status_code in (409,422):
+            raise sqlite3.IntegrityError(r.text)
+        if not r.ok:
+            raise RuntimeError(f"Supabase PATCH {r.status_code}: {r.text[:300]}")
+        return r.json()
+    def _delete(self, table, filters):
+        r=self.requests.delete(self._url(table), headers=self.headers, params=filters, timeout=20)
+        if not r.ok:
+            raise RuntimeError(f"Supabase DELETE {r.status_code}: {r.text[:300]}")
+        return r.json() if r.text else []
+    def execute(self, sql, params=()):
+        q=' '.join(sql.strip().split())
+        u=q.upper()
+        # INSERT
+        if u.startswith('INSERT INTO SISWA'):
+            vals=dict(zip(['nis','nama','kelas','qr','orang_tua','whatsapp','hubungan'], params))
+            return RemoteResult([RemoteRow(x) for x in self._post('siswa', vals)])
+        if u.startswith('INSERT INTO TENAGA'):
+            vals=dict(zip(['nip','nama','jabatan','qr'], params))
+            return RemoteResult([RemoteRow(x) for x in self._post('tenaga', vals)])
+        if u.startswith('INSERT INTO ABSENSI_TENAGA'):
+            vals=dict(zip(['nip','nama','jabatan','tanggal','jam','status'], params))
+            return RemoteResult([RemoteRow(x) for x in self._post('absensi_tenaga', vals)])
+        if u.startswith('INSERT INTO ABSENSI'):
+            vals=dict(zip(['nis','nama','kelas','tanggal','jam','status'], params))
+            return RemoteResult([RemoteRow(x) for x in self._post('absensi', vals)])
+        if u.startswith('INSERT INTO USERS'):
+            vals=dict(zip(['username','password','role'], params))
+            return RemoteResult([RemoteRow(x) for x in self._post('users', vals)])
+        # UPDATE
+        if u.startswith('UPDATE SISWA SET'):
+            fields=['nis','nama','kelas','qr','orang_tua','whatsapp','hubungan']; vals=params
+            payload=dict(zip(fields, vals[:-1])); sid=vals[-1]
+            return RemoteResult([RemoteRow(x) for x in self._patch('siswa', {'id':f'eq.{sid}'}, payload)])
+        if u.startswith('UPDATE TENAGA SET'):
+            fields=['nip','nama','jabatan','qr']; vals=params
+            payload=dict(zip(fields, vals[:-1])); tid=vals[-1]
+            return RemoteResult([RemoteRow(x) for x in self._patch('tenaga', {'id':f'eq.{tid}'}, payload)])
+        # DELETE
+        if u.startswith('DELETE FROM SISWA'):
+            return RemoteResult([RemoteRow(x) for x in self._delete('siswa', {'id':f'eq.{params[0]}'} )])
+        if u.startswith('DELETE FROM TENAGA'):
+            return RemoteResult([RemoteRow(x) for x in self._delete('tenaga', {'id':f'eq.{params[0]}'} )])
+        # login
+        if 'FROM USERS WHERE USERNAME=? AND PASSWORD=?' in u:
+            rows=self._get('users', {'select':'*','username':f'eq.{params[0]}','password':f'eq.{params[1]}','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        # count queries
+        if u == 'SELECT COUNT(*) FROM SISWA':
+            rows=self._get('siswa', {'select':'id','limit':'1000'})
+            return RemoteResult([(len(rows),)])
+        if u == 'SELECT COUNT(*) FROM TENAGA':
+            rows=self._get('tenaga', {'select':'id','limit':'1000'})
+            return RemoteResult([(len(rows),)])
+        if 'SELECT COUNT(*) FROM ABSENSI WHERE TANGGAL=? AND STATUS=' in u:
+            status=params[1]; rows=self._get('absensi', {'select':'id','tanggal':f'eq.{params[0]}','status':f'eq.{status}','limit':'1000'})
+            return RemoteResult([(len(rows),)])
+        if 'SELECT COUNT(*) FROM ABSENSI_TENAGA WHERE TANGGAL=? AND STATUS=' in u:
+            status=params[1]; rows=self._get('absensi_tenaga', {'select':'id','tanggal':f'eq.{params[0]}','status':f'eq.{status}','limit':'1000'})
+            return RemoteResult([(len(rows),)])
+        # classes
+        if 'SELECT DISTINCT KELAS FROM SISWA' in u:
+            rows=self._get('siswa', {'select':'kelas','order':'kelas.asc','limit':'1000'})
+            seen=[]
+            for x in rows:
+                k=x.get('kelas') or ''
+                if k not in seen: seen.append(k)
+            return RemoteResult([RemoteRow({'kelas':k}) for k in seen])
+        if 'SELECT KELAS,COUNT(*) TOTAL FROM SISWA GROUP BY KELAS' in u:
+            rows=self._get('siswa', {'select':'kelas','order':'kelas.asc','limit':'1000'})
+            counts={}
+            for x in rows:
+                k=x.get('kelas') or ''; counts[k]=counts.get(k,0)+1
+            return RemoteResult([RemoteRow({'kelas':k,'total':counts[k]}) for k in sorted(counts)])
+        # single records by id
+        if 'FROM SISWA WHERE ID=?' in u:
+            rows=self._get('siswa', {'select':'*','id':f'eq.{params[0]}','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        if 'FROM TENAGA WHERE ID=?' in u:
+            rows=self._get('tenaga', {'select':'*','id':f'eq.{params[0]}','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        # scan lookup
+        if 'FROM SISWA WHERE QR=? OR NIS=?' in u:
+            rows=self._get('siswa', {'select':'*','or':f'(qr.eq.{params[0]},nis.eq.{params[1]})','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        if 'FROM TENAGA WHERE QR=? OR NIP=?' in u:
+            rows=self._get('tenaga', {'select':'*','or':f'(qr.eq.{params[0]},nip.eq.{params[1]})','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        # duplicate attendance
+        if 'SELECT ID FROM ABSENSI WHERE NIS=? AND TANGGAL=? AND STATUS=?' in u:
+            rows=self._get('absensi', {'select':'id','nis':f'eq.{params[0]}','tanggal':f'eq.{params[1]}','status':f'eq.{params[2]}','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        if 'SELECT ID FROM ABSENSI_TENAGA WHERE NIP=? AND TANGGAL=? AND STATUS=?' in u:
+            rows=self._get('absensi_tenaga', {'select':'id','nip':f'eq.{params[0]}','tanggal':f'eq.{params[1]}','status':f'eq.{params[2]}','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        # ordered lists
+        if 'SELECT * FROM SISWA ORDER BY KELAS,NAMA' in u:
+            rows=self._get('siswa', {'select':'*','order':'kelas.asc,nama.asc','limit':'1000'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        if 'SELECT * FROM TENAGA ORDER BY NAMA' in u:
+            rows=self._get('tenaga', {'select':'*','order':'nama.asc','limit':'1000'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        # reports
+        if 'FROM ABSENSI WHERE TANGGAL BETWEEN ? AND ?' in u:
+            rows=self._get('absensi', {'select':'tanggal,jam,nama,kelas,status','gte.tanggal':params[0],'lte.tanggal':params[1],'order':'tanggal.desc,nama.asc,kelas.asc,jam.asc','limit':'10000'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        if 'FROM ABSENSI_TENAGA WHERE TANGGAL BETWEEN ? AND ?' in u:
+            rows=self._get('absensi_tenaga', {'select':'tanggal,jam,nama,jabatan,status','gte.tanggal':params[0],'lte.tanggal':params[1],'order':'tanggal.desc,nama.asc,jam.asc','limit':'10000'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+        raise NotImplementedError('Supabase SQL belum didukung: '+q)
+    def commit(self): pass
+    def close(self): pass
+
+def db():
+    return SupabaseDB()
 
 def add_column(c, table, column, definition):
-    cols = [r["name"] for r in c.execute(f"PRAGMA table_info({table})").fetchall()]
-    if column not in cols:
-        c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
-
+    return None
 
 def init_db():
-    c = db()
-    c.execute("""CREATE TABLE IF NOT EXISTS siswa(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nis TEXT UNIQUE NOT NULL,
-        nama TEXT NOT NULL,
-        kelas TEXT NOT NULL,
-        qr TEXT UNIQUE,
-        orang_tua TEXT DEFAULT '',
-        whatsapp TEXT DEFAULT '',
-        hubungan TEXT DEFAULT ''
-    )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS absensi(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nis TEXT NOT NULL, nama TEXT NOT NULL, kelas TEXT NOT NULL,
-        tanggal TEXT NOT NULL, jam TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'Masuk'
-    )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS tenaga(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nip TEXT UNIQUE NOT NULL, nama TEXT NOT NULL, jabatan TEXT NOT NULL,
-        qr TEXT UNIQUE
-    )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS absensi_tenaga(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nip TEXT NOT NULL, nama TEXT NOT NULL, jabatan TEXT NOT NULL,
-        tanggal TEXT NOT NULL, jam TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'Masuk'
-    )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'guru'
-    )""")
-    add_column(c, "siswa", "orang_tua", "TEXT DEFAULT ''")
-    add_column(c, "siswa", "whatsapp", "TEXT DEFAULT ''")
-    add_column(c, "siswa", "hubungan", "TEXT DEFAULT ''")
-    if c.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0:
-        c.execute("INSERT INTO users(username,password,role) VALUES(?,?,?)",
-                  (ADMIN_USER, ADMIN_PASS, "admin"))
-    c.commit()
-    c.close()
-
+    # Tabel dibuat di Supabase SQL Editor. Di sini hanya memastikan akun admin awal ada.
+    c=db()
+    try:
+        if c.execute('SELECT COUNT(*) FROM users').fetchone()[0] == 0:
+            c.execute('INSERT INTO users(username,password,role) VALUES(?,?,?)', (ADMIN_USER, ADMIN_PASS, 'admin'))
+            c.commit()
+    finally:
+        c.close()
 
 def login_required(f):
     @wraps(f)
