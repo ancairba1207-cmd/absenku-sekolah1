@@ -46,9 +46,33 @@ class SupabaseDB:
     def _url(self, table):
         return self.base + table
     def _get(self, table, params=None):
-        r=self.requests.get(self._url(table), headers=self.headers, params=params or {}, timeout=20)
+        raw=params or {}
+        fixed=[]
+
+        for k,v in raw.items():
+            if k.startswith("gte."):
+                fixed.append((k[4:],"gte."+str(v)))
+            elif k.startswith("lte."):
+                fixed.append((k[4:],"lte."+str(v)))
+            elif k.startswith("gt."):
+                fixed.append((k[3:],"gt."+str(v)))
+            elif k.startswith("lt."):
+                fixed.append((k[3:],"lt."+str(v)))
+            elif k.startswith("neq."):
+                fixed.append((k[4:],"neq."+str(v)))
+            else:
+                fixed.append((k,v))
+
+        r=self.requests.get(
+            self._url(table),
+            headers=self.headers,
+            params=fixed,
+            timeout=20
+        )
+
         if not r.ok:
             raise RuntimeError(f"Supabase GET {r.status_code}: {r.text[:300]}")
+
         return r.json()
     def _post(self, table, payload):
         h=dict(self.headers); h['Prefer']='return=representation'
