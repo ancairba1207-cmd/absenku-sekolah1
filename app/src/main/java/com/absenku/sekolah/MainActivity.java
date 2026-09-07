@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
         webParams.bottomMargin = 60;
         mainLayout.addView(webView, webParams);
         adView = new AdView(this);
-        adView.setAdSize(com.google.android.gms.ads.AdSize.BANNER);
+        adView.setAdSize(com.google.android.gms.ads.AdSize.LARGE_BANNER);
         adView.setAdUnitId("ca-app-pub-3940256099942544/9214589741");
         FrameLayout.LayoutParams adParams = new FrameLayout.LayoutParams(-1, -2);
         adParams.gravity = android.view.Gravity.BOTTOM;
