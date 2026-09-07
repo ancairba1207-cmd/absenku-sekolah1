@@ -1101,6 +1101,12 @@ def export_excel():
     bio=BytesIO(); wb.save(bio); bio.seek(0); return send_file(bio,as_attachment=True,download_name=f"absenku_{a}_sampai_{b}.xlsx",mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
+@app.errorhandler(Exception)
+def handle_server_error(e):
+    import traceback
+    traceback.print_exc()
+    return f"<h1>ERROR SERVER</h1><pre>{escape(traceback.format_exc())}</pre>", 500
+
 if __name__=="__main__":
     init_db()
     print(f"{SEKOLAH} - SISTEM ABSENSI BERJALAN")
