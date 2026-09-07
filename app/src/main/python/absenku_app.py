@@ -836,7 +836,31 @@ def export_excel():
         from io import BytesIO
         from flask import send_file
     except ImportError: return "Modul Excel belum terpasang. Jalankan: pip install openpyxl",500
-    c=db(); siswa=c.execute("SELECT tanggal,jam,nama,kelas,status FROM absensi WHERE tanggal BETWEEN ? AND ? ORDER BY kelas,nama,tanggal,jam",(a,b)).fetchall(); tenaga=c.execute("SELECT tanggal,jam,nama,jabatan,status FROM absensi_tenaga WHERE tanggal BETWEEN ? AND ? ORDER BY nama,tanggal,jam",(a,b)).fetchall(); kelas_rows=c.execute("SELECT kelas FROM siswa").fetchall(); c.close()
+    c=db()
+    try:
+        siswa=c._get("absensi", {
+            "select":"tanggal,jam,nama,kelas,status",
+            "gte.tanggal":a,
+            "lte.tanggal":b,
+            "order":"kelas.asc,nama.asc,tanggal.asc,jam.asc",
+            "limit":"10000"
+        })
+
+        tenaga=c._get("absensi_tenaga", {
+            "select":"tanggal,jam,nama,jabatan,status",
+            "gte.tanggal":a,
+            "lte.tanggal":b,
+            "order":"nama.asc,tanggal.asc,jam.asc",
+            "limit":"10000"
+        })
+
+        kelas_rows=c._get("siswa", {
+            "select":"kelas",
+            "order":"kelas.asc",
+            "limit":"10000"
+        })
+    finally:
+        c.close()
     def group(rows,staff=False):
         m={}
         for x in rows:
