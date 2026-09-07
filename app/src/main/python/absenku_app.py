@@ -267,6 +267,23 @@ class SupabaseDB:
                 }
             )
             return RemoteResult([RemoteRow(x) for x in rows])
+        if 'SELECT * FROM ABSENSI WHERE TANGGAL=?' in u:
+            rows=self._get('absensi', {
+                'select':'*',
+                'tanggal':f'eq.{params[0]}',
+                'order':'jam.asc',
+                'limit':'10000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        if u == 'SELECT * FROM ABSENSI':
+            rows=self._get('absensi', {
+                'select':'*',
+                'order':'tanggal.desc,jam.asc',
+                'limit':'10000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         raise NotImplementedError('Supabase SQL belum didukung: '+str(q))
     def commit(self): pass
     def close(self): pass
