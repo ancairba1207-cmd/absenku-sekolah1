@@ -39,9 +39,8 @@ jobs:
           ls -la
           echo "=== APP ==="
           ls -la app
-          echo "=== BUILD GRADLE ==="
-          grep -n "chaquopy" build.gradle
-          grep -n 'version = "3.12"' app/build.gradle
+          echo "=== SOURCE ==="
+          find app/src/main -maxdepth 3 -type f | sort
 
       - name: Build APK
         run: |
