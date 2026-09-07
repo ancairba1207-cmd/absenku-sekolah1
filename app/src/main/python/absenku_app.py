@@ -168,26 +168,33 @@ class SupabaseDB:
         # COUNT(*) compatibility for dashboard/report queries
         m_count = re.match(r'^SELECT COUNT\(\*\) FROM ([A-Z_]+)(?: WHERE (.*))?$', u)
         if m_count:
-            table=m_count.group(1).lower(); where=m_count.group(2) or ''
-            q={'select':'id','limit':'10000'}
-            pi=0
-            if 'TANGGAL BETWEEN ? AND ?' in where and len(params)>=2:
-                q['gte.tanggal']=params[0]; q['lte.tanggal']=params[1]; pi=2
-            elif 'TANGGAL=?' in where and len(params)>=1:
-                q['tanggal']=f'eq.{params[0]}'; pi=1
+            table = m_count.group(1).lower()
+            where = m_count.group(2) or ''
+            q = {'select':'id','limit':'10000'}
+            pi = 0
 
-        # Filter kelas untuk Guru
-        if 'KELAS=?' in where and len(params)>pi:
-            q['kelas']=f'eq.{params[pi]}'
-            pi += 1
+            if 'TANGGAL BETWEEN ? AND ?' in where and len(params) >= 2:
+                q['gte.tanggal'] = params[0]
+                q['lte.tanggal'] = params[1]
+                pi = 2
+            elif 'TANGGAL=?' in where and len(params) >= 1:
+                q['tanggal'] = f'eq.{params[0]}'
+                pi = 1
 
-            # Support both parameterized and literal status filters.
-            if 'STATUS=?' in where and len(params)>pi:
-                q['status']=f'eq.{params[pi]}'
+            # Filter kelas untuk Guru
+            if 'KELAS=?' in where and len(params) > pi:
+                q['kelas'] = f'eq.{params[pi]}'
+                pi += 1
+
+            # Support status parameterized dan literal
+            if 'STATUS=?' in where and len(params) > pi:
+                q['status'] = f'eq.{params[pi]}'
             else:
-                m_status=re.search(r"STATUS=\s*'([^']*)'", where)
-                if m_status: q['status']=f"eq.{m_status.group(1)}"
-            rows=self._get(table,q)
+                m_status = re.search(r"STATUS=\s*'([^']*)'", where)
+                if m_status:
+                    q['status'] = f"eq.{m_status.group(1)}"
+
+            rows = self._get(table, q)
             return RemoteResult([(len(rows),)])
 
         # classes / GROUP BY compatibility
@@ -260,7 +267,7 @@ class SupabaseDB:
                 }
             )
             return RemoteResult([RemoteRow(x) for x in rows])
-        raise NotImplementedError('Supabase SQL belum didukung: '+q)
+        raise NotImplementedError('Supabase SQL belum didukung: '+str(q))
     def commit(self): pass
     def close(self): pass
 
