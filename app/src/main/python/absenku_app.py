@@ -299,6 +299,7 @@ def home():
 <a class="btn green" href="/scan_tenaga?status=Masuk">📷 Scan Guru Masuk</a>
 <a class="btn orange" href="/scan_tenaga?status=Pulang">📷 Scan Guru Pulang</a>
 <a class="btn gray" href="/laporan">📊 Laporan Harian/Mingguan/Bulanan</a>
+<a class="btn gray" href="/tes_supabase">☁️ Tes Supabase</a>
 </div>"""
     return page("Dashboard", body)
 
@@ -316,6 +317,10 @@ def siswa():
                 VALUES(?,?,?,?,?,?,?)""",(nis,nama,kelas,qr,ortu,wa,hubungan)); c.commit(); c.close()
         except sqlite3.IntegrityError:
             return page("Siswa", '<div class="warn">NIS atau QR sudah digunakan.</div><a class="btn gray" href="/siswa">Kembali</a>')
+        except Exception as e:
+            try: c.close()
+            except Exception: pass
+            return page("Siswa", f'<div class="warn">❌ Gagal menyimpan ke Supabase:<br><small>{escape(str(e))}</small></div><a class="btn gray" href="/siswa">Kembali</a>')
         return redirect(url_for("siswa"))
     c=db(); data=c.execute("SELECT * FROM siswa ORDER BY kelas,nama").fetchall(); c.close()
     rows=""
@@ -380,6 +385,10 @@ def tenaga():
             c=db(); c.execute("INSERT INTO tenaga(nip,nama,jabatan,qr) VALUES(?,?,?,?)",(nip,nama,jab,qr)); c.commit(); c.close()
         except sqlite3.IntegrityError:
             return page("Guru/Tendik",'<div class="warn">NIP atau QR sudah digunakan.</div>')
+        except Exception as e:
+            try: c.close()
+            except Exception: pass
+            return page("Guru/Tendik", f'<div class="warn">❌ Gagal menyimpan ke Supabase:<br><small>{escape(str(e))}</small></div><a class="btn gray" href="/tenaga">Kembali</a>')
         return redirect(url_for("tenaga"))
     c=db(); data=c.execute("SELECT * FROM tenaga ORDER BY nama").fetchall(); c.close()
     rows="".join(f"""<tr><td>{escape(t['nip'])}</td><td>{escape(t['nama'])}</td><td>{escape(t['jabatan'])}</td>
@@ -504,6 +513,18 @@ def proses_scan_tenaga():
     c.execute("INSERT INTO absensi_tenaga(nip,nama,jabatan,tanggal,jam,status) VALUES(?,?,?,?,?,?)",(t["nip"],t["nama"],t["jabatan"],tgl,jam,status));c.commit();c.close()
     return jsonify(ok=True,message=f"✅ {t['nama']} berhasil absen {status.lower()} pada {jam}.")
 
+
+@app.route("/tes_supabase")
+@login_required
+def tes_supabase():
+    try:
+        c=db()
+        siswa_count=c.execute("SELECT COUNT(*) FROM siswa").fetchone()[0]
+        tenaga_count=c.execute("SELECT COUNT(*) FROM tenaga").fetchone()[0]
+        c.close()
+        return page("Tes Supabase", f"<div class='card'><h2>✅ Supabase Terhubung</h2><p>Data siswa online: <b>{siswa_count}</b></p><p>Guru/Tendik online: <b>{tenaga_count}</b></p><p>Jika angka ini sesuai dengan Table Editor Supabase, koneksi online berhasil.</p><a class='btn gray' href='/'>Kembali</a></div>")
+    except Exception as e:
+        return page("Tes Supabase", f"<div class='card'><h2>❌ Supabase Belum Terhubung</h2><div class='warn'><small>{escape(str(e))}</small></div><p>Periksa koneksi internet, Project URL, Publishable Key, dan policy RLS.</p><a class='btn gray' href='/'>Kembali</a></div>")
 
 @app.route("/laporan")
 @login_required
