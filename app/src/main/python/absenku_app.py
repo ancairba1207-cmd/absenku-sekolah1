@@ -387,8 +387,6 @@ def home():
     return page("Dashboard", body)
 
 
-@app.route("/siswa", methods=["GET","POST"])
-@login_required
 def upload_foto_siswa(file):
     if not file or not file.filename:
         return ""
@@ -408,6 +406,8 @@ def upload_foto_siswa(file):
     finally:
         c.close()
 
+@app.route("/siswa", methods=["GET","POST"])
+@login_required
 def siswa():
     if request.method == "POST":
         nis=request.form.get("nis","").strip(); nama=request.form.get("nama","").strip()
