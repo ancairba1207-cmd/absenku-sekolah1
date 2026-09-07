@@ -96,12 +96,29 @@ class SupabaseDB:
             'apikey': SUPABASE_KEY,
             'Authorization': 'Bearer ' + SUPABASE_KEY,
             'Content-Type': content_type,
+            'Content-Length': str(len(data)),
+            'Cache-Control': '3600',
             'x-upsert': 'true'
         }
-        r = self.requests.post(url, headers=h, data=data, timeout=30)
-        if not r.ok:
-            raise RuntimeError(f"Supabase Storage POST {r.status_code}: {r.text[:300]}")
-        return SUPABASE_URL.rstrip('/') + f'/storage/v1/object/public/{bucket}/{path}'
+
+        last_error = None
+        for attempt in range(3):
+            try:
+                r = self.requests.put(
+                    url,
+                    headers=h,
+                    data=data,
+                    timeout=(15, 60)
+                )
+                if r.ok:
+                    return SUPABASE_URL.rstrip('/') + f'/storage/v1/object/public/{bucket}/{path}'
+
+                last_error = f"Supabase Storage PUT {r.status_code}: {r.text[:300]}"
+
+            except Exception as e:
+                last_error = f"{type(e).__name__}: {e}"
+
+        raise RuntimeError(f"Gagal upload foto setelah 3 percobaan: {last_error}")
 
     def _delete(self, table, filters):
         r=self.requests.delete(self._url(table), headers=self.headers, params=filters, timeout=20)
