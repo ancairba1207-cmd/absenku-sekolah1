@@ -90,6 +90,37 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void doubleScanFeedback() {
+            runOnUiThread(() -> {
+                try {
+                    MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.double_scan);
+                    if (mp != null) {
+                        mp.setOnCompletionListener(MediaPlayer::release);
+                        mp.start();
+                    }
+                } catch (Exception ignored) {}
+
+                try {
+                    Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+                    if (vibrator != null && vibrator.hasVibrator()) {
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            vibrator.vibrate(VibrationEffect.createWaveform(
+                                    new long[]{0, 180, 100, 180}, -1));
+                        } else {
+                            vibrator.vibrate(new long[]{0, 180, 100, 180}, -1);
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                Toast.makeText(
+                        MainActivity.this,
+                        "⚠️ QR SUDAH DI-SCAN",
+                        Toast.LENGTH_LONG
+                ).show();
+            });
+        }
+
+        @JavascriptInterface
         public void successFeedback() {
             runOnUiThread(() -> {
                 try {

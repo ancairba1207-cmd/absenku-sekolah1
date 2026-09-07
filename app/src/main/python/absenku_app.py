@@ -269,7 +269,7 @@ def page(title, body):
         <a href="/scan?status=Pulang">📷 Pulang Siswa</a>
         <a href="/scan_tenaga?status=Masuk">📷 Masuk Guru</a>
         <a href="/scan_tenaga?status=Pulang">📷 Pulang Guru</a>
-        <a href="/laporan">📊 Laporan</a>
+        <a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 Laporan</a>
         <a href="/logout">🚪 Keluar ({user})</a>
         </div>"""
     return f"""<!doctype html><html lang="id"><head>
@@ -368,7 +368,7 @@ def home():
 <a class="btn orange" href="/scan?status=Pulang">📷 Scan Siswa Pulang</a>
 <a class="btn green" href="/scan_tenaga?status=Masuk">📷 Scan Guru Masuk</a>
 <a class="btn orange" href="/scan_tenaga?status=Pulang">📷 Scan Guru Pulang</a>
-<a class="btn gray" href="/laporan">📊 Laporan Harian/Mingguan/Bulanan</a>
+<a class="btn gray" href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 Laporan Harian/Mingguan/Bulanan</a>
 <a class="btn gray" href="/tes_supabase">☁️ Tes Supabase</a>
 </div>"""
     return page("Dashboard", body)
