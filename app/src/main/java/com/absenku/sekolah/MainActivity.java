@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
                     webView.loadUrl("http://127.0.0.1:5000/"));
             } catch (Exception e) {
                 runOnUiThread(() -> webView.loadData(
-                    "<meta name="viewport" content="width=device-width,initial-scale=1"><h2>ABSENKU SEKOLAH</h2><p>Server gagal:</p><pre>"
+                    "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><h2>ABSENKU SEKOLAH</h2><p>Server gagal:</p><pre>"
                     + android.text.TextUtils.htmlEncode(e.toString()) + "</pre>",
                     "text/html", "UTF-8"));
             }
