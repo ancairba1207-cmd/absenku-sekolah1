@@ -573,7 +573,14 @@ def laporan():
     c=db()
     siswa=c.execute("SELECT tanggal,jam,nama,kelas,status FROM absensi WHERE tanggal BETWEEN ? AND ? ORDER BY tanggal DESC,nama,kelas,jam",(a,b)).fetchall()
     tenaga=c.execute("SELECT tanggal,jam,nama,jabatan,status FROM absensi_tenaga WHERE tanggal BETWEEN ? AND ? ORDER BY tanggal DESC,nama,jam",(a,b)).fetchall()
-    kelas=c.execute("SELECT kelas,COUNT(*) total FROM siswa GROUP BY kelas ORDER BY kelas").fetchall(); c.close()
+    kelas_raw=c.execute("SELECT kelas FROM siswa").fetchall()
+    kelas_count={}
+    for k in kelas_raw:
+        kk=(k["kelas"] or "").strip()
+        if kk:
+            kelas_count[kk]=kelas_count.get(kk,0)+1
+    kelas=[{"kelas":k,"total":v} for k,v in sorted(kelas_count.items())]
+    c.close()
     def group(rows,staff=False):
         m={}
         for x in rows:
@@ -615,7 +622,7 @@ def export_excel():
         from io import BytesIO
         from flask import send_file
     except ImportError: return "Modul Excel belum terpasang. Jalankan: pip install openpyxl",500
-    c=db(); siswa=c.execute("SELECT tanggal,jam,nama,kelas,status FROM absensi WHERE tanggal BETWEEN ? AND ? ORDER BY kelas,nama,tanggal,jam",(a,b)).fetchall(); tenaga=c.execute("SELECT tanggal,jam,nama,jabatan,status FROM absensi_tenaga WHERE tanggal BETWEEN ? AND ? ORDER BY nama,tanggal,jam",(a,b)).fetchall(); kelas_rows=c.execute("SELECT DISTINCT kelas FROM siswa WHERE kelas<>'' ORDER BY kelas").fetchall(); c.close()
+    c=db(); siswa=c.execute("SELECT tanggal,jam,nama,kelas,status FROM absensi WHERE tanggal BETWEEN ? AND ? ORDER BY kelas,nama,tanggal,jam",(a,b)).fetchall(); tenaga=c.execute("SELECT tanggal,jam,nama,jabatan,status FROM absensi_tenaga WHERE tanggal BETWEEN ? AND ? ORDER BY nama,tanggal,jam",(a,b)).fetchall(); kelas_rows=c.execute("SELECT kelas FROM siswa").fetchall(); c.close()
     def group(rows,staff=False):
         m={}
         for x in rows:

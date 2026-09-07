@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.ToneGenerator;
 import android.os.Build;
 import android.os.Bundle;
@@ -92,9 +93,11 @@ public class MainActivity extends Activity {
         public void successFeedback() {
             runOnUiThread(() -> {
                 try {
-                    ToneGenerator tone = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
-                    tone.startTone(ToneGenerator.TONE_PROP_ACK, 180);
-                    new android.os.Handler().postDelayed(tone::release, 350);
+                    MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.scan_success);
+                    if (mp != null) {
+                        mp.setOnCompletionListener(MediaPlayer::release);
+                        mp.start();
+                    }
                 } catch (Exception ignored) {}
                 try {
                     Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
