@@ -6,6 +6,7 @@ from html import escape
 from urllib.parse import quote
 import base64
 import os
+import re
 
 app = Flask(__name__)
 app.secret_key = "SDINPRES377PATTIMPA-GANTI-SECRET"
@@ -111,50 +112,41 @@ class SupabaseDB:
         if 'FROM USERS WHERE USERNAME=? AND PASSWORD=?' in u:
             rows=self._get('users', {'select':'*','username':f'eq.{params[0]}','password':f'eq.{params[1]}','limit':'1'})
             return RemoteResult([RemoteRow(x) for x in rows])
-        # count queries - generic COUNT(*) compatibility
-        m_count = __import__('re').match(r'^SELECT COUNT\(\*\) FROM ([A-Z_]+)(?: WHERE (.*))?$', u)
+        # COUNT(*) compatibility for dashboard/report queries
+        m_count = re.match(r'^SELECT COUNT\(\*\) FROM ([A-Z_]+)(?: WHERE (.*))?$', u)
         if m_count:
-            table = m_count.group(1).lower()
-            where = m_count.group(2) or ''
-            params_list = list(params)
-            query = {'select':'id','limit':'10000'}
-            if 'TANGGAL BETWEEN ? AND ?' in where and len(params_list) >= 2:
-                query['gte.tanggal'] = params_list[0]; query['lte.tanggal'] = params_list[1]
-            elif 'TANGGAL=?' in where and 'STATUS=' in where and len(params_list) >= 1:
-                query['tanggal'] = f'eq.{params_list[0]}'
-                if len(params_list) >= 2:
-                    query['status'] = f'eq.{params_list[1]}'
-            rows = self._get(table, query)
+            table=m_count.group(1).lower(); where=m_count.group(2) or ''
+            q={'select':'id','limit':'10000'}
+            pi=0
+            if 'TANGGAL BETWEEN ? AND ?' in where and len(params)>=2:
+                q['gte.tanggal']=params[0]; q['lte.tanggal']=params[1]; pi=2
+            elif 'TANGGAL=?' in where and len(params)>=1:
+                q['tanggal']=f'eq.{params[0]}'; pi=1
+            # Support both parameterized and literal status filters.
+            if 'STATUS=?' in where and len(params)>pi:
+                q['status']=f'eq.{params[pi]}'
+            else:
+                m_status=re.search(r"STATUS=\s*'([^']*)'", where)
+                if m_status: q['status']=f"eq.{m_status.group(1)}"
+            rows=self._get(table,q)
             return RemoteResult([(len(rows),)])
-        if u == 'SELECT COUNT(*) FROM SISWA':
-            rows=self._get('siswa', {'select':'id','limit':'1000'})
-            return RemoteResult([(len(rows),)])
-        if u == 'SELECT COUNT(*) FROM TENAGA':
-            rows=self._get('tenaga', {'select':'id','limit':'1000'})
-            return RemoteResult([(len(rows),)])
-        if u == 'SELECT COUNT(*) FROM USERS':
-            rows=self._get('users', {'select':'id','limit':'1000'})
-            return RemoteResult([(len(rows),)])
-        if 'SELECT COUNT(*) FROM ABSENSI WHERE TANGGAL=? AND STATUS=' in u:
-            status=params[1]; rows=self._get('absensi', {'select':'id','tanggal':f'eq.{params[0]}','status':f'eq.{status}','limit':'1000'})
-            return RemoteResult([(len(rows),)])
-        if 'SELECT COUNT(*) FROM ABSENSI_TENAGA WHERE TANGGAL=? AND STATUS=' in u:
-            status=params[1]; rows=self._get('absensi_tenaga', {'select':'id','tanggal':f'eq.{params[0]}','status':f'eq.{status}','limit':'1000'})
-            return RemoteResult([(len(rows),)])
-        # classes
-        if 'SELECT DISTINCT KELAS FROM SISWA' in u:
-            rows=self._get('siswa', {'select':'kelas','order':'kelas.asc','limit':'1000'})
-            seen=[]
-            for x in rows:
-                k=x.get('kelas') or ''
-                if k not in seen: seen.append(k)
-            return RemoteResult([RemoteRow({'kelas':k}) for k in seen])
+
+        # classes / GROUP BY compatibility
         if 'SELECT KELAS,COUNT(*) TOTAL FROM SISWA GROUP BY KELAS' in u:
-            rows=self._get('siswa', {'select':'kelas','order':'kelas.asc','limit':'1000'})
+            rows=self._get('siswa', {'select':'kelas','order':'kelas.asc','limit':'10000'})
             counts={}
             for x in rows:
-                k=x.get('kelas') or ''; counts[k]=counts.get(k,0)+1
-            return RemoteResult([RemoteRow({'kelas':k,'total':counts[k]}) for k in sorted(counts)])
+                k=(x.get('kelas') or '').strip()
+                if k: counts[k]=counts.get(k,0)+1
+            return RemoteResult([RemoteRow({'kelas':k,'total':counts[k]}) for k in sorted(counts, key=lambda z:z.lower())])
+        if 'SELECT DISTINCT KELAS FROM SISWA' in u:
+            rows=self._get('siswa', {'select':'kelas','order':'kelas.asc','limit':'10000'})
+            seen=[]
+            for x in rows:
+                k=(x.get('kelas') or '').strip()
+                if 'KELAS<>\'\'' in u and not k: continue
+                if k not in seen: seen.append(k)
+            return RemoteResult([RemoteRow({'kelas':k}) for k in seen])
         # single records by id
         if 'FROM SISWA WHERE ID=?' in u:
             rows=self._get('siswa', {'select':'*','id':f'eq.{params[0]}','limit':'1'})
@@ -256,9 +248,11 @@ input,select{{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10p
 .table-wrap{{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}} table{{width:100%;border-collapse:collapse;font-size:13px;min-width:620px;display:block;overflow-x:auto}} th,td{{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}}
 .small{{font-size:13px;color:#64748b}} .ok{{background:#dcfce7;color:#166534;padding:12px;border-radius:10px}}
 .warn{{background:#fef3c7;color:#92400e;padding:12px;border-radius:10px}}
-.actions a{{margin-right:5px}} .actions{{white-space:nowrap}}
+#reader{{width:100%;max-width:520px;margin:12px auto}}#reader video{{width:100%!important;height:auto!important;border-radius:16px}}.scan-status{{text-align:center;font-weight:bold;margin:10px 0}}.actions a{{margin-right:5px}}.actions{{white-space:nowrap}}@media(max-width:650px){{#reader{{max-width:100%}}#reader__dashboard_section{{padding:4px!important}}#reader__dashboard_section_csr button,#reader__dashboard_section_csr select{{font-size:14px!important}}}}
 @media(max-width:650px){{header{{padding:14px 10px;border-radius:0 0 18px 18px}} .logo{{width:68px;height:68px}} header h1{{font-size:18px}} header p{{font-size:12px}} main{{padding:8px}} .card{{padding:12px;border-radius:14px}} .grid{{grid-template-columns:1fr 1fr;gap:8px}} .stat{{padding:10px;font-size:12px}} .stat b{{font-size:21px}} .btn{{padding:11px 8px;font-size:13px}} table{{font-size:11px}}}}
-@media(max-width:380px){{.grid{{grid-template-columns:1fr}} .stat{{padding:11px}}}}
+@media(max-width:380px){{.grid{{grid-template-columns:1fr}} .stat{{padding:11px}} header h1{{font-size:17px}} .nav a{{font-size:12px;padding:8px 9px}} .card{{padding:10px}} input,select{{font-size:16px}} #reader{{max-width:100vw;margin-left:auto;margin-right:auto}}}}
+@media(min-width:651px){{main{{max-width:1100px;padding:18px}} .card{{padding:18px}} .grid{{grid-template-columns:repeat(4,minmax(0,1fr))}} #reader{{max-width:560px}}}}
+@media print{{body{{background:white!important}} header,nav,.btn,button,.small{{display:none!important}} main{{padding:0!important}} .card{{box-shadow:none!important;border:0!important;margin:0!important}} table{{min-width:0!important;display:table!important;font-size:11px!important}} #reader{{display:none!important}}}}
 </style></head><body>
 <header><img class="logo" src="data:image/png;base64,{LOGO_B64}" alt="Logo Sekolah"><h1>{SEKOLAH}</h1><p>ABSENKU SEKOLAH • Siswa • Guru • Tendik</p></header>
 <main>{nav}{body}</main></body></html>"""
@@ -457,7 +451,7 @@ def qr_page(item, staff=False):
     back="/tenaga" if staff else "/siswa"
     body=f"""<div class="card" style="text-align:center"><h2>🪪 QR {"Guru/Tendik" if staff else "Siswa"}</h2>
 <h3>{nama}</h3><p>{sub}</p><div id="qrcode" style="display:inline-block;margin:15px"></div>
-<p class="small">Kode: {code}</p><button class="btn" onclick="window.print()">🖨 Cetak</button></div>
+<p class="small">Kode: {code}</p><button class="btn" onclick="AndroidPrint.printPage()">🖨 Cetak</button></div>
 <a class="btn gray" href="{back}">⬅ Kembali</a>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>new QRCode(document.getElementById("qrcode"),{{text:{code!r},width:240,height:240}});</script>"""
@@ -482,14 +476,25 @@ def qr_staff(tid):
 @login_required
 def scan():
     status=request.args.get("status","Masuk"); status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><h2>📷 Scan Siswa {status}</h2><div id="reader"></div><div id="hasil"></div></div>
+    body=f"""<div class="card"><h2>📷 Scan Siswa {status}</h2><div id="reader"></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div><div id="hasil"></div></div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-function ok(t){{document.getElementById('hasil').innerHTML='<div class="ok">'+t+'</div>'}}
-function bad(t){{document.getElementById('hasil').innerHTML='<div class="warn">'+t+'</div>'}}
-function onScanSuccess(x){{fetch('/proses_scan?kode='+encodeURIComponent(x)+'&status='+encodeURIComponent({status!r}))
-.then(r=>r.json()).then(d=>{{(d.ok?ok:bad)(d.message);}}).catch(()=>bad('Gagal menghubungi server.'))}}
-new Html5QrcodeScanner('reader',{{fps:10,qrbox:250}}).render(onScanSuccess)
+let scanner=null, processing=false;
+function show(t,ok){{document.getElementById('hasil').innerHTML='<div class="'+(ok?'ok':'warn')+'">'+t+'</div>';}}
+function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
+function startScanner(){{
+  scanner=new Html5Qrcode('reader');
+  const config={{fps:10,qrbox:(w,h)=>{{const q=Math.floor(Math.min(w,h)*0.68);return {{width:q,height:q}};}}}};
+  scanner.start({{facingMode:{{exact:'environment'}}}},config,(decodedText)=>{{
+    if(processing)return; processing=true;
+    document.getElementById('scan-status').textContent='QR terbaca, memproses...';
+    fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
+      .then(r=>r.json()).then(d=>{{if(d.ok) successFeedback(); show(d.message,d.ok); if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
+      .catch(()=>{{show('Gagal menghubungi server.',false);document.getElementById('scan-status').textContent='Gagal';}})
+      .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
+  }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
+}}
+startScanner();
 </script>"""
     return page("Scan Siswa",body)
 
@@ -513,12 +518,13 @@ def proses_scan():
 @login_required
 def scan_tenaga():
     status=request.args.get("status","Masuk");status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><h2>📷 Scan Guru/Tendik {status}</h2><div id="reader"></div><div id="hasil"></div></div>
+    body=f"""<div class="card"><h2>📷 Scan Guru/Tendik {status}</h2><div id="reader"></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div><div id="hasil"></div></div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-function onScanSuccess(x){{fetch('/proses_scan_tenaga?kode='+encodeURIComponent(x)+'&status='+encodeURIComponent({status!r}))
-.then(r=>r.json()).then(d=>{{document.getElementById('hasil').innerHTML='<div class="'+(d.ok?'ok':'warn')+'">'+d.message+'</div>';}})}}
-new Html5QrcodeScanner('reader',{{fps:10,qrbox:250}}).render(onScanSuccess)
+let scanner=null,processing=false;
+function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
+function startScanner(){{scanner=new Html5Qrcode('reader');const config={{fps:10,qrbox:(w,h)=>{{const q=Math.floor(Math.min(w,h)*0.68);return {{width:q,height:q}};}}}};scanner.start({{facingMode:{{exact:'environment'}}}},config,(x)=>{{if(processing)return;processing=true;document.getElementById('scan-status').textContent='QR terbaca, memproses...';fetch('/proses_scan_tenaga?kode='+encodeURIComponent(x)+'&status='+encodeURIComponent({status!r})).then(r=>r.json()).then(d=>{{if(d.ok) successFeedback();document.getElementById('hasil').innerHTML='<div class="'+(d.ok?'ok':'warn')+'">'+d.message+'</div>';document.getElementById('scan-status').textContent=d.ok?'✅ Scan berhasil':'⚠️ Silakan coba lagi';}}).catch(()=>{{document.getElementById('hasil').innerHTML='<div class="warn">Gagal menghubungi server.</div>';}}).finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));}},()=>{{}}).catch(()=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});}}
+startScanner();
 </script>"""
     return page("Scan Guru",body)
 
@@ -583,7 +589,7 @@ def laporan():
     body=f'''<div class="card"><h2>📊 Laporan Absensi</h2>
 <a class="btn" href="/laporan?period=harian">Hari Ini</a><a class="btn green" href="/laporan?period=mingguan">7 Hari</a><a class="btn orange" href="/laporan?period=bulanan">Bulan Ini</a>
 <div class="card" style="margin-top:12px;background:#f8fafc"><h3>📅 Pilih Periode</h3><form method="get"><label>Dari tanggal</label><input type="date" name="dari" value="{a}" required><label>Sampai tanggal</label><input type="date" name="sampai" value="{b}" required><button class="btn purple" type="submit">🔎 Tampilkan Periode</button></form><p class="small">Bisa memilih beberapa bulan sekaligus atau rentang tahun.</p></div>
-<button type="button" class="btn gray" onclick="window.print()">🖨️ PRINT LAPORAN</button><a class="btn green" href="/export_excel?dari={a}&sampai={b}">📥 DOWNLOAD</a><p class="small">Periode: {a} sampai {b}</p></div>
+<button type="button" class="btn gray" onclick="AndroidPrint.printPage()">🖨️ PRINT LAPORAN</button><a class="btn green" href="/export_excel?dari={a}&sampai={b}">📥 DOWNLOAD</a><p class="small">Periode: {a} sampai {b}</p></div>
 <div class="card"><h3>👨‍🎓 Absensi Siswa</h3><table><tr><th>Tanggal</th><th>Nama</th><th>Kelas</th><th>Jam Masuk</th><th>Jam Pulang</th></tr>{sr or '<tr><td colspan="5">Kosong</td></tr>'}</table></div>
 <div class="card"><h3>👨‍🏫 Absensi Guru/Tendik</h3><table><tr><th>Tanggal</th><th>Nama</th><th>Jabatan</th><th>Jam Masuk</th><th>Jam Pulang</th></tr>{tr or '<tr><td colspan="5">Kosong</td></tr>'}</table></div>
 <div class="card"><h3>📚 Jumlah Siswa per Kelas</h3><table><tr><th>Kelas</th><th>Jumlah</th></tr>{cr or '<tr><td colspan="2">Kosong</td></tr>'}</table></div>'''
