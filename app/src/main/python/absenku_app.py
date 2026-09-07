@@ -334,7 +334,7 @@ input,select{{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10p
 .scan-popup.error h2{{color:#b91c1c}}
 @keyframes popIn{{to{{transform:scale(1)}}}}
 @media(max-width:480px){{.scan-popup{{padding:22px 16px}}.scan-popup .icon{{font-size:52px}}.scan-popup h2{{font-size:22px}}.scan-popup p{{font-size:15px}}}}
-@media print{{body{{background:white!important}} header,nav,.btn,button,.small{{display:none!important}} main{{padding:0!important}} .card{{box-shadow:none!important;border:0!important;margin:0!important}} table{{min-width:0!important;display:table!important;font-size:11px!important}} #reader{{display:none!important}}}}
+@media print{{body{{background:white!important}} header,nav,.nav,.btn,button,.small{{display:none!important}} main{{padding:0!important}} .card{{box-shadow:none!important;border:0!important;margin:0!important}} table{{min-width:0!important;display:table!important;font-size:11px!important}} #reader{{display:none!important}}}}
 </style></head><body>
 <header><img class="logo" src="data:image/png;base64,{LOGO_B64}" alt="Logo Sekolah"><h1>{SEKOLAH}</h1><p>ABSENKU SEKOLAH • Siswa • Guru • Tendik</p></header>
 <main>{nav}{body}</main></body></html>"""
