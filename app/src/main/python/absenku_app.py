@@ -624,16 +624,38 @@ def laporan():
     else: d1=d2=today
     a=d1.strftime("%Y-%m-%d"); b=d2.strftime("%Y-%m-%d")
     c=db()
-    siswa=c.execute("SELECT tanggal,jam,nama,kelas,status FROM absensi WHERE tanggal BETWEEN ? AND ? ORDER BY tanggal DESC,nama,kelas,jam",(a,b)).fetchall()
-    tenaga=c.execute("SELECT tanggal,jam,nama,jabatan,status FROM absensi_tenaga WHERE tanggal BETWEEN ? AND ? ORDER BY tanggal DESC,nama,jam",(a,b)).fetchall()
-    kelas_raw=c.execute("SELECT kelas FROM siswa").fetchall()
-    kelas_count={}
-    for k in kelas_raw:
-        kk=(k["kelas"] or "").strip()
-        if kk:
-            kelas_count[kk]=kelas_count.get(kk,0)+1
-    kelas=[{"kelas":k,"total":v} for k,v in sorted(kelas_count.items())]
-    c.close()
+    try:
+        siswa=c._get("absensi", {
+            "select":"tanggal,jam,nama,kelas,status",
+            "gte.tanggal":a,
+            "lte.tanggal":b,
+            "order":"tanggal.desc,nama.asc,kelas.asc,jam.asc",
+            "limit":"10000"
+        })
+
+        tenaga=c._get("absensi_tenaga", {
+            "select":"tanggal,jam,nama,jabatan,status",
+            "gte.tanggal":a,
+            "lte.tanggal":b,
+            "order":"tanggal.desc,nama.asc,jam.asc",
+            "limit":"10000"
+        })
+
+        kelas_raw=c._get("siswa", {
+            "select":"kelas",
+            "order":"kelas.asc",
+            "limit":"10000"
+        })
+
+        kelas_count={}
+        for k in kelas_raw:
+            kk=(k.get("kelas") or "").strip()
+            if kk:
+                kelas_count[kk]=kelas_count.get(kk,0)+1
+
+        kelas=[{"kelas":k,"total":v} for k,v in sorted(kelas_count.items(), key=lambda x:x[0].lower())]
+    finally:
+        c.close()
     def group(rows,staff=False):
         m={}
         for x in rows:
