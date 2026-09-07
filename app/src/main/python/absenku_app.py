@@ -285,22 +285,45 @@ def login_required(f):
     return wrapped
 
 
+def admin_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if "user" not in session:
+            return redirect(url_for("login", next=request.path))
+        if session.get("role") != "admin":
+            return ("Akses ditolak. Halaman ini khusus Admin.", 403)
+        return f(*args, **kwargs)
+    return wrapped
+
+
 def page(title, body):
     user = escape(session.get("user", ""))
     nav = ""
     if user:
-        nav = f"""
-        <div class="nav">
-        <a href="/">🏠 Dashboard</a>
-        <a href="/siswa">👨‍🎓 Siswa</a>
-        <a href="/tenaga">👨‍🏫 Guru/Tendik</a>
-        <a href="/scan?status=Masuk">📷 Masuk Siswa</a>
-        <a href="/scan?status=Pulang">📷 Pulang Siswa</a>
-        <a href="/scan_tenaga?status=Masuk">📷 Masuk Guru</a>
-        <a href="/scan_tenaga?status=Pulang">📷 Pulang Guru</a>
-        <a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 Laporan</a>
-        <a href="/logout">🚪 Keluar ({user})</a>
-        </div>"""
+        role = session.get("role", "admin")
+        if role == "guru":
+            nav = f"""
+<div class="nav">
+<a href="/dashboard_guru">🏠 Dashboard Guru</a>
+<a href="/scan?status=Masuk">📷 Masuk Siswa</a>
+<a href="/scan?status=Pulang">📷 Pulang Siswa</a>
+<a href="/laporan_siswa_harian">📅 Laporan Harian</a>
+<a href="/laporan_siswa_bulanan">📊 Laporan Bulanan</a>
+<a href="/logout">🚪 Keluar ({user})</a>
+</div>"""
+        else:
+            nav = f"""
+<div class="nav">
+<a href="/">🏠 Dashboard</a>
+<a href="/siswa">👨‍🎓 Siswa</a>
+<a href="/tenaga">👨‍🏫 Guru/Tendik</a>
+<a href="/scan?status=Masuk">📷 Masuk Siswa</a>
+<a href="/scan?status=Pulang">📷 Pulang Siswa</a>
+<a href="/scan_tenaga?status=Masuk">📷 Masuk Guru</a>
+<a href="/scan_tenaga?status=Pulang">📷 Pulang Guru</a>
+<a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 Laporan</a>
+<a href="/logout">🚪 Keluar ({user})</a>
+</div>"""
     return f"""<!doctype html><html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(title)} - {SEKOLAH}</title>
@@ -369,9 +392,197 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/dashboard_guru")
+@login_required
+def dashboard_guru():
+    c = db()
+    today = datetime.now().strftime("%Y-%m-%d")
+    total = c.execute("SELECT COUNT(*) FROM siswa").fetchone()[0]
+    masuk = c.execute("SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Masuk'", (today,)).fetchone()[0]
+    pulang = c.execute("SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Pulang'", (today,)).fetchone()[0]
+    c.close()
+
+    belum = max(total - masuk, 0)
+    persen = round((masuk / total * 100), 1) if total else 0
+    user = escape(session.get("user", ""))
+
+    body = f"""
+    <div class="card">
+        <h2>👨‍🏫 Dashboard Guru</h2>
+        <p class="small">Selamat datang, <b>{user}</b></p>
+        <div class="grid">
+            <div class="stat"><b>{total}</b><br>Total Siswa</div>
+            <div class="stat"><b>{masuk}</b><br>Sudah Masuk</div>
+            <div class="stat"><b>{belum}</b><br>Belum Hadir</div>
+            <div class="stat"><b>{pulang}</b><br>Sudah Pulang</div>
+        </div>
+        <p class="small">Kehadiran hari ini: <b>{persen}%</b></p>
+    </div>
+
+    <div class="grid">
+        <a class="btn green" href="/scan?status=Masuk">📷 Scan Siswa Masuk</a>
+        <a class="btn orange" href="/scan?status=Pulang">📷 Scan Siswa Pulang</a>
+        <a class="btn gray" href="/laporan_siswa_harian">📅 Laporan Harian Siswa</a>
+        <a class="btn purple" href="/laporan_siswa_bulanan">📊 Laporan Bulanan Siswa</a>
+    </div>
+    """
+    return page("Dashboard Guru", body)
+
+
+@app.route("/laporan_siswa_harian", methods=["GET"])
+@login_required
+def laporan_siswa_harian():
+    tanggal = request.args.get("tanggal", "").strip()
+    if not tanggal:
+        tanggal = datetime.now().strftime("%Y-%m-%d")
+
+    c = db()
+    rows = c.execute("""
+        SELECT
+            s.nis,
+            s.nama,
+            s.kelas,
+            MAX(CASE WHEN a.status='Masuk' THEN a.jam END) AS jam_masuk,
+            MAX(CASE WHEN a.status='Pulang' THEN a.jam END) AS jam_pulang
+        FROM siswa s
+        LEFT JOIN absensi a
+            ON a.nis = s.nis
+            AND a.tanggal = ?
+        GROUP BY s.nis, s.nama, s.kelas
+        ORDER BY s.kelas, s.nama
+    """, (tanggal,)).fetchall()
+    c.close()
+
+    data = []
+    for r in rows:
+        jam_masuk = r["jam_masuk"] or "-"
+        jam_pulang = r["jam_pulang"] or "-"
+        status = "Hadir" if r["jam_masuk"] else "Belum Hadir"
+        data.append((r["nis"], r["nama"], r["kelas"], jam_masuk, jam_pulang, status))
+
+    trs = ""
+    for i, row in enumerate(data, 1):
+        trs += f"""
+        <tr>
+            <td>{i}</td>
+            <td>{escape(row[0])}</td>
+            <td>{escape(row[1])}</td>
+            <td>{escape(row[2] or "-")}</td>
+            <td>{escape(str(row[3]))}</td>
+            <td>{escape(str(row[4]))}</td>
+            <td>{escape(row[5])}</td>
+        </tr>
+        """
+
+    body = f"""
+    <div class="card">
+        <h2>📅 Laporan Harian Siswa</h2>
+
+        <form method="get" class="form">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal" value="{escape(tanggal)}">
+            <button class="btn" type="submit">🔎 Tampilkan</button>
+        </form>
+
+        <div style="overflow:auto;margin-top:15px">
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>NIS</th>
+                    <th>Nama</th>
+                    <th>Kelas</th>
+                    <th>Jam Masuk</th>
+                    <th>Jam Pulang</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {trs if trs else '<tr><td colspan="7">Belum ada data siswa.</td></tr>'}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    """
+
+    return page("Laporan Harian Siswa", body)
+
+@app.route("/laporan_siswa_bulanan", methods=["GET"])
+@login_required
+def laporan_siswa_bulanan():
+    bulan = request.args.get("bulan", "").strip()
+    if not bulan:
+        bulan = datetime.now().strftime("%Y-%m")
+
+    c = db()
+    rows = c.execute("""
+        SELECT
+            s.nis,
+            s.nama,
+            s.kelas,
+            COUNT(DISTINCT CASE WHEN a.status='Masuk' THEN a.tanggal END) AS hadir,
+            COUNT(DISTINCT CASE WHEN a.status='Pulang' THEN a.tanggal END) AS pulang
+        FROM siswa s
+        LEFT JOIN absensi a
+            ON a.nis = s.nis
+            AND substr(a.tanggal, 1, 7) = ?
+        GROUP BY s.nis, s.nama, s.kelas
+        ORDER BY s.kelas, s.nama
+    """, (bulan,)).fetchall()
+    c.close()
+
+    trs = ""
+    for i, r in enumerate(rows, 1):
+        hadir = r["hadir"] or 0
+        pulang = r["pulang"] or 0
+        trs += f"""
+        <tr>
+            <td>{i}</td>
+            <td>{escape(r["nis"])}</td>
+            <td>{escape(r["nama"])}</td>
+            <td>{escape(r["kelas"] or "-")}</td>
+            <td>{hadir}</td>
+            <td>{pulang}</td>
+        </tr>
+        """
+
+    body = f"""
+    <div class="card">
+        <h2>📊 Laporan Bulanan Siswa</h2>
+
+        <form method="get" class="form">
+            <label>Bulan</label>
+            <input type="month" name="bulan" value="{escape(bulan)}">
+            <button class="btn" type="submit">🔎 Tampilkan</button>
+        </form>
+
+        <div style="overflow:auto;margin-top:15px">
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>NIS</th>
+                    <th>Nama</th>
+                    <th>Kelas</th>
+                    <th>Hari Hadir</th>
+                    <th>Hari Pulang</th>
+                </tr>
+            </thead>
+            <tbody>
+                {trs if trs else '<tr><td colspan="6">Belum ada data siswa.</td></tr>'}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    """
+
+    return page("Laporan Bulanan Siswa", body)
+
 @app.route("/")
 @login_required
 def home():
+    if session.get("role") == "guru":
+        return redirect(url_for("dashboard_guru"))
     c = db(); today = datetime.now().strftime("%Y-%m-%d")
     total = c.execute("SELECT COUNT(*) FROM siswa").fetchone()[0]
     total_t = c.execute("SELECT COUNT(*) FROM tenaga").fetchone()[0]
@@ -423,7 +634,7 @@ def upload_foto_siswa(file):
         c.close()
 
 @app.route("/siswa", methods=["GET","POST"])
-@login_required
+@admin_required
 def siswa():
     if request.method == "POST":
         nis=request.form.get("nis","").strip(); nama=request.form.get("nama","").strip()
@@ -465,7 +676,7 @@ def siswa():
 
 
 @app.route("/edit_siswa/<int:sid>", methods=["GET","POST"])
-@login_required
+@admin_required
 def edit_siswa(sid):
     c=db(); s=c.execute("SELECT * FROM siswa WHERE id=?",(sid,)).fetchone(); c.close()
     if not s: return "Siswa tidak ditemukan",404
@@ -490,7 +701,7 @@ def edit_siswa(sid):
 
 
 @app.route("/hapus_siswa/<int:sid>")
-@login_required
+@admin_required
 def hapus_siswa(sid):
     c=db(); c.execute("DELETE FROM siswa WHERE id=?",(sid,)); c.commit(); c.close()
     return redirect(url_for("siswa"))
@@ -517,7 +728,7 @@ def upload_foto_tenaga(file):
 
 
 @app.route("/tenaga", methods=["GET","POST"])
-@login_required
+@admin_required
 def tenaga():
     if request.method=="POST":
         nip=request.form.get("nip","").strip(); nama=request.form.get("nama","").strip()
@@ -545,7 +756,7 @@ def tenaga():
 
 
 @app.route("/edit_tenaga/<int:tid>", methods=["GET","POST"])
-@login_required
+@admin_required
 def edit_tenaga(tid):
     c=db(); t=c.execute("SELECT * FROM tenaga WHERE id=?",(tid,)).fetchone(); c.close()
     if not t:return "Data tidak ditemukan",404
@@ -575,7 +786,7 @@ def edit_tenaga(tid):
 
 
 @app.route("/hapus_tenaga/<int:tid>")
-@login_required
+@admin_required
 def hapus_tenaga(tid):
     c=db();c.execute("DELETE FROM tenaga WHERE id=?",(tid,));c.commit();c.close();return redirect(url_for("tenaga"))
 
@@ -762,7 +973,7 @@ def qr_student(sid):
 
 
 @app.route("/qr_tenaga/<int:tid>")
-@login_required
+@admin_required
 def qr_staff(tid):
     c=db();t=c.execute("SELECT * FROM tenaga WHERE id=?",(tid,)).fetchone();c.close()
     return qr_page(t,True) if t else ("Data tidak ditemukan",404)
@@ -823,7 +1034,7 @@ def proses_scan():
 
 
 @app.route("/scan_tenaga")
-@login_required
+@admin_required
 def scan_tenaga():
     status=request.args.get("status","Masuk");status=status if status in ("Masuk","Pulang") else "Masuk"
     body=f"""<div class="card"><h2>📷 Scan Guru/Tendik {status}</h2><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div><div id="hasil"></div></div>
@@ -850,7 +1061,7 @@ startScanner();
 
 
 @app.route("/proses_scan_tenaga")
-@login_required
+@admin_required
 def proses_scan_tenaga():
     kode=request.args.get("kode","").strip();status=request.args.get("status","Masuk")
     if status not in ("Masuk","Pulang"):status="Masuk"
@@ -864,7 +1075,7 @@ def proses_scan_tenaga():
 
 
 @app.route("/tes_supabase")
-@login_required
+@admin_required
 def tes_supabase():
     try:
         c=db()
@@ -876,7 +1087,7 @@ def tes_supabase():
         return page("Tes Supabase", f"<div class='card'><h2>❌ Supabase Belum Terhubung</h2><div class='warn'><small>{escape(str(e))}</small></div><p>Periksa koneksi internet, Project URL, Publishable Key, dan policy RLS.</p><a class='btn gray' href='/'>Kembali</a></div>")
 
 @app.route("/laporan")
-@login_required
+@admin_required
 def laporan():
     today=date.today()
     period=request.args.get("period","harian")
@@ -1060,7 +1271,7 @@ def laporan():
 
 
 @app.route("/export_excel")
-@login_required
+@admin_required
 def export_excel():
     period=request.args.get("period",""); today=date.today(); dari=request.args.get("dari","").strip(); sampai=request.args.get("sampai","").strip()
     if dari and sampai:
