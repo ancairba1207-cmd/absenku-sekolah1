@@ -259,6 +259,15 @@ class SupabaseDB:
         if 'SELECT * FROM TENAGA ORDER BY NAMA' in u:
             rows=self._get('tenaga', {'select':'*','order':'nama.asc','limit':'1000'})
             return RemoteResult([RemoteRow(x) for x in rows])
+        # dashboard - aktivitas terbaru siswa
+        if 'SELECT NAMA, KELAS, TANGGAL, JAM, STATUS FROM ABSENSI ORDER BY' in u:
+            rows=self._get('absensi', {
+                'select':'nama,kelas,tanggal,jam,status',
+                'order':'tanggal.desc,jam.desc',
+                'limit':'8'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         # reports
         if 'FROM ABSENSI WHERE TANGGAL BETWEEN ? AND ?' in u:
             rows=self._get(
