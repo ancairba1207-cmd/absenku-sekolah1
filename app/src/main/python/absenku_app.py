@@ -1679,9 +1679,19 @@ def kehadiran_orangtua():
     }
 
     for r in rows:
-        status = str(r["status"] or "").strip().capitalize()
-        if status in rekap:
-            rekap[status] += 1
+        status = str(r["status"] or "").strip().lower()
+
+        # Status "Masuk" dihitung sebagai Hadir.
+        # Status "Pulang" tidak dihitung lagi agar satu hari
+        # tidak terhitung dua kali.
+        if status == "masuk" or status == "hadir":
+            rekap["Hadir"] += 1
+        elif status == "izin":
+            rekap["Izin"] += 1
+        elif status == "sakit":
+            rekap["Sakit"] += 1
+        elif status == "alpa":
+            rekap["Alpa"] += 1
 
     trs = ""
 
