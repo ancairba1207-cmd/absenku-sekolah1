@@ -2606,6 +2606,50 @@ def nilai_siswa():
     if not rows:
         rows = '<tr><td colspan="9" style="text-align:center;padding:25px;color:#64748b;">Belum ada data nilai.</td></tr>'
 
+    tugas_rows = ""
+    try:
+        c2 = db()
+
+        if session.get("role") == "guru":
+            kelas_guru = str(session.get("kelas") or "").strip()
+            tugas_data = c2.execute(
+                "SELECT * FROM nilai_tugas WHERE kelas=? ORDER BY tanggal_tugas DESC, created_at DESC",
+                (kelas_guru,)
+            ).fetchall()
+        else:
+            tugas_data = c2.execute(
+                "SELECT * FROM nilai_tugas ORDER BY tanggal_tugas DESC, created_at DESC"
+            ).fetchall()
+
+        c2.close()
+
+        for t in tugas_data:
+            tugas_rows += (
+                "<tr>"
+                f"<td>{escape(str(t['tanggal_tugas'] or '-'))}</td>"
+                f"<td>{escape(str(t['nama'] or '-'))}</td>"
+                f"<td>{escape(str(t['kelas'] or '-'))}</td>"
+                f"<td>{escape(str(t['mata_pelajaran'] or '-'))}</td>"
+                f"<td><strong>{escape(str(t['nilai'] if t['nilai'] is not None else '-'))}</strong></td>"
+                f"<td>{escape(str(t['keterangan'] or '-'))}</td>"
+                f"<td><a href='/edit_nilai_tugas/{t['id']}' class='edit-btn'>Edit</a></td>"
+                "</tr>"
+            )
+
+        if not tugas_rows:
+            tugas_rows = (
+                '<tr><td colspan="7" style="text-align:center;padding:25px;color:#64748b;">'
+                'Belum ada tugas harian.'
+                '</td></tr>'
+            )
+
+    except Exception:
+        tugas_rows = (
+            '<tr><td colspan="7" style="text-align:center;padding:25px;color:#64748b;">'
+            'Belum ada tugas harian.'
+            '</td></tr>'
+        )
+
     body = f"""
     <style>
     .nilai-admin-wrap{{max-width:1100px;margin:auto}}
