@@ -540,14 +540,14 @@ opacity:.85;
 
 
 
-.buku-foto{
+.buku-foto{{
 width:48px;
 height:48px;
 border-radius:50%;
 object-fit:cover;
 border:2px solid #e2e8f0;
 display:block;
-}
+}}
 
 .buku-foto-default{
 display:flex;
@@ -809,27 +809,214 @@ if(e.key==='Escape') closeMenu();
 @app.route("/login", methods=["GET","POST"])
 def login():
     msg = ""
+
     if request.method == "POST":
-        u = request.form.get("username","").strip()
-        p = request.form.get("password","")
+        u = request.form.get("username", "").strip()
+        p = request.form.get("password", "")
+
         c = db()
-        row = c.execute("SELECT * FROM users WHERE username=? AND password=?", (u,p)).fetchone()
+        row = c.execute(
+            "SELECT * FROM users WHERE username=? AND password=?",
+            (u, p)
+        ).fetchone()
         c.close()
+
         if row:
             session["user"] = row["username"]
             session["role"] = row["role"]
             session["kelas"] = row["kelas"] or ""
+
             if row["role"] == "guru":
                 return redirect(url_for("dashboard_guru"))
+
             return redirect(request.args.get("next") or "/")
-        msg = '<div class="warn">Username atau password salah.</div>'
-    body = f"""<div class="card"><h2>🔐 Login Admin/Guru</h2>{msg}
-<form method="post">
-<label>Username</label><input name="username" required>
-<label>Password</label><input type="password" name="password" required>
-<button class="btn" type="submit">Masuk</button></form>
-<p class="small">Login awal: admin / admin123. Segera ganti pada server produksi.</p></div>"""
-    return page("Login", body)
+
+        msg = '<div class="login-error">Username atau password salah.</div>'
+
+    body = f"""
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Login - ABSENKU SEKOLAH</title>
+
+<style>
+*{{box-sizing:border-box}}
+
+html,body{{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    font-family:Arial,Helvetica,sans-serif;
+}}
+
+body{{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#e0f2fe,#f8fafc,#dbeafe);
+    padding:20px;
+}}
+
+.login-wrapper{{
+    width:100%;
+    max-width:430px;
+}}
+
+.login-card{{
+    background:#ffffff;
+    border-radius:24px;
+    padding:32px 26px;
+    box-shadow:0 15px 45px rgba(15,23,42,.15);
+    text-align:center;
+}}
+
+.login-logo{{
+    width:100px;
+    height:100px;
+    object-fit:contain;
+    display:block;
+    margin:0 auto 14px;
+}}
+
+.login-title{{
+    margin:0;
+    font-size:25px;
+    font-weight:800;
+    color:#0f172a;
+}}
+
+.login-subtitle{{
+    margin:7px 0 25px;
+    color:#64748b;
+    font-size:14px;
+}}
+
+.login-form{{
+    text-align:left;
+}}
+
+.login-label{{
+    display:block;
+    margin:14px 0 7px;
+    font-size:14px;
+    font-weight:700;
+    color:#334155;
+}}
+
+.login-input{{
+    width:100%;
+    padding:14px 15px;
+    border:1px solid #cbd5e1;
+    border-radius:12px;
+    outline:none;
+    font-size:15px;
+    background:#f8fafc;
+}}
+
+.login-input:focus{{
+    border-color:#2563eb;
+    background:#ffffff;
+}}
+
+.login-button{{
+    width:100%;
+    margin-top:22px;
+    padding:14px;
+    border:0;
+    border-radius:12px;
+    background:#2563eb;
+    color:#ffffff;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+}}
+
+.login-button:active{{
+    transform:scale(.98);
+}}
+
+.login-error{{
+    background:#fee2e2;
+    color:#b91c1c;
+    border:1px solid #fecaca;
+    border-radius:10px;
+    padding:11px;
+    margin-bottom:15px;
+    text-align:center;
+    font-size:14px;
+}}
+
+.login-footer{{
+    margin-top:24px;
+    color:#94a3b8;
+    font-size:12px;
+}}
+
+@media(max-width:420px){{
+    .login-card{{padding:27px 20px}}
+    .login-logo{{width:85px;height:85px}}
+    .login-title{{font-size:22px}}
+}}
+</style>
+</head>
+
+<body>
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <img
+            class="login-logo"
+            src="data:image/png;base64,{LOGO_B64}"
+            alt="Logo Sekolah"
+        >
+
+        <h1 class="login-title">ABSENKU SEKOLAH</h1>
+        <p class="login-subtitle">Silakan masuk untuk melanjutkan</p>
+
+        {msg}
+
+        <form method="post" class="login-form">
+
+            <label class="login-label">Username</label>
+            <input
+                class="login-input"
+                type="text"
+                name="username"
+                placeholder="Masukkan username"
+                autocomplete="username"
+                required
+            >
+
+            <label class="login-label">Password</label>
+            <input
+                class="login-input"
+                type="password"
+                name="password"
+                placeholder="Masukkan password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button class="login-button" type="submit">
+                Masuk
+            </button>
+
+        </form>
+
+        <div class="login-footer">
+            © 2026 ABSENKU SEKOLAH
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
+"""
+
+    return body
 
 @app.route("/logout")
 def logout():
