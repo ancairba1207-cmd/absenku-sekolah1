@@ -317,6 +317,29 @@ class SupabaseDB:
             })
             return RemoteResult([RemoteRow(x) for x in rows])
 
+        # dashboard orang tua - absensi hari ini berdasarkan NIS
+        if 'SELECT JAM,STATUS FROM ABSENSI WHERE NIS=? AND TANGGAL=? ORDER BY JAM ASC' in u:
+            rows=self._get('absensi', {
+                'select':'jam,status',
+                'nis':f'eq.{params[0]}',
+                'tanggal':f'eq.{params[1]}',
+                'order':'jam.asc',
+                'limit':'100'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        # dashboard orang tua - rekap absensi bulan berjalan berdasarkan NIS
+        if 'SELECT TANGGAL,STATUS FROM ABSENSI WHERE NIS=? AND TANGGAL BETWEEN ? AND ? ORDER BY TANGGAL ASC' in u:
+            rows=self._get('absensi', {
+                'select':'tanggal,status',
+                'nis':f'eq.{params[0]}',
+                'gte.tanggal':params[1],
+                'lte.tanggal':params[2],
+                'order':'tanggal.asc',
+                'limit':'1000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         # reports
         if 'FROM ABSENSI WHERE TANGGAL BETWEEN ? AND ?' in u:
             rows=self._get(
