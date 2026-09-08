@@ -203,28 +203,33 @@ class SupabaseDB:
             table = m_count.group(1).lower()
             where = m_count.group(2) or ''
             q = {'select':'id','limit':'10000'}
-            pi = 0
 
+            # Filter tanggal
             if 'TANGGAL BETWEEN ? AND ?' in where and len(params) >= 2:
                 q['gte.tanggal'] = params[0]
                 q['lte.tanggal'] = params[1]
-                pi = 2
             elif 'TANGGAL=?' in where and len(params) >= 1:
                 q['tanggal'] = f'eq.{params[0]}'
-                pi = 1
 
-            # Filter kelas untuk Guru
-            if 'KELAS=?' in where and len(params) > pi:
-                q['kelas'] = f'eq.{params[pi]}'
-                pi += 1
+            # Filter kelas
+            m_kelas = re.search(r'KELAS=\?', where)
+            if m_kelas:
+                # Cari parameter kelas berdasarkan posisi parameter
+                if 'TANGGAL=?' in where and len(params) >= 2:
+                    q['kelas'] = f'eq.{params[1]}'
+                elif len(params) >= 1:
+                    q['kelas'] = f'eq.{params[-1]}'
 
-            # Support status parameterized dan literal
-            if 'STATUS=?' in where and len(params) > pi:
-                q['status'] = f'eq.{params[pi]}'
-            else:
-                m_status = re.search(r"STATUS=\s*'([^']*)'", where)
-                if m_status:
-                    q['status'] = f"eq.{m_status.group(1)}"
+            # Filter status literal, misalnya STATUS='Masuk'
+            m_status = re.search(r"STATUS=\s*'([^']*)'", where)
+            if m_status:
+                q['status'] = f"eq.{m_status.group(1)}"
+            elif 'STATUS=?' in where:
+                # Untuk query status parameterized
+                if len(params) >= 2:
+                    q['status'] = f'eq.{params[-1]}'
+                elif len(params) >= 1:
+                    q['status'] = f'eq.{params[0]}'
 
             rows = self._get(table, q)
             return RemoteResult([(len(rows),)])
