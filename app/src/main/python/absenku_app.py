@@ -131,6 +131,11 @@ class SupabaseDB:
         if u.startswith('INSERT INTO SISWA'):
             vals=dict(zip(['nis','nama','kelas','qr','orang_tua','whatsapp','hubungan','foto'], params))
             return RemoteResult([RemoteRow(x) for x in self._post('siswa', vals)])
+        if u.startswith('INSERT INTO NILAI_AKADEMIK'):
+            fields=['nis','nama','kelas','mata_pelajaran','tugas','ulangan','pts','pas','nilai_akhir','predikat','semester','tahun_ajaran']
+            vals=dict(zip(fields, params))
+            return RemoteResult([RemoteRow(x) for x in self._post('nilai_akademik', vals)])
+
         if u.startswith('INSERT INTO TENAGA'):
             vals=dict(zip(['nip','nama','jabatan','qr','foto'], params))
             return RemoteResult([RemoteRow(x) for x in self._post('tenaga', vals)])
@@ -484,6 +489,7 @@ def page(title, body):
     elif role == "guru":
         menu_links = f"""
         <a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
+        <a href="/nilai_siswa">📊 <span>Nilai Siswa</span></a>
 
         <details class="menu-group">
             <summary>📋 <span>ABSENSI</span></summary>
@@ -498,6 +504,7 @@ def page(title, body):
     else:
         menu_links = f"""
         <a href="/">🏠 <span>Dashboard</span></a>
+        <a href="/nilai_siswa">📊 <span>Nilai Siswa</span></a>
 
         <details class="menu-group">
             <summary>📋 <span>ABSENSI</span></summary>
@@ -2189,6 +2196,314 @@ def dashboard_orangtua():
 
     return page("Dashboard Orang Tua", body)
 
+
+@app.route("/nilai_siswa", methods=["GET", "POST"])
+@login_required
+def nilai_siswa():
+    if session.get("role") not in ("admin", "guru"):
+        return redirect(url_for("home"))
+
+    pesan = ""
+
+    try:
+        c = db()
+
+        if request.method == "POST":
+            nis = request.form.get("nis", "").strip()
+            mata_pelajaran = request.form.get("mata_pelajaran", "").strip()
+            tugas = request.form.get("tugas", "0").strip() or "0"
+            ulangan = request.form.get("ulangan", "0").strip() or "0"
+            pts = request.form.get("pts", "0").strip() or "0"
+            pas = request.form.get("pas", "0").strip() or "0"
+            semester = request.form.get("semester", "").strip()
+            tahun_ajaran = request.form.get("tahun_ajaran", "").strip()
+
+            if not nis or not mata_pelajaran:
+                pesan = '<div class="warn">NIS dan Mata Pelajaran wajib diisi.</div>'
+            else:
+                try:
+                    angka = [
+                        float(tugas),
+                        float(ulangan),
+                        float(pts),
+                        float(pas)
+                    ]
+
+                    nilai_akhir = round(sum(angka) / 4, 2)
+
+                    if nilai_akhir >= 90:
+                        predikat = "A"
+                    elif nilai_akhir >= 80:
+                        predikat = "B+"
+                    elif nilai_akhir >= 75:
+                        predikat = "B"
+                    elif nilai_akhir >= 70:
+                        predikat = "C"
+                    elif nilai_akhir >= 60:
+                        predikat = "D"
+                    else:
+                        predikat = "E"
+
+                    siswa_row = c.execute(
+                        "SELECT * FROM siswa WHERE nis=?",
+                        (nis,)
+                    ).fetchone()
+
+                    if not siswa_row:
+                        pesan = '<div class="warn">Siswa tidak ditemukan.</div>'
+                    else:
+                        nama = siswa_row["nama"] or ""
+                        kelas = siswa_row["kelas"] or ""
+
+                        c.execute(
+                            """INSERT INTO nilai_akademik
+                            (nis,nama,kelas,mata_pelajaran,tugas,ulangan,pts,pas,nilai_akhir,predikat,semester,tahun_ajaran)
+                            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                            (
+                                nis,
+                                nama,
+                                kelas,
+                                mata_pelajaran,
+                                tugas,
+                                ulangan,
+                                pts,
+                                pas,
+                                nilai_akhir,
+                                predikat,
+                                semester,
+                                tahun_ajaran
+                            )
+                        )
+                        c.commit()
+                        pesan = f'<div class="ok">Nilai {escape(nama)} berhasil disimpan. Nilai akhir: <strong>{nilai_akhir}</strong> ({predikat}).</div>'
+
+                except ValueError:
+                    pesan = '<div class="warn">Nilai Tugas, Ulangan, PTS dan PAS harus berupa angka.</div>'
+
+        siswa_data = c.execute(
+            "SELECT * FROM siswa ORDER BY kelas,nama"
+        ).fetchall()
+
+        nilai_data = c.execute(
+            "SELECT * FROM nilai_akademik ORDER BY created_at DESC"
+        ).fetchall()
+
+        c.close()
+
+    except Exception as e:
+        try:
+            c.close()
+        except Exception:
+            pass
+        return page(
+            "Nilai Siswa",
+            f'<div class="warn">Gagal membuka Nilai Siswa:<br><small>{escape(str(e))}</small></div>'
+        )
+
+    pilihan_siswa = ""
+    for st in siswa_data:
+        pilihan_siswa += (
+            f'<option value="{escape(str(st["nis"]))}">'
+            f'{escape(str(st["nama"]))} — Kelas {escape(str(st["kelas"] or "-"))} '
+            f'— NIS {escape(str(st["nis"]))}'
+            f'</option>'
+        )
+
+    rows = ""
+    for n in nilai_data:
+        rows += f"""
+        <tr>
+            <td>{escape(str(n["nama"] or "-"))}</td>
+            <td>{escape(str(n["kelas"] or "-"))}</td>
+            <td>{escape(str(n["mata_pelajaran"] or "-"))}</td>
+            <td>{escape(str(n["tugas"] if n["tugas"] is not None else "-"))}</td>
+            <td>{escape(str(n["ulangan"] if n["ulangan"] is not None else "-"))}</td>
+            <td>{escape(str(n["pts"] if n["pts"] is not None else "-"))}</td>
+            <td>{escape(str(n["pas"] if n["pas"] is not None else "-"))}</td>
+            <td><strong>{escape(str(n["nilai_akhir"] if n["nilai_akhir"] is not None else "-"))}</strong></td>
+            <td>{escape(str(n["predikat"] or "-"))}</td>
+        </tr>
+        """
+
+    if not rows:
+        rows = '<tr><td colspan="9" style="text-align:center;padding:25px;color:#64748b;">Belum ada data nilai.</td></tr>'
+
+    body = f"""
+    <style>
+    .nilai-admin-wrap{{max-width:1100px;margin:auto}}
+    .nilai-admin-head{{
+        background:linear-gradient(135deg,#2563eb,#4f46e5);
+        color:white;
+        border-radius:20px;
+        padding:22px;
+        margin-bottom:16px;
+        box-shadow:0 8px 25px rgba(37,99,235,.18)
+    }}
+    .nilai-admin-head h2{{margin:0 0 5px}}
+    .nilai-admin-head p{{margin:0;opacity:.9}}
+    .nilai-form-card,.nilai-table-card{{
+        background:white;
+        border-radius:18px;
+        padding:20px;
+        margin-bottom:16px;
+        box-shadow:0 4px 18px rgba(15,23,42,.07)
+    }}
+    .nilai-form-grid{{
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:14px
+    }}
+    .nilai-form-grid label{{
+        display:block;
+        font-size:13px;
+        font-weight:600;
+        color:#475569;
+        margin-bottom:6px
+    }}
+    .nilai-form-grid input,.nilai-form-grid select{{
+        width:100%;
+        padding:12px;
+        border:1px solid #cbd5e1;
+        border-radius:10px;
+        background:white;
+        font-size:14px
+    }}
+    .nilai-full{{grid-column:1/-1}}
+    .nilai-table-card{{overflow:auto}}
+    .nilai-table-card table{{
+        width:100%;
+        border-collapse:collapse;
+        min-width:900px
+    }}
+    .nilai-table-card th,.nilai-table-card td{{
+        padding:11px;
+        border-bottom:1px solid #e2e8f0;
+        text-align:center;
+        white-space:nowrap
+    }}
+    .nilai-table-card th{{
+        background:#f8fafc;
+        color:#475569;
+        font-size:13px
+    }}
+    .nilai-table-card td:first-child,.nilai-table-card th:first-child{{
+        text-align:left
+    }}
+    .nilai-hasil{{
+        background:#eff6ff;
+        border-radius:12px;
+        padding:12px;
+        margin-top:15px;
+        color:#1e40af
+    }}
+    @media(max-width:600px){{
+        .nilai-form-grid{{grid-template-columns:1fr}}
+        .nilai-full{{grid-column:auto}}
+    }}
+    </style>
+
+    <div class="nilai-admin-wrap">
+
+        <div class="nilai-admin-head">
+            <h2>Nilai Siswa</h2>
+            <p>Input dan kelola nilai akademik siswa.</p>
+        </div>
+
+        {pesan}
+
+        <div class="nilai-form-card">
+            <h3 style="margin-top:0;">Input Nilai</h3>
+
+            <form method="post">
+
+                <div class="nilai-form-grid">
+
+                    <div class="nilai-full">
+                        <label>Siswa</label>
+                        <select name="nis" required>
+                            <option value="">Pilih siswa</option>
+                            {pilihan_siswa}
+                        </select>
+                    </div>
+
+                    <div class="nilai-full">
+                        <label>Mata Pelajaran</label>
+                        <input name="mata_pelajaran" placeholder="Contoh: Matematika" required>
+                    </div>
+
+                    <div>
+                        <label>Tugas</label>
+                        <input type="number" name="tugas" min="0" max="100" step="0.01" value="0" required>
+                    </div>
+
+                    <div>
+                        <label>Ulangan</label>
+                        <input type="number" name="ulangan" min="0" max="100" step="0.01" value="0" required>
+                    </div>
+
+                    <div>
+                        <label>PTS</label>
+                        <input type="number" name="pts" min="0" max="100" step="0.01" value="0" required>
+                    </div>
+
+                    <div>
+                        <label>PAS</label>
+                        <input type="number" name="pas" min="0" max="100" step="0.01" value="0" required>
+                    </div>
+
+                    <div>
+                        <label>Semester</label>
+                        <select name="semester">
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Tahun Ajaran</label>
+                        <input name="tahun_ajaran" placeholder="2026/2027" value="2026/2027">
+                    </div>
+
+                </div>
+
+                <div class="nilai-hasil">
+                    Nilai Akhir akan dihitung otomatis dari rata-rata Tugas, Ulangan, PTS dan PAS.
+                </div>
+
+                <button class="btn green" type="submit" style="margin-top:15px;">
+                    Simpan Nilai
+                </button>
+
+            </form>
+        </div>
+
+        <div class="nilai-table-card">
+            <h3 style="margin-top:0;">Daftar Nilai Siswa</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Siswa</th>
+                        <th>Kelas</th>
+                        <th>Mata Pelajaran</th>
+                        <th>Tugas</th>
+                        <th>Ulangan</th>
+                        <th>PTS</th>
+                        <th>PAS</th>
+                        <th>Nilai Akhir</th>
+                        <th>Predikat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    """
+
+    return page("Nilai Siswa", body)
 
 @app.route("/nilai_orangtua")
 @login_required
