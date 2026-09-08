@@ -729,7 +729,7 @@ table{{font-size:11px}}
 <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
 <header>
-<img class="logo" src="{LOGO_URL}" alt="Logo">
+<img class="logo" src="{LOGO_B64}" alt="Logo">
 <h1>{SEKOLAH}</h1>
 <p>{escape(title)}</p>
 </header>
