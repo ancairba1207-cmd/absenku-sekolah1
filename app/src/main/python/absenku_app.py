@@ -525,6 +525,50 @@ class SupabaseDB:
     def commit(self): pass
     def close(self): pass
 
+
+def kirim_notifikasi_fcm(nis, judul, pesan, data=None):
+    """Kirim notifikasi FCM melalui Supabase Edge Function.
+    Jika pengiriman gagal, proses utama aplikasi tetap berjalan.
+    """
+    try:
+        import requests
+
+        if not nis:
+            return False
+
+        url = SUPABASE_URL.rstrip("/") + "/functions/v1/send-notification"
+
+        payload = {
+            "nis": str(nis),
+            "title": str(judul),
+            "message": str(pesan),
+            "data": data or {}
+        }
+
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Content-Type": "application/json"
+        }
+
+        r = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=15
+        )
+
+        if not r.ok:
+            print("FCM GAGAL:", r.status_code, r.text[:500])
+            return False
+
+        print("FCM BERHASIL:", r.text[:500])
+        return True
+
+    except Exception as e:
+        print("FCM ERROR:", str(e))
+        return False
+
 def db():
     return SupabaseDB()
 
@@ -1317,7 +1361,13 @@ def simpan_fcm_token():
     try:
         username = session.get("user", "")
         role = session.get("role", "")
-        nis = session.get("nis", "") or ""
+
+        # NIS hanya boleh ditautkan ke akun orang tua.
+        # Admin/guru tidak boleh menjadi target notifikasi absensi siswa.
+        if role == "orangtua":
+            nis = session.get("nis", "") or ""
+        else:
+            nis = ""
 
         c = db()
 
@@ -4823,6 +4873,23 @@ def proses_scan():
     ada=c.execute("SELECT id FROM absensi WHERE nis=? AND tanggal=? AND status=?",(s["nis"],tgl,status)).fetchone()
     if ada:c.close();return jsonify(ok=False,message=f"⚠️ {s['nama']} sudah tercatat {status.lower()} hari ini.")
     c.execute("INSERT INTO absensi(nis,nama,kelas,tanggal,jam,status) VALUES(?,?,?,?,?,?)",(s["nis"],s["nama"],s["kelas"],tgl,jam,status));c.commit();c.close()
+
+    # Kirim notifikasi FCM hanya setelah absensi benar-benar berhasil disimpan.
+    # Jika FCM gagal, proses absensi tetap dianggap berhasil.
+    judul_fcm = f"Absensi {status} Siswa"
+    pesan_fcm = f"{s['nama']} telah melakukan absensi {status.lower()} pada {jam}."
+    kirim_notifikasi_fcm(
+        s["nis"],
+        judul_fcm,
+        pesan_fcm,
+        {
+            "jenis": "absensi",
+            "status": status,
+            "nis": str(s["nis"]),
+            "route": "/dashboard_orangtua"
+        }
+    )
+
     return jsonify(ok=True,message=f"✅ {s['nama']} berhasil absen {status.lower()} pada {jam}.",
                     whatsapp=s["whatsapp"] or "",nama=s["nama"],jam=jam,orang_tua=s["orang_tua"] or "")
 
