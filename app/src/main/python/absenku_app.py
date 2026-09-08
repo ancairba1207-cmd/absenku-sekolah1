@@ -549,13 +549,13 @@ border:2px solid #e2e8f0;
 display:block;
 }}
 
-.buku-foto-default{
+.buku-foto-default{{
 display:flex;
 align-items:center;
 justify-content:center;
 background:#e2e8f0;
 font-size:24px;
-}
+}}
 
 .menu-label{{
 font-size:11px;
