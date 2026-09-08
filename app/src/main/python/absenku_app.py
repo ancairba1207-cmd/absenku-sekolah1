@@ -3498,8 +3498,13 @@ def nilai_orangtua():
 @app.route("/")
 @login_required
 def home():
-    if session.get("role") == "guru":
+    role = session.get("role")
+
+    if role == "guru":
         return redirect(url_for("dashboard_guru"))
+
+    if role == "orangtua":
+        return redirect(url_for("dashboard_orangtua"))
 
     from datetime import date, timedelta
 
