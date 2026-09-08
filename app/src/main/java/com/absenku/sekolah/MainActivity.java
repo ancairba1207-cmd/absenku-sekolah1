@@ -71,6 +71,8 @@ public class MainActivity extends Activity {
     private static final int CAMERA_REQ = 1001;
     private static final int FILE_CHOOSER_REQ = 1002;
     private ValueCallback<android.net.Uri[]> filePathCallback;
+    private String notificationRoute = "";
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -90,8 +92,45 @@ public class MainActivity extends Activity {
 
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        if (intent != null && intent.hasExtra("notification_route")) {
+            String route = intent.getStringExtra("notification_route");
+
+            if (route != null && !route.isEmpty() && webView != null) {
+                final String safeRoute = route.replace("\\", "\\\\").replace("'", "\\'");
+
+                webView.postDelayed(() -> {
+                    try {
+                        webView.evaluateJavascript(
+                                "window.location.href='" + safeRoute + "';",
+                                null
+                        );
+                    } catch (Exception e) {
+                        android.util.Log.e(
+                                "ABSENKU_FCM",
+                                "Gagal membuka route dari notifikasi",
+                                e
+                        );
+                    }
+                }, 500);
+            }
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getIntent() != null && getIntent().hasExtra("notification_route")) {
+            notificationRoute = getIntent().getStringExtra("notification_route");
+            if (notificationRoute == null) {
+                notificationRoute = "";
+            }
+        }
+
         ambilFCMToken();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -144,6 +183,22 @@ public class MainActivity extends Activity {
                         + "})()",
                         null
                 );
+
+                if (!notificationRoute.isEmpty()) {
+                    final String route = notificationRoute;
+                    notificationRoute = "";
+                    view.postDelayed(() -> {
+                        try {
+                            String safeRoute = route.replace("\\", "\\\\").replace("'", "\\'");
+                            view.evaluateJavascript(
+                                    "window.location.href='" + safeRoute + "';",
+                                    null
+                            );
+                        } catch (Exception e) {
+                            android.util.Log.e("ABSENKU_FCM", "Gagal membuka route notifikasi", e);
+                        }
+                    }, 1200);
+                }
             }
         });
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidPrint");

@@ -36,7 +36,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             body = "Ada pemberitahuan baru.";
         }
 
-        showNotification(title, body);
+        String route = remoteMessage.getData().get("route");
+        showNotification(title, body, route);
     }
 
     @Override
@@ -48,14 +49,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         android.util.Log.d("ABSENKU_FCM", "FCM_TOKEN=" + token);
     }
 
-    private void showNotification(String title, String body) {
+    private void showNotification(String title, String body, String route) {
         NotificationManager manager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         createNotificationChannel(manager);
 
         Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        if (route != null && !route.isEmpty()) {
+            intent.putExtra("notification_route", route);
+        }
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this,
