@@ -1453,36 +1453,635 @@ def laporan_siswa_bulanan():
 def home():
     if session.get("role") == "guru":
         return redirect(url_for("dashboard_guru"))
-    c = db(); today = datetime.now().strftime("%Y-%m-%d")
+
+    from datetime import date, timedelta
+
+    c = db()
+    today = date.today()
+    today_str = today.strftime("%Y-%m-%d")
+
     total = c.execute("SELECT COUNT(*) FROM siswa").fetchone()[0]
     total_t = c.execute("SELECT COUNT(*) FROM tenaga").fetchone()[0]
-    masuk = c.execute("SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Masuk'",(today,)).fetchone()[0]
-    pulang = c.execute("SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Pulang'",(today,)).fetchone()[0]
-    tm = c.execute("SELECT COUNT(*) FROM absensi_tenaga WHERE tanggal=? AND status='Masuk'",(today,)).fetchone()[0]
-    tp = c.execute("SELECT COUNT(*) FROM absensi_tenaga WHERE tanggal=? AND status='Pulang'",(today,)).fetchone()[0]
-    classes = c.execute("SELECT DISTINCT kelas FROM siswa ORDER BY kelas").fetchall()
-    c.close()
-    belum = max(total - masuk, 0)
-    persen = round((masuk/total*100),1) if total else 0
-    body = f"""<div class="card"><h2>📊 Dashboard Hari Ini</h2>
-<div class="grid">
-<div class="stat"><b>{total}</b><br>Siswa</div><div class="stat"><b>{total_t}</b><br>Guru & Tendik</div>
-<div class="stat"><b>{masuk}</b><br>Siswa Masuk</div><div class="stat"><b>{belum}</b><br>Belum Hadir</div>
-<div class="stat"><b>{pulang}</b><br>Siswa Pulang</div><div class="stat"><b>{persen}%</b><br>Kehadiran Siswa</div>
-<div class="stat"><b>{tm}</b><br>Guru/Tendik Masuk</div><div class="stat"><b>{tp}</b><br>Guru/Tendik Pulang</div>
-</div></div>
-<div class="grid">
-<a class="btn" href="/siswa">👨‍🎓 Kelola Siswa</a>
-<a class="btn" href="/tenaga">👨‍🏫 Kelola Guru/Tendik</a>
-<a class="btn green" href="/scan?status=Masuk">📷 Scan Siswa Masuk</a>
-<a class="btn orange" href="/scan?status=Pulang">📷 Scan Siswa Pulang</a>
-<a class="btn green" href="/scan_tenaga?status=Masuk">📷 Scan Guru Masuk</a>
-<a class="btn orange" href="/scan_tenaga?status=Pulang">📷 Scan Guru Pulang</a>
-<a class="btn gray" href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 Laporan Harian/Mingguan/Bulanan</a>
-<a class="btn gray" href="/tes_supabase">☁️ Tes Supabase</a>
-</div>"""
-    return page("Dashboard", body)
 
+    masuk = c.execute(
+        "SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Masuk'",
+        (today_str,)
+    ).fetchone()[0]
+
+    pulang = c.execute(
+        "SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Pulang'",
+        (today_str,)
+    ).fetchone()[0]
+
+    tm = c.execute(
+        "SELECT COUNT(*) FROM absensi_tenaga WHERE tanggal=? AND status='Masuk'",
+        (today_str,)
+    ).fetchone()[0]
+
+    tp = c.execute(
+        "SELECT COUNT(*) FROM absensi_tenaga WHERE tanggal=? AND status='Pulang'",
+        (today_str,)
+    ).fetchone()[0]
+
+    # Grafik 7 hari terakhir
+    grafik = []
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        ds = d.strftime("%Y-%m-%d")
+        hadir = c.execute(
+            "SELECT COUNT(*) FROM absensi WHERE tanggal=? AND status='Masuk'",
+            (ds,)
+        ).fetchone()[0]
+        grafik.append({
+            "tanggal": d.strftime("%d/%m"),
+            "hadir": hadir
+        })
+
+    # Aktivitas terbaru siswa
+    aktivitas = c.execute("""
+        SELECT nama, kelas, tanggal, jam, status
+        FROM absensi
+        ORDER BY tanggal DESC, jam DESC
+        LIMIT 8
+    """).fetchall()
+
+    c.close()
+
+    belum = max(total - masuk, 0)
+    persen = round((masuk / total * 100), 1) if total else 0
+    persen_belum = round((belum / total * 100), 1) if total else 0
+
+    max_grafik = max([x["hadir"] for x in grafik] + [1])
+
+    grafik_html = ""
+    for x in grafik:
+        tinggi = round((x["hadir"] / max_grafik) * 180) if max_grafik else 0
+        grafik_html += f"""
+        <div class="chart-col">
+            <div class="chart-value">{x["hadir"]}</div>
+            <div class="chart-bar" style="height:{max(8, tinggi)}px"></div>
+            <div class="chart-label">{x["tanggal"]}</div>
+        </div>
+        """
+
+    aktivitas_html = ""
+    for a in aktivitas:
+        status = escape(str(a["status"] or ""))
+        nama = escape(str(a["nama"] or "-"))
+        kelas = escape(str(a["kelas"] or "-"))
+        jam = escape(str(a["jam"] or "-"))
+
+        if status == "Masuk":
+            badge = '<span class="badge hadir">Masuk</span>'
+            icon = "✓"
+        else:
+            badge = '<span class="badge pulang">Pulang</span>'
+            icon = "↗"
+
+        aktivitas_html += f"""
+        <div class="activity-row">
+            <div class="activity-icon">{icon}</div>
+            <div class="activity-info">
+                <b>{nama}</b>
+                <small>Siswa • Kelas {kelas}</small>
+            </div>
+            {badge}
+            <span class="activity-time">{jam}</span>
+        </div>
+        """
+
+    if not aktivitas_html:
+        aktivitas_html = """
+        <div class="empty-activity">
+            Belum ada aktivitas absensi hari ini.
+        </div>
+        """
+
+    body = f"""
+<style>
+.dashboard-pro {{
+    padding-bottom:20px;
+}}
+
+.welcome-card {{
+    position:relative;
+    overflow:hidden;
+    border-radius:20px;
+    padding:25px;
+    margin-bottom:18px;
+    color:white;
+    background:linear-gradient(120deg,#2563eb,#1d4ed8,#0f3c91);
+    box-shadow:0 10px 30px rgba(37,99,235,.20);
+}}
+
+.welcome-card h2 {{
+    margin:0 0 8px;
+    font-size:25px;
+}}
+
+.welcome-card p {{
+    margin:0;
+    max-width:650px;
+    opacity:.9;
+    font-size:14px;
+}}
+
+.welcome-date {{
+    margin-top:15px;
+    display:inline-block;
+    background:rgba(255,255,255,.15);
+    padding:7px 12px;
+    border-radius:20px;
+    font-size:12px;
+}}
+
+.dashboard-stats {{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:18px;
+}}
+
+.dashboard-stat {{
+    background:white;
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 5px 20px rgba(15,23,42,.07);
+    border:1px solid #e2e8f0;
+}}
+
+.stat-top {{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}}
+
+.stat-icon {{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:23px;
+    background:#eff6ff;
+}}
+
+.stat-number {{
+    font-size:27px;
+    font-weight:800;
+    color:#0f172a;
+}}
+
+.stat-name {{
+    color:#64748b;
+    font-size:13px;
+    margin-top:2px;
+}}
+
+.dashboard-grid {{
+    display:grid;
+    grid-template-columns:1.45fr 1fr;
+    gap:18px;
+    margin-bottom:18px;
+}}
+
+.dashboard-card {{
+    background:white;
+    border-radius:18px;
+    padding:20px;
+    border:1px solid #e2e8f0;
+    box-shadow:0 5px 20px rgba(15,23,42,.06);
+}}
+
+.card-title {{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}}
+
+.card-title h3 {{
+    margin:0;
+    color:#123b91;
+    font-size:17px;
+}}
+
+.card-title small {{
+    color:#64748b;
+}}
+
+.chart {{
+    height:245px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-around;
+    gap:10px;
+    border-bottom:1px solid #cbd5e1;
+    padding:15px 8px 0;
+}}
+
+.chart-col {{
+    flex:1;
+    max-width:70px;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+}}
+
+.chart-value {{
+    font-size:11px;
+    font-weight:700;
+    color:#1e3a8a;
+    margin-bottom:5px;
+}}
+
+.chart-bar {{
+    width:70%;
+    min-height:8px;
+    border-radius:9px 9px 3px 3px;
+    background:linear-gradient(180deg,#22c55e,#16a34a);
+    box-shadow:0 4px 10px rgba(22,163,74,.18);
+}}
+
+.chart-label {{
+    padding-top:9px;
+    font-size:11px;
+    color:#64748b;
+}}
+
+.donut-wrap {{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:25px;
+    min-height:245px;
+}}
+
+.donut {{
+    width:170px;
+    height:170px;
+    border-radius:50%;
+    background:conic-gradient(#16a34a {persen}%,#e2e8f0 {persen}%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}}
+
+.donut::after {{
+    content:"";
+    width:116px;
+    height:116px;
+    background:white;
+    border-radius:50%;
+    position:absolute;
+}}
+
+.donut-center {{
+    position:relative;
+    z-index:2;
+    text-align:center;
+}}
+
+.donut-percent {{
+    display:block;
+    font-size:27px;
+    font-weight:800;
+    color:#0f172a;
+}}
+
+.donut-text {{
+    font-size:11px;
+    color:#64748b;
+}}
+
+.legend {{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}}
+
+.legend-item {{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:#475569;
+}}
+
+.legend-dot {{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+}}
+
+.rekap-grid {{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}}
+
+.rekap {{
+    text-align:center;
+    padding:18px 10px;
+    border-radius:15px;
+}}
+
+.rekap.green {{
+    background:#dcfce7;
+}}
+
+.rekap.blue {{
+    background:#dbeafe;
+}}
+
+.rekap.red {{
+    background:#fee2e2;
+}}
+
+.rekap-number {{
+    font-size:27px;
+    font-weight:800;
+    margin-bottom:4px;
+}}
+
+.rekap-label {{
+    font-size:12px;
+    color:#475569;
+}}
+
+.activity-row {{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 0;
+    border-bottom:1px solid #f1f5f9;
+}}
+
+.activity-row:last-child {{
+    border-bottom:0;
+}}
+
+.activity-icon {{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#dcfce7;
+    color:#15803d;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+}}
+
+.activity-info {{
+    flex:1;
+    min-width:0;
+}}
+
+.activity-info b {{
+    display:block;
+    font-size:13px;
+}}
+
+.activity-info small {{
+    display:block;
+    color:#94a3b8;
+    font-size:11px;
+    margin-top:2px;
+}}
+
+.badge {{
+    padding:5px 9px;
+    border-radius:8px;
+    font-size:10px;
+    font-weight:700;
+}}
+
+.badge.hadir {{
+    background:#dcfce7;
+    color:#15803d;
+}}
+
+.badge.pulang {{
+    background:#ffedd5;
+    color:#c2410c;
+}}
+
+.activity-time {{
+    font-size:11px;
+    color:#64748b;
+    min-width:38px;
+    text-align:right;
+}}
+
+.empty-activity {{
+    padding:35px 10px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:13px;
+}}
+
+@media(max-width:900px) {{
+    .dashboard-stats {{
+        grid-template-columns:repeat(2,1fr);
+    }}
+
+    .dashboard-grid {{
+        grid-template-columns:1fr;
+    }}
+}}
+
+@media(max-width:520px) {{
+    .welcome-card {{
+        padding:20px;
+    }}
+
+    .welcome-card h2 {{
+        font-size:21px;
+    }}
+
+    .dashboard-stats {{
+        gap:9px;
+    }}
+
+    .dashboard-stat {{
+        padding:13px;
+    }}
+
+    .stat-icon {{
+        width:40px;
+        height:40px;
+        font-size:19px;
+    }}
+
+    .stat-number {{
+        font-size:22px;
+    }}
+
+    .donut-wrap {{
+        flex-direction:column;
+        gap:15px;
+    }}
+
+    .chart {{
+        height:210px;
+    }}
+}}
+</style>
+
+<div class="dashboard-pro">
+
+    <div class="welcome-card">
+        <h2>Selamat Datang, {escape(str(session.get("user") or "Administrator"))} 👋</h2>
+        <p>Kelola data sekolah, pantau kehadiran, dan lihat perkembangan absensi secara cepat dalam satu dashboard.</p>
+        <div class="welcome-date">📅 {today.strftime("%A, %d %B %Y")}</div>
+    </div>
+
+    <div class="dashboard-stats">
+
+        <div class="dashboard-stat">
+            <div class="stat-top">
+                <div class="stat-icon">👨‍🎓</div>
+                <div>
+                    <div class="stat-number">{total}</div>
+                    <div class="stat-name">Total Siswa</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-stat">
+            <div class="stat-top">
+                <div class="stat-icon">👨‍🏫</div>
+                <div>
+                    <div class="stat-number">{total_t}</div>
+                    <div class="stat-name">Guru & Tendik</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-stat">
+            <div class="stat-top">
+                <div class="stat-icon">✅</div>
+                <div>
+                    <div class="stat-number">{masuk}</div>
+                    <div class="stat-name">Hadir Hari Ini</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-stat">
+            <div class="stat-top">
+                <div class="stat-icon">⚠️</div>
+                <div>
+                    <div class="stat-number">{belum}</div>
+                    <div class="stat-name">Belum Hadir</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="dashboard-card">
+            <div class="card-title">
+                <h3>📊 Grafik Kehadiran Siswa</h3>
+                <small>7 Hari Terakhir</small>
+            </div>
+
+            <div class="chart">
+                {grafik_html}
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-title">
+                <h3>📈 Persentase Kehadiran</h3>
+                <small>Hari Ini</small>
+            </div>
+
+            <div class="donut-wrap">
+                <div class="donut">
+                    <div class="donut-center">
+                        <span class="donut-percent">{persen}%</span>
+                        <span class="donut-text">Kehadiran</span>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background:#16a34a"></span>
+                        Hadir: <b>{masuk}</b>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background:#e2e8f0"></span>
+                        Belum Hadir: <b>{belum}</b>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="dashboard-card">
+            <div class="card-title">
+                <h3>📋 Rekap Absensi Hari Ini</h3>
+                <small>{today_str}</small>
+            </div>
+
+            <div class="rekap-grid">
+                <div class="rekap green">
+                    <div class="rekap-number">{masuk}</div>
+                    <div class="rekap-label">Siswa Masuk</div>
+                </div>
+
+                <div class="rekap blue">
+                    <div class="rekap-number">{pulang}</div>
+                    <div class="rekap-label">Siswa Pulang</div>
+                </div>
+
+                <div class="rekap red">
+                    <div class="rekap-number">{belum}</div>
+                    <div class="rekap-label">Belum Hadir</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-title">
+                <h3>🕐 Aktivitas Terbaru</h3>
+                <small>Absensi</small>
+            </div>
+
+            {aktivitas_html}
+        </div>
+
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-title">
+            <h3>⚡ Akses Cepat</h3>
+            <small>Administrator</small>
+        </div>
+
+        <div class="grid">
+            <a class="btn" href="/siswa">👨‍🎓 Data Siswa</a>
+            <a class="btn" href="/tenaga">👨‍🏫 Data Guru / Tendik</a>
+            <a class="btn green" href="/scan?status=Masuk">📷 Scan Siswa Masuk</a>
+            <a class="btn orange" href="/scan?status=Pulang">📷 Scan Siswa Pulang</a>
+        </div>
+    </div>
+
+</div>
+"""
+
+    return page("Dashboard", body)
 
 def upload_foto_siswa(file):
     if not file or not file.filename:
