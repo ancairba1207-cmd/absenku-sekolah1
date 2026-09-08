@@ -340,6 +340,16 @@ class SupabaseDB:
             })
             return RemoteResult([RemoteRow(x) for x in rows])
 
+        # nilai akademik orang tua - berdasarkan NIS siswa
+        if 'FROM NILAI_AKADEMIK WHERE NIS=? ORDER BY' in u:
+            rows=self._get('nilai_akademik', {
+                'select':'*',
+                'nis':f'eq.{params[0]}',
+                'order':'created_at.desc',
+                'limit':'1000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         # reports
         if 'FROM ABSENSI WHERE TANGGAL BETWEEN ? AND ?' in u:
             rows=self._get(
@@ -2157,6 +2167,159 @@ def dashboard_orangtua():
 
     return page("Dashboard Orang Tua", body)
 
+
+@app.route("/nilai_orangtua")
+@login_required
+def nilai_orangtua():
+    if session.get("role") != "orangtua":
+        return redirect(url_for("home"))
+
+    username = session.get("user", "")
+    nis = ""
+    anak = None
+    rows = []
+
+    try:
+        c = db()
+
+        user_row = c.execute(
+            "SELECT * FROM users WHERE username=?",
+            (username,)
+        ).fetchone()
+
+        if user_row:
+            nis = user_row["nis"] or ""
+
+        if nis:
+            anak = c.execute(
+                "SELECT * FROM siswa WHERE nis=?",
+                (nis,)
+            ).fetchone()
+
+            rows = c.execute(
+                "SELECT * FROM nilai_akademik WHERE nis=? ORDER BY created_at DESC",
+                (nis,)
+            ).fetchall()
+
+        c.close()
+    except Exception:
+        pass
+
+    nama_anak = anak["nama"] if anak else "Data anak belum terhubung"
+    kelas_anak = anak["kelas"] if anak else "-"
+
+    trs = ""
+
+    for r in rows:
+        nilai_akhir = r["nilai_akhir"] if r["nilai_akhir"] is not None else "-"
+        predikat = r["predikat"] or "-"
+
+        trs += f"""
+        <tr>
+            <td>{escape(str(r["mata_pelajaran"] or "-"))}</td>
+            <td>{escape(str(r["tugas"] if r["tugas"] is not None else "-"))}</td>
+            <td>{escape(str(r["ulangan"] if r["ulangan"] is not None else "-"))}</td>
+            <td>{escape(str(r["pts"] if r["pts"] is not None else "-"))}</td>
+            <td>{escape(str(r["pas"] if r["pas"] is not None else "-"))}</td>
+            <td><strong>{escape(str(nilai_akhir))}</strong></td>
+            <td>{escape(str(predikat))}</td>
+        </tr>
+        """
+
+    if not trs:
+        trs = """
+        <tr>
+            <td colspan="7" style="text-align:center;padding:30px;color:#64748b;">
+                Belum ada nilai akademik anak.
+            </td>
+        </tr>
+        """
+
+    body = f"""
+    <style>
+    .nilai-wrap{{max-width:1100px;margin:auto}}
+    .nilai-head{{
+        background:linear-gradient(135deg,#2563eb,#4f46e5);
+        color:white;
+        border-radius:20px;
+        padding:22px;
+        margin-bottom:16px;
+        box-shadow:0 8px 25px rgba(37,99,235,.18)
+    }}
+    .nilai-head h2{{margin:0 0 5px}}
+    .nilai-head p{{margin:0;opacity:.9}}
+    .nilai-card{{
+        background:white;
+        border-radius:18px;
+        padding:18px;
+        box-shadow:0 4px 18px rgba(15,23,42,.07);
+        overflow:auto
+    }}
+    .nilai-card table{{
+        width:100%;
+        border-collapse:collapse;
+        min-width:760px
+    }}
+    .nilai-card th,.nilai-card td{{
+        padding:12px;
+        border-bottom:1px solid #e2e8f0;
+        text-align:center;
+        white-space:nowrap
+    }}
+    .nilai-card th{{
+        background:#f8fafc;
+        color:#475569;
+        font-size:13px
+    }}
+    .nilai-card td:first-child,.nilai-card th:first-child{{
+        text-align:left
+    }}
+    .nilai-info{{
+        background:#eff6ff;
+        color:#1e40af;
+        padding:12px 14px;
+        border-radius:12px;
+        margin-bottom:15px;
+        font-size:14px
+    }}
+    </style>
+
+    <div class="nilai-wrap">
+
+        <div class="nilai-head">
+            <h2>Nilai Akademik</h2>
+            <p>{escape(nama_anak)} • Kelas {escape(kelas_anak)} • NIS {escape(nis or "-")}</p>
+        </div>
+
+        <div class="nilai-info">
+            Nilai akademik anak yang tersimpan di sistem sekolah.
+        </div>
+
+        <div class="nilai-card">
+            <h3 style="margin-top:0;">Daftar Nilai</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mata Pelajaran</th>
+                        <th>Tugas</th>
+                        <th>Ulangan</th>
+                        <th>PTS</th>
+                        <th>PAS</th>
+                        <th>Nilai Akhir</th>
+                        <th>Predikat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {trs}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    """
+
+    return page("Nilai Akademik", body)
 
 @app.route("/")
 @login_required
