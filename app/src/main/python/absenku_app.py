@@ -379,36 +379,49 @@ def page(title, body):
 
     if role == "guru":
         menu_links = f"""
-<a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
+        <a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
 
-<div class="menu-label">ABSENSI</div>
-<a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
-<a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
-<a href="/laporan_siswa_harian">📅 <span>Laporan Harian</span></a>
-<a href="/laporan_siswa_bulanan">📊 <span>Laporan Bulanan</span></a>
-
-"""
+        <details class="menu-group">
+            <summary>📋 <span>ABSENSI</span></summary>
+            <div class="submenu">
+                <a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
+                <a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
+                <a href="/laporan_siswa_harian">📅 <span>Laporan Harian</span></a>
+                <a href="/laporan_siswa_bulanan">📊 <span>Laporan Bulanan</span></a>
+            </div>
+        </details>
+        """
     else:
         menu_links = f"""
-<a href="/">🏠 <span>Dashboard</span></a>
+        <a href="/">🏠 <span>Dashboard</span></a>
 
-<div class="menu-label">ABSENSI</div>
-<a href="/siswa">👨‍🎓 <span>Data Siswa</span></a>
-<a href="/tenaga">👨‍🏫 <span>Data Guru / Tendik</span></a>
-<a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
-<a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
-<a href="/scan_tenaga?status=Masuk">📷 <span>Masuk Guru</span></a>
-<a href="/scan_tenaga?status=Pulang">📷 <span>Pulang Guru</span></a>
-<a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 <span>Laporan Absensi</span></a>
+        <details class="menu-group">
+            <summary>📋 <span>ABSENSI</span></summary>
+            <div class="submenu">
+                <a href="/siswa">👨‍🎓 <span>Data Siswa</span></a>
+                <a href="/tenaga">👨‍🏫 <span>Data Guru / Tendik</span></a>
+                <a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
+                <a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
+                <a href="/scan_tenaga?status=Masuk">📷 <span>Masuk Guru</span></a>
+                <a href="/scan_tenaga?status=Pulang">📷 <span>Pulang Guru</span></a>
+                <a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 <span>Laporan Absensi</span></a>
+            </div>
+        </details>
 
-<div class="menu-label">BUKU INDUK</div>
-<a href="/buku_induk">📚 <span>Buku Induk</span></a>
+        <details class="menu-group">
+            <summary>📚 <span>BUKU INDUK</span></summary>
+            <div class="submenu">
+                <a href="/buku_induk">📚 <span>Buku Induk</span></a>
+            </div>
+        </details>
 
-<div class="menu-label">BOSP</div>
-<a href="/bosp">💰 <span>BOSP</span></a>
-"""
-
-
+        <details class="menu-group">
+            <summary>💰 <span>BOSP</span></summary>
+            <div class="submenu">
+                <a href="/bosp">💰 <span>BOSP</span></a>
+            </div>
+        </details>
+        """
 
     return f"""<!doctype html>
 <html lang="id">
@@ -557,6 +570,14 @@ background:#e2e8f0;
 font-size:24px;
 }}
 
+.menu-group{{margin:0;padding:0}}
+.menu-group summary{{list-style:none;cursor:pointer;padding:12px 14px;font-size:15px;display:flex;align-items:center;gap:10px;color:#334155;font-weight:600}}
+.menu-group summary::-webkit-details-marker{{display:none}}
+.menu-group summary::after{{content:'›';margin-left:auto;font-size:22px;transition:.2s}}
+.menu-group[open] summary::after{{content:'⌄'}}
+.menu-group summary:hover{{background:#f1f5f9}}
+.submenu{{padding:0 0 5px 18px}}
+.submenu a{{padding:10px 14px;font-size:14px}}
 .menu-label{{
 font-size:11px;
 font-weight:bold;
