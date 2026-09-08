@@ -141,8 +141,17 @@ class SupabaseDB:
             vals=dict(zip(['nis','nama','kelas','tanggal','jam','status'], params))
             return RemoteResult([RemoteRow(x) for x in self._post('absensi', vals)])
         if u.startswith('INSERT INTO USERS'):
-            vals=dict(zip(['username','password','role'], params))
-            return RemoteResult([RemoteRow(x) for x in self._post('users', vals)])
+            vals = list(params)
+
+            # Akun biasa: username, password, role
+            # Akun orang tua: username, password, role, nis
+            if len(vals) >= 4:
+                fields = ['username', 'password', 'role', 'nis']
+            else:
+                fields = ['username', 'password', 'role']
+
+            payload = dict(zip(fields, vals))
+            return RemoteResult([RemoteRow(x) for x in self._post('users', payload)])
         # UPDATE
         if u.startswith('UPDATE SISWA SET'):
             fields=['nis','nama','kelas','qr','orang_tua','whatsapp','hubungan']; vals=params
@@ -379,14 +388,27 @@ def page(title, body):
     nama_profil = escape(nama_profil)
     user = escape(user)
 
-    role_text = "Guru" if role == "guru" else "Administrator"
+    if role == "orangtua":
+        role_text = "Orang Tua"
+    elif role == "guru":
+        role_text = "Guru"
+    else:
+        role_text = "Administrator"
 
     if foto_profil:
         avatar = f'<img class="menu-avatar" src="{escape(foto_profil)}" alt="Foto Profil">'
     else:
         avatar = '<div class="menu-avatar menu-avatar-default">👤</div>'
 
-    if role == "guru":
+    if role == "orangtua":
+        menu_links = f"""
+        <a href="/dashboard_orangtua">🏠 <span>Beranda</span></a>
+        <a href="/kehadiran_orangtua">📅 <span>Kehadiran</span></a>
+        <a href="/nilai_orangtua">📊 <span>Nilai Akademik</span></a>
+        <a href="/obrolan_orangtua">💬 <span>Obrolan</span></a>
+        <a href="/profil">👤 <span>Profil</span></a>
+        """
+    elif role == "guru":
         menu_links = f"""
         <a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
 
@@ -409,6 +431,7 @@ def page(title, body):
             <div class="submenu">
                 <a href="/siswa">👨‍🎓 <span>Data Siswa</span></a>
                 <a href="/tenaga">👨‍🏫 <span>Data Guru / Tendik</span></a>
+                <a href="/akun_orangtua">👪 <span>Akun Orang Tua</span></a>
                 <a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
                 <a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
                 <a href="/scan_tenaga?status=Masuk">📷 <span>Masuk Guru</span></a>
@@ -859,6 +882,9 @@ def login():
             if row["role"] == "guru":
                 return redirect(url_for("dashboard_guru"))
 
+            if row["role"] == "orangtua":
+                return redirect(url_for("dashboard_orangtua"))
+
             return redirect(request.args.get("next") or "/")
 
         msg = '<div class="login-error">Username atau password salah.</div>'
@@ -1055,6 +1081,116 @@ def logout():
 
 
 
+@app.route("/akun_orangtua", methods=["GET", "POST"])
+@login_required
+def akun_orangtua():
+    if session.get("role") != "admin":
+        return redirect(url_for("home"))
+
+    msg = ""
+    c = db()
+
+    if request.method == "POST":
+        nis = request.form.get("nis", "").strip()
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        if not nis or not username or not password:
+            msg = "Semua data wajib diisi."
+        else:
+            cek = c._get(
+                "users",
+                {
+                    "select": "id",
+                    "username": f"eq.{username}",
+                    "limit": "1"
+                }
+            )
+
+            if cek:
+                msg = "Username sudah digunakan."
+            else:
+                c._post(
+                    "users",
+                    {
+                        "username": username,
+                        "password": password,
+                        "role": "orangtua",
+                        "nis": nis
+                    }
+                )
+                msg = "Akun Orang Tua berhasil dibuat."
+
+    siswa_rows = c._get(
+        "siswa",
+        {
+            "select": "id,nis,nama,kelas",
+            "order": "nama.asc",
+            "limit": "1000"
+        }
+    )
+
+    c.close()
+
+    pilihan = ""
+    for x in siswa_rows:
+        nis_siswa = x.get("nis") or ""
+        nama_siswa = x.get("nama") or "-"
+        kelas_siswa = x.get("kelas") or "-"
+
+        pilihan += (
+            '<option value="' + escape(nis_siswa) + '">' +
+            escape(nama_siswa) + " - Kelas " +
+            escape(kelas_siswa) + " - NIS " +
+            escape(nis_siswa) +
+            "</option>"
+        )
+
+    body = f"""
+    <div class="card">
+        <h2>Akun Orang Tua</h2>
+        <p>Buat akun dan hubungkan dengan siswa berdasarkan NIS.</p>
+
+        <div style="padding:12px;background:#eff6ff;border-radius:10px;margin:12px 0;">
+            {escape(msg)}
+        </div>
+
+        <form method="POST">
+
+            <label>Pilih Siswa</label>
+
+            <select name="nis" required
+                    style="width:100%;padding:12px;margin:6px 0 14px;border-radius:10px;border:1px solid #cbd5e1;">
+                <option value="">-- Pilih Siswa --</option>
+                {pilihan}
+            </select>
+
+            <label>Username Orang Tua</label>
+
+            <input name="username"
+                   placeholder="Contoh: orangtua_budi"
+                   required
+                   style="width:100%;padding:12px;margin:6px 0 14px;border-radius:10px;border:1px solid #cbd5e1;">
+
+            <label>Password</label>
+
+            <input type="password"
+                   name="password"
+                   placeholder="Buat password"
+                   required
+                   style="width:100%;padding:12px;margin:6px 0 14px;border-radius:10px;border:1px solid #cbd5e1;">
+
+            <button type="submit"
+                    style="width:100%;padding:13px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:bold;">
+                Buat Akun Orang Tua
+            </button>
+
+        </form>
+    </div>
+    """
+
+    return page("Akun Orang Tua", body)
+    
 @app.route("/profil", methods=["GET","POST"])
 @login_required
 def profil():
@@ -1456,6 +1592,234 @@ def laporan_siswa_bulanan():
     """
 
     return page("Laporan Bulanan Siswa", body)
+
+@app.route("/dashboard_orangtua")
+@login_required
+def dashboard_orangtua():
+    if session.get("role") != "orangtua":
+        return redirect(url_for("home"))
+
+    username = session.get("user", "")
+    nis = ""
+    anak = None
+
+    try:
+        c = db()
+
+        user_row = c.execute(
+            "SELECT * FROM users WHERE username=?",
+            (username,)
+        ).fetchone()
+
+        if user_row:
+            nis = user_row["nis"] or ""
+
+        if nis:
+            anak = c.execute(
+                "SELECT * FROM siswa WHERE nis=?",
+                (nis,)
+            ).fetchone()
+
+        c.close()
+    except Exception:
+        pass
+
+    nama_anak = anak["nama"] if anak else "Data anak belum terhubung"
+    kelas_anak = anak["kelas"] if anak else "-"
+    foto_anak = anak["foto"] if anak else ""
+
+    if foto_anak:
+        foto_html = f'<img src="{escape(foto_anak)}" class="anak-foto" alt="Foto Anak">'
+    else:
+        foto_html = '<div class="anak-foto anak-foto-default">👤</div>'
+
+    body = f"""
+    <style>
+    .ortu-wrap{{max-width:1000px;margin:auto}}
+
+    .ortu-hero{{
+        background:linear-gradient(135deg,#2563eb,#4f46e5);
+        color:white;
+        border-radius:22px;
+        padding:24px;
+        margin-bottom:16px;
+        box-shadow:0 8px 25px rgba(37,99,235,.2)
+    }}
+
+    .ortu-hero h2{{margin:0 0 6px;font-size:22px}}
+    .ortu-hero p{{margin:0;opacity:.9;font-size:14px}}
+
+    .anak-card{{
+        background:white;
+        border-radius:20px;
+        padding:18px;
+        display:flex;
+        align-items:center;
+        gap:16px;
+        box-shadow:0 4px 18px rgba(15,23,42,.08);
+        margin-bottom:16px
+    }}
+
+    .anak-foto{{
+        width:72px;
+        height:72px;
+        border-radius:50%;
+        object-fit:cover;
+        border:3px solid #dbeafe;
+        background:#eff6ff;
+        flex-shrink:0
+    }}
+
+    .anak-foto-default{{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:34px
+    }}
+
+    .anak-info h3{{margin:0 0 5px;font-size:18px}}
+    .anak-info p{{margin:2px 0;color:#64748b;font-size:14px}}
+
+    .ortu-grid{{
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:14px;
+        margin-bottom:16px
+    }}
+
+    .ortu-card{{
+        background:white;
+        border-radius:18px;
+        padding:18px;
+        box-shadow:0 4px 18px rgba(15,23,42,.07)
+    }}
+
+    .ortu-card .label{{
+        font-size:13px;
+        color:#64748b;
+        margin-bottom:8px
+    }}
+
+    .ortu-card .value{{
+        font-size:25px;
+        font-weight:bold;
+        color:#1e3a8a
+    }}
+
+    .ortu-card .small{{
+        font-size:12px;
+        color:#94a3b8;
+        margin-top:4px
+    }}
+
+    .ortu-menu-grid{{
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:12px
+    }}
+
+    .ortu-menu{{
+        background:white;
+        border-radius:18px;
+        padding:20px 12px;
+        text-align:center;
+        text-decoration:none;
+        color:#1e293b;
+        box-shadow:0 4px 18px rgba(15,23,42,.07)
+    }}
+
+    .ortu-icon{{
+        width:48px;
+        height:48px;
+        border-radius:14px;
+        background:#eff6ff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        margin:0 auto 10px;
+        font-size:24px
+    }}
+
+    .ortu-menu strong{{display:block;font-size:14px}}
+    .ortu-menu span{{display:block;font-size:11px;color:#94a3b8;margin-top:4px}}
+
+    @media(max-width:600px){{
+        .ortu-grid{{grid-template-columns:repeat(2,1fr)}}
+        .ortu-menu-grid{{grid-template-columns:repeat(2,1fr)}}
+    }}
+    </style>
+
+    <div class="ortu-wrap">
+
+        <div class="ortu-hero">
+            <h2>Selamat Datang 👋</h2>
+            <p>Pantau kehadiran dan perkembangan akademik anak Anda.</p>
+        </div>
+
+        <div class="anak-card">
+            {foto_html}
+            <div class="anak-info">
+                <h3>{escape(nama_anak)}</h3>
+                <p>Kelas: <strong>{escape(kelas_anak)}</strong></p>
+                <p>NIS: {escape(nis or "-")}</p>
+            </div>
+        </div>
+
+        <div class="ortu-grid">
+
+            <div class="ortu-card">
+                <div class="label">Kehadiran Hari Ini</div>
+                <div class="value">-</div>
+                <div class="small">Data kehadiran anak</div>
+            </div>
+
+            <div class="ortu-card">
+                <div class="label">Kehadiran Bulan Ini</div>
+                <div class="value">-</div>
+                <div class="small">Rekap bulanan</div>
+            </div>
+
+            <div class="ortu-card">
+                <div class="label">Nilai Terbaru</div>
+                <div class="value">-</div>
+                <div class="small">Data akademik anak</div>
+            </div>
+
+            <div class="ortu-card">
+                <div class="label">Obrolan</div>
+                <div class="value">💬</div>
+                <div class="small">Hubungi sekolah</div>
+            </div>
+
+        </div>
+
+        <div class="ortu-menu-grid">
+
+            <a class="ortu-menu" href="/kehadiran_orangtua">
+                <div class="ortu-icon">📅</div>
+                <strong>Kehadiran</strong>
+                <span>Riwayat absensi</span>
+            </a>
+
+            <a class="ortu-menu" href="/nilai_orangtua">
+                <div class="ortu-icon">📊</div>
+                <strong>Nilai Akademik</strong>
+                <span>Perkembangan nilai</span>
+            </a>
+
+            <a class="ortu-menu" href="/obrolan_orangtua">
+                <div class="ortu-icon">💬</div>
+                <strong>Obrolan</strong>
+                <span>Chat dengan sekolah</span>
+            </a>
+
+        </div>
+
+    </div>
+    """
+
+    return page("Dashboard Orang Tua", body)
+
 
 @app.route("/")
 @login_required
