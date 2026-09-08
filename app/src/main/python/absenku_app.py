@@ -192,6 +192,11 @@ class SupabaseDB:
         if 'FROM USERS WHERE USERNAME=? AND PASSWORD=?' in u:
             rows=self._get('users', {'select':'*','username':f'eq.{params[0]}','password':f'eq.{params[1]}','limit':'1'})
             return RemoteResult([RemoteRow(x) for x in rows])
+        # lookup akun berdasarkan username (dashboard orang tua/profil)
+        if 'FROM USERS WHERE USERNAME=?' in u and 'PASSWORD=?' not in u:
+            rows=self._get('users', {'select':'*','username':f'eq.{params[0]}','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         # COUNT(*) compatibility for dashboard/report queries
         m_count = re.match(r'^SELECT COUNT\(\*\) FROM ([A-Z_]+)(?: WHERE (.*))?$', u)
         if m_count:
@@ -1110,16 +1115,24 @@ def akun_orangtua():
             if cek:
                 msg = "Username sudah digunakan."
             else:
-                c._post(
-                    "users",
-                    {
-                        "username": username,
-                        "password": password,
-                        "role": "orangtua",
-                        "nis": nis
-                    }
-                )
-                msg = "Akun Orang Tua berhasil dibuat."
+                try:
+                    c._post(
+                        "users",
+                        {
+                            "username": username,
+                            "password": password,
+                            "role": "orangtua",
+                            "nis": nis
+                        }
+                    )
+                    msg = "Akun Orang Tua berhasil dibuat."
+                except Exception as e:
+                    err = str(e).lower()
+                    if "duplicate" in err or "unique" in err or "23505" in err:
+                        msg = "Username sudah digunakan."
+                    else:
+                        msg = "Akun Orang Tua gagal dibuat."
+
 
     siswa_rows = c._get(
         "siswa",
@@ -1152,7 +1165,17 @@ def akun_orangtua():
         <p>Buat akun dan hubungkan dengan siswa berdasarkan NIS.</p>
 
         <div style="padding:12px;background:#eff6ff;border-radius:10px;margin:12px 0;">
-            {escape(msg)}
+            {(
+    '<div id="ortuToast" style="padding:14px 16px;background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:12px;margin:12px 0;font-weight:600;">✓ Akun Orang Tua berhasil dibuat.</div>'
+    if msg == "Akun Orang Tua berhasil dibuat."
+    else '<div id="ortuToast" style="padding:14px 16px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;border-radius:12px;margin:12px 0;font-weight:600;">⚠ Username sudah digunakan. Silakan gunakan username lain.</div>'
+    if msg == "Username sudah digunakan."
+    else '<div id="ortuToast" style="padding:14px 16px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:12px;margin:12px 0;font-weight:600;">⚠ Semua data wajib diisi.</div>'
+    if msg == "Semua data wajib diisi."
+    else '<div id="ortuToast" style="padding:14px 16px;background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;border-radius:12px;margin:12px 0;font-weight:600;">⚠ Akun Orang Tua gagal dibuat.</div>'
+    if msg == "Akun Orang Tua gagal dibuat."
+    else ""
+)}
         </div>
 
         <form method="POST">
