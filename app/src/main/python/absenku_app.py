@@ -1980,6 +1980,28 @@ def dashboard_orangtua():
         " • Alpa " + str(alpa_bulan)
     )
 
+    nilai_terbaru_html = '<span style="color:#64748b;">Belum ada nilai</span>'
+
+    try:
+        if nis:
+            nilai_row = c.execute(
+                "SELECT * FROM nilai_akademik WHERE nis=? ORDER BY created_at DESC",
+                (nis,)
+            ).fetchone()
+
+            if nilai_row:
+                mapel = escape(str(nilai_row["mata_pelajaran"] or "-"))
+                akhir = nilai_row["nilai_akhir"] if nilai_row["nilai_akhir"] is not None else "-"
+                predikat = escape(str(nilai_row["predikat"] or "-"))
+
+                nilai_terbaru_html = (
+                    f'<strong>{mapel}</strong><br>'
+                    f'<span style="font-size:20px;">{escape(str(akhir))}</span> '
+                    f'<span style="font-size:14px;">({predikat})</span>'
+                )
+    except Exception:
+        pass
+
     body = f"""
     <style>
     .ortu-wrap{{max-width:1000px;margin:auto}}
@@ -2128,7 +2150,7 @@ def dashboard_orangtua():
 
             <div class="ortu-card">
                 <div class="label">Nilai Terbaru</div>
-                <div class="value">-</div>
+                <div class="value" style="font-size:17px;line-height:1.5;">{nilai_terbaru_html}</div>
                 <div class="small">Data akademik anak</div>
             </div>
 
