@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for, session, jsonify
+from flask import Flask, request, redirect, url_for, session, jsonify, flash
 import sqlite3
 from datetime import datetime, date, timedelta
 from functools import wraps
