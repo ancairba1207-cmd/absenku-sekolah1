@@ -2531,27 +2531,55 @@ def nilai_siswa():
                         nama = siswa_row["nama"] or ""
                         kelas = siswa_row["kelas"] or ""
 
-                        c.execute(
-                            """INSERT INTO nilai_akademik
-                            (nis,nama,kelas,mata_pelajaran,tugas,ulangan,pts,pas,nilai_akhir,predikat,semester,tahun_ajaran)
-                            VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
-                            (
-                                nis,
-                                nama,
-                                kelas,
-                                mata_pelajaran,
-                                tugas,
-                                ulangan,
-                                pts,
-                                pas,
-                                nilai_akhir,
-                                predikat,
-                                semester,
-                                tahun_ajaran
+                        nilai_lama = c.execute(
+                            """SELECT id FROM nilai_akademik
+                               WHERE nis=? AND mata_pelajaran=? AND semester=? AND tahun_ajaran=?
+                               ORDER BY created_at DESC""",
+                            (nis, mata_pelajaran, semester, tahun_ajaran)
+                        ).fetchone()
+
+                        if nilai_lama:
+                            c.execute(
+                                """UPDATE nilai_akademik
+                                   SET nama=?, kelas=?, tugas=?, ulangan=?, pts=?, pas=?,
+                                       nilai_akhir=?, predikat=?
+                                   WHERE id=?""",
+                                (
+                                    nama,
+                                    kelas,
+                                    tugas,
+                                    ulangan,
+                                    pts,
+                                    pas,
+                                    nilai_akhir,
+                                    predikat,
+                                    nilai_lama["id"]
+                                )
                             )
-                        )
+                            pesan = f'<div class="ok">Nilai {escape(nama)} berhasil diperbarui. Nilai akhir: <strong>{nilai_akhir}</strong> ({predikat}).</div>'
+                        else:
+                            c.execute(
+                                """INSERT INTO nilai_akademik
+                                (nis,nama,kelas,mata_pelajaran,tugas,ulangan,pts,pas,nilai_akhir,predikat,semester,tahun_ajaran)
+                                VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
+                                (
+                                    nis,
+                                    nama,
+                                    kelas,
+                                    mata_pelajaran,
+                                    tugas,
+                                    ulangan,
+                                    pts,
+                                    pas,
+                                    nilai_akhir,
+                                    predikat,
+                                    semester,
+                                    tahun_ajaran
+                                )
+                            )
+                            pesan = f'<div class="ok">Nilai {escape(nama)} berhasil disimpan. Nilai akhir: <strong>{nilai_akhir}</strong> ({predikat}).</div>'
+
                         c.commit()
-                        pesan = f'<div class="ok">Nilai {escape(nama)} berhasil disimpan. Nilai akhir: <strong>{nilai_akhir}</strong> ({predikat}).</div>'
 
                 except ValueError:
                     pesan = '<div class="warn">Nilai Tugas, Ulangan, PTS dan PAS harus berupa angka.</div>'
