@@ -2176,6 +2176,30 @@ def dashboard_orangtua():
     except Exception:
         pass
 
+    nilai_tugas_terbaru_html = '<span style="color:#64748b;">Belum ada tugas harian</span>'
+
+    try:
+        if nis:
+            tugas_row = c.execute(
+                "SELECT * FROM nilai_tugas WHERE nis=? ORDER BY tanggal_tugas DESC, created_at DESC",
+                (nis,)
+            ).fetchone()
+
+            if tugas_row:
+                tugas_mapel = escape(str(tugas_row["mata_pelajaran"] or "-"))
+                tugas_nilai = tugas_row["nilai"] if tugas_row["nilai"] is not None else "-"
+                tugas_tanggal = escape(str(tugas_row["tanggal_tugas"] or "-"))
+                tugas_keterangan = escape(str(tugas_row["keterangan"] or ""))
+
+                nilai_tugas_terbaru_html = (
+                    f'<strong>{tugas_mapel}</strong><br>'
+                    f'<span style="font-size:20px;">{escape(str(tugas_nilai))}</span><br>'
+                    f'<span style="font-size:12px;color:#64748b;">{tugas_tanggal}</span>'
+                    + (f'<br><span style="font-size:12px;color:#64748b;">{tugas_keterangan}</span>' if tugas_keterangan else '')
+                )
+    except Exception:
+        pass
+
     body = f"""
     <style>
     .ortu-wrap{{max-width:1000px;margin:auto}}
@@ -2329,9 +2353,9 @@ def dashboard_orangtua():
             </div>
 
             <div class="ortu-card">
-                <div class="label">Obrolan</div>
-                <div class="value">💬</div>
-                <div class="small">Hubungi sekolah</div>
+                <div class="label">Nilai Tugas Harian</div>
+                <div class="value" style="font-size:17px;line-height:1.5;">{nilai_tugas_terbaru_html}</div>
+                <div class="small">Tugas terbaru anak</div>
             </div>
 
         </div>
