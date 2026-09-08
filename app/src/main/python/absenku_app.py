@@ -223,7 +223,22 @@ class SupabaseDB:
             # Filter status literal, misalnya STATUS='Masuk'
             m_status = re.search(r"STATUS=\s*'([^']*)'", where)
             if m_status:
-                q['status'] = f"eq.{m_status.group(1)}"
+                status_value = m_status.group(1).strip().lower()
+
+                # Query disimpan dalam huruf besar karena normalisasi SQL,
+                # sedangkan nilai asli di Supabase menggunakan "Masuk"/"Pulang".
+                status_map = {
+                    "masuk": "Masuk",
+                    "pulang": "Pulang",
+                    "hadir": "Hadir",
+                    "izin": "Izin",
+                    "sakit": "Sakit",
+                    "alpa": "Alpa"
+                }
+
+                status_value = status_map.get(status_value, m_status.group(1))
+                q['status'] = f"eq.{status_value}"
+
             elif 'STATUS=?' in where:
                 # Untuk query status parameterized
                 if len(params) >= 2:
