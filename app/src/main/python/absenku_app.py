@@ -346,10 +346,27 @@ class SupabaseDB:
             return RemoteResult([RemoteRow(x) for x in rows])
 
         # nilai akademik orang tua - berdasarkan NIS siswa
+        if 'FROM MATA_PELAJARAN WHERE AKTIF=? ORDER BY NAMA' in u:
+            rows=self._get('mata_pelajaran', {
+                'select':'*',
+                'aktif':'eq.true',
+                'order':'nama.asc',
+                'limit':'200'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         if 'FROM NILAI_AKADEMIK WHERE NIS=? ORDER BY' in u:
             rows=self._get('nilai_akademik', {
                 'select':'*',
                 'nis':f'eq.{params[0]}',
+                'order':'created_at.desc',
+                'limit':'1000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        if 'FROM NILAI_AKADEMIK ORDER BY CREATED_AT DESC' in u:
+            rows=self._get('nilai_akademik', {
+                'select':'*',
                 'order':'created_at.desc',
                 'limit':'1000'
             })
@@ -2309,6 +2326,22 @@ def nilai_siswa():
             f'</option>'
         )
 
+    mapel_data = []
+    try:
+        mapel_data = c.execute(
+            "SELECT * FROM mata_pelajaran WHERE aktif=? ORDER BY nama",
+            (True,)
+        ).fetchall()
+    except Exception:
+        mapel_data = []
+
+    pilihan_mapel = ""
+    for mp in mapel_data:
+        nama_mapel = escape(str(mp["nama"] or ""))
+        pilihan_mapel += (
+            f'<option value="{nama_mapel}">{nama_mapel}</option>'
+        )
+
     rows = ""
     for n in nilai_data:
         rows += f"""
@@ -2428,7 +2461,10 @@ def nilai_siswa():
 
                     <div class="nilai-full">
                         <label>Mata Pelajaran</label>
-                        <input name="mata_pelajaran" placeholder="Contoh: Matematika" required>
+                        <select name="mata_pelajaran" required>
+                            <option value="">Pilih Mata Pelajaran</option>
+                            {pilihan_mapel}
+                        </select>
                     </div>
 
                     <div>
