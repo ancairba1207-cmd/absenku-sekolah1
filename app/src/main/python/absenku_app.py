@@ -3145,7 +3145,42 @@ def nilai_orangtua():
     nama_anak = anak["nama"] if anak else "Data anak belum terhubung"
     kelas_anak = anak["kelas"] if anak else "-"
 
+    tugas_rows_ortu = []
+    try:
+        if nis:
+            c3 = db()
+            tugas_rows_ortu = c3.execute(
+                "SELECT * FROM nilai_tugas WHERE nis=? ORDER BY tanggal_tugas DESC, created_at DESC",
+                (nis,)
+            ).fetchall()
+            c3.close()
+    except Exception:
+        tugas_rows_ortu = []
+
+
     trs = ""
+
+    tugas_trs = ""
+
+    for t in tugas_rows_ortu:
+        tugas_trs += f"""
+        <tr>
+            <td>{escape(str(t["tanggal_tugas"] or "-"))}</td>
+            <td>{escape(str(t["mata_pelajaran"] or "-"))}</td>
+            <td><strong>{escape(str(t["nilai"] if t["nilai"] is not None else "-"))}</strong></td>
+            <td>{escape(str(t["keterangan"] or "-"))}</td>
+        </tr>
+        """
+
+    if not tugas_trs:
+        tugas_trs = """
+        <tr>
+            <td colspan="4" style="text-align:center;padding:30px;color:#64748b;">
+                Belum ada nilai tugas harian.
+            </td>
+        </tr>
+        """
+
 
     for r in rows:
         nilai_akhir = r["nilai_akhir"] if r["nilai_akhir"] is not None else "-"
@@ -3251,6 +3286,23 @@ def nilai_orangtua():
                     {trs}
                 </tbody>
             </table>
+
+          <div class="nilai-card" style="margin-top:16px;">
+              <h3 style="margin-top:0;">Nilai Tugas Harian</h3>
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Tanggal</th>
+                          <th>Mata Pelajaran</th>
+                          <th>Nilai</th>
+                          <th>Keterangan</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {tugas_trs}
+                  </tbody>
+              </table>
+          </div>
         </div>
 
     </div>
