@@ -297,6 +297,15 @@ class SupabaseDB:
             rows=self._get('absensi_tenaga', {'select':'id','nip':f'eq.{params[0]}','tanggal':f'eq.{params[1]}','status':f'eq.{params[2]}','limit':'1'})
             return RemoteResult([RemoteRow(x) for x in rows])
         # ordered lists
+        if 'SELECT * FROM SISWA WHERE KELAS=? ORDER BY NAMA' in u:
+            rows=self._get('siswa', {
+                'select':'*',
+                'kelas':f'eq.{params[0]}',
+                'order':'nama.asc',
+                'limit':'2000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         if 'SELECT * FROM SISWA ORDER BY KELAS,NAMA' in u:
             rows=self._get('siswa', {'select':'*','order':'kelas.asc,nama.asc','limit':'1000'})
             return RemoteResult([RemoteRow(x) for x in rows])
