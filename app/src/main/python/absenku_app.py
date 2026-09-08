@@ -2878,6 +2878,7 @@ def nilai_siswa():
                         <th>Mata Pelajaran</th>
                         <th>Nilai</th>
                         <th>Keterangan</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3021,7 +3022,7 @@ def edit_nilai_tugas(tugas_id):
     """
 
     c.close()
-    return render_page("Edit Tugas Harian", body)
+    return page("Edit Tugas Harian", body)
 
 
 @app.route("/nilai_tugas", methods=["POST"])
