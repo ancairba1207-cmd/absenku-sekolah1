@@ -1878,6 +1878,75 @@ def dashboard_orangtua():
     else:
         foto_html = '<div class="anak-foto anak-foto-default">👤</div>'
 
+    # Rekap kehadiran untuk Dashboard Orang Tua
+    hari_ini = datetime.now().strftime("%Y-%m-%d")
+    bulan_ini = datetime.now().strftime("%Y-%m")
+
+    jam_masuk = "-"
+    jam_pulang = "-"
+    hadir_bulan = 0
+    izin_bulan = 0
+    sakit_bulan = 0
+    alpa_bulan = 0
+
+    if nis:
+        try:
+            c2 = db()
+
+            hari_rows = c2.execute(
+                "SELECT jam,status FROM absensi WHERE nis=? AND tanggal=? ORDER BY jam ASC",
+                (nis, hari_ini)
+            ).fetchall()
+
+            for ar in hari_rows:
+                st = str(ar["status"] or "").strip().lower()
+                if st == "masuk":
+                    jam_masuk = str(ar["jam"] or "-")
+                elif st == "pulang":
+                    jam_pulang = str(ar["jam"] or "-")
+
+            bulan_rows = c2.execute(
+                "SELECT tanggal,status FROM absensi WHERE nis=? AND tanggal BETWEEN ? AND ? ORDER BY tanggal ASC",
+                (nis, bulan_ini + "-01", hari_ini)
+            ).fetchall()
+
+            tanggal_hadir = set()
+
+            for br in bulan_rows:
+                st = str(br["status"] or "").strip().lower()
+                tg = str(br["tanggal"] or "")
+
+                if st == "masuk" or st == "hadir":
+                    tanggal_hadir.add(tg)
+                elif st == "izin":
+                    izin_bulan += 1
+                elif st == "sakit":
+                    sakit_bulan += 1
+                elif st == "alpa":
+                    alpa_bulan += 1
+
+            hadir_bulan = len(tanggal_hadir)
+            c2.close()
+
+        except Exception:
+            pass
+
+    if jam_masuk != "-" and jam_pulang != "-":
+        hadir_hari_html = "Masuk " + escape(jam_masuk) + '<br><span style="font-size:12px;color:#64748b;">Pulang ' + escape(jam_pulang) + '</span>'
+    elif jam_masuk != "-":
+        hadir_hari_html = "Masuk " + escape(jam_masuk)
+    elif jam_pulang != "-":
+        hadir_hari_html = "Pulang " + escape(jam_pulang)
+    else:
+        hadir_hari_html = "Belum ada absensi"
+
+    rekap_bulan_html = (
+        "Hadir " + str(hadir_bulan) +
+        " • Izin " + str(izin_bulan) +
+        " • Sakit " + str(sakit_bulan) +
+        " • Alpa " + str(alpa_bulan)
+    )
+
     body = f"""
     <style>
     .ortu-wrap{{max-width:1000px;margin:auto}}
@@ -2014,14 +2083,14 @@ def dashboard_orangtua():
 
             <div class="ortu-card">
                 <div class="label">Kehadiran Hari Ini</div>
-                <div class="value">-</div>
-                <div class="small">Data kehadiran anak</div>
+                <div class="value" style="font-size:18px;line-height:1.7;">{hadir_hari_html}</div>
+                <div class="small">Data kehadiran hari ini</div>
             </div>
 
             <div class="ortu-card">
                 <div class="label">Kehadiran Bulan Ini</div>
-                <div class="value">-</div>
-                <div class="small">Rekap bulanan</div>
+                <div class="value" style="font-size:15px;line-height:1.7;">{rekap_bulan_html}</div>
+                <div class="small">Rekap kehadiran bulan ini</div>
             </div>
 
             <div class="ortu-card">
