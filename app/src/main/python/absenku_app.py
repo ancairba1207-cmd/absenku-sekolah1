@@ -379,23 +379,36 @@ def page(title, body):
 
     if role == "guru":
         menu_links = f"""
-<a href="/dashboard_guru">🏠 <span>Dashboard Guru</span></a>
+<a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
+
+<div class="menu-label">ABSENSI</div>
 <a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
 <a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
 <a href="/laporan_siswa_harian">📅 <span>Laporan Harian</span></a>
 <a href="/laporan_siswa_bulanan">📊 <span>Laporan Bulanan</span></a>
+
 """
     else:
         menu_links = f"""
 <a href="/">🏠 <span>Dashboard</span></a>
-<a href="/siswa">👨‍🎓 <span>Siswa</span></a>
-<a href="/tenaga">👨‍🏫 <span>Guru / Tendik</span></a>
+
+<div class="menu-label">ABSENSI</div>
+<a href="/siswa">👨‍🎓 <span>Data Siswa</span></a>
+<a href="/tenaga">👨‍🏫 <span>Data Guru / Tendik</span></a>
 <a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
 <a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
 <a href="/scan_tenaga?status=Masuk">📷 <span>Masuk Guru</span></a>
 <a href="/scan_tenaga?status=Pulang">📷 <span>Pulang Guru</span></a>
-<a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 <span>Laporan</span></a>
+<a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 <span>Laporan Absensi</span></a>
+
+<div class="menu-label">BUKU INDUK</div>
+<a href="/buku_induk">📚 <span>Buku Induk</span></a>
+
+<div class="menu-label">BOSP</div>
+<a href="/bosp">💰 <span>BOSP</span></a>
 """
+
+
 
     return f"""<!doctype html>
 <html lang="id">
@@ -523,6 +536,33 @@ margin:4px 0;
 .menu-role{{
 font-size:13px;
 opacity:.85;
+}}
+
+
+
+.buku-foto{
+width:48px;
+height:48px;
+border-radius:50%;
+object-fit:cover;
+border:2px solid #e2e8f0;
+display:block;
+}
+
+.buku-foto-default{
+display:flex;
+align-items:center;
+justify-content:center;
+background:#e2e8f0;
+font-size:24px;
+}
+
+.menu-label{{
+font-size:11px;
+font-weight:bold;
+color:#64748b;
+padding:14px 14px 5px;
+letter-spacing:.7px;
 }}
 
 .menu-section{{
@@ -729,7 +769,7 @@ table{{font-size:11px}}
 <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 
 <header>
-<img class="logo" src="{LOGO_B64}" alt="Logo">
+<img class="logo" src="data:image/png;base64,{LOGO_B64}" alt="Logo">
 <h1>{SEKOLAH}</h1>
 <p>{escape(title)}</p>
 </header>
@@ -1255,6 +1295,130 @@ def upload_foto_siswa(file):
     finally:
         c.close()
 
+
+@app.route("/buku_induk", methods=["GET"])
+@admin_required
+def buku_induk():
+    kelas = request.args.get("kelas", "").strip()
+
+    c = db()
+    try:
+        if kelas:
+            siswa = c._get("siswa", {
+                "select": "*",
+                "kelas": f"eq.{kelas}",
+                "order": "nama.asc"
+            })
+        else:
+            siswa = c._get("siswa", {
+                "select": "*",
+                "order": "nama.asc"
+            })
+
+        kelas_rows = c._get("siswa", {
+            "select": "kelas",
+            "order": "kelas.asc"
+        })
+    finally:
+        c.close()
+
+    kelas_list = sorted(set(
+        str(x.get("kelas") or "").strip()
+        for x in kelas_rows
+        if str(x.get("kelas") or "").strip()
+    ))
+
+    from datetime import date
+
+    def hitung_umur(tgl):
+        if not tgl:
+            return "-"
+        try:
+            lahir = datetime.strptime(str(tgl)[:10], "%Y-%m-%d").date()
+            hari_ini = date.today()
+            umur = hari_ini.year - lahir.year
+            if (hari_ini.month, hari_ini.day) < (lahir.month, lahir.day):
+                umur -= 1
+            return str(umur) + " tahun"
+        except Exception:
+            return "-"
+
+    rows_html = ""
+
+    for no, x in enumerate(siswa, 1):
+        sid = x.get("id", "")
+        nis = escape(str(x.get("nis") or ""))
+        nama = escape(str(x.get("nama") or ""))
+        kls = escape(str(x.get("kelas") or ""))
+        tgl = escape(str(x.get("tanggal_lahir") or ""))
+        umur = hitung_umur(x.get("tanggal_lahir"))
+
+        foto = x.get("foto") or ""
+        if foto:
+            foto_html = f'<img class="buku-foto" src="{escape(foto)}" alt="Foto">'
+        else:
+            foto_html = '<div class="buku-foto buku-foto-default">👤</div>'
+
+        rows_html += f"""
+<tr>
+<td>{no}</td>
+<td>{foto_html}</td>
+<td>{nis}</td>
+<td><b>{nama}</b></td>
+<td>{kls}</td>
+<td>{tgl}</td>
+<td>{umur}</td>
+<td>
+<a class="btn purple" href="/edit_siswa/{sid}">Lihat / Edit</a>
+</td>
+</tr>
+"""
+
+    pilihan_kelas = '<option value="">Semua Kelas</option>'
+    for k in kelas_list:
+        selected = " selected" if k == kelas else ""
+        pilihan_kelas += f'<option value="{escape(k)}"{selected}>{escape(k)}</option>'
+
+    body = f"""
+<div class="card">
+<h2>📚 Buku Induk</h2>
+<p class="small">
+Data Peserta Didik • Umur dihitung otomatis berdasarkan tanggal lahir.
+</p>
+
+<form method="get">
+<label>Filter Kelas</label>
+<select name="kelas" onchange="this.form.submit()">
+{pilihan_kelas}
+</select>
+</form>
+</div>
+
+<div class="card">
+<div class="table-wrap">
+<table style="min-width:900px">
+<thead>
+<tr>
+<th>No</th>
+<th>Foto</th>
+<th>NIS</th>
+<th>Nama</th>
+<th>Kelas</th>
+<th>Tanggal Lahir</th>
+<th>Umur</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody>
+{rows_html if rows_html else '<tr><td colspan="8" style="text-align:center;padding:25px">Belum ada data siswa.</td></tr>'}
+</tbody>
+</table>
+</div>
+</div>
+"""
+
+    return page("Buku Induk", body)
+
 @app.route("/siswa", methods=["GET","POST"])
 @admin_required
 def siswa():
@@ -1300,27 +1464,224 @@ def siswa():
 @app.route("/edit_siswa/<int:sid>", methods=["GET","POST"])
 @admin_required
 def edit_siswa(sid):
-    c=db(); s=c.execute("SELECT * FROM siswa WHERE id=?",(sid,)).fetchone(); c.close()
-    if not s: return "Siswa tidak ditemukan",404
-    if request.method=="POST":
-        vals=(request.form.get("nis","").strip(),request.form.get("nama","").strip(),
-              request.form.get("kelas","").strip(),request.form.get("qr","").strip() or request.form.get("nis","").strip(),
-              request.form.get("orang_tua","").strip(),request.form.get("whatsapp","").strip(),request.form.get("hubungan","").strip(),sid)
-        c=db()
-        try: c.execute("""UPDATE siswa SET nis=?,nama=?,kelas=?,qr=?,orang_tua=?,whatsapp=?,hubungan=? WHERE id=?""",vals); c.commit()
-        except sqlite3.IntegrityError: c.close(); return page("Edit Siswa",'<div class="warn">NIS atau QR sudah digunakan.</div>')
-        c.close(); return redirect(url_for("siswa"))
-    body=f"""<div class="card"><h2>✏️ Edit Siswa</h2><form method="post">
-<label>NIS</label><input name="nis" value="{escape(s['nis'])}" required>
-<label>Nama</label><input name="nama" value="{escape(s['nama'])}" required>
-<label>Kelas</label><input name="kelas" value="{escape(s['kelas'])}" required>
-<label>Kode QR</label><input name="qr" value="{escape(s['qr'] or '')}">
-<label>Orang Tua</label><input name="orang_tua" value="{escape(s['orang_tua'] or '')}">
-<label>WhatsApp</label><input name="whatsapp" value="{escape(s['whatsapp'] or '')}">
-<label>Hubungan</label><input name="hubungan" value="{escape(s['hubungan'] or '')}">
-<button class="btn green">💾 Simpan Perubahan</button></form></div>"""
-    return page("Edit Siswa",body)
+    c = db()
+    s = c.execute("SELECT * FROM siswa WHERE id=?", (sid,)).fetchone()
+    c.close()
 
+    if not s:
+        return "Siswa tidak ditemukan", 404
+
+    if request.method == "POST":
+        nis = request.form.get("nis", "").strip()
+        nisn = request.form.get("nisn", "").strip()
+        nama = request.form.get("nama", "").strip()
+        nama_panggilan = request.form.get("nama_panggilan", "").strip()
+        kelas = request.form.get("kelas", "").strip()
+        jenis_kelamin = request.form.get("jenis_kelamin", "").strip()
+        tempat_lahir = request.form.get("tempat_lahir", "").strip()
+        tanggal_lahir = request.form.get("tanggal_lahir", "").strip() or None
+        nik = request.form.get("nik", "").strip()
+        agama = request.form.get("agama", "").strip()
+        anak_ke_raw = request.form.get("anak_ke", "").strip()
+        status_dalam_keluarga = request.form.get("status_dalam_keluarga", "").strip()
+        orang_tua = request.form.get("orang_tua", "").strip()
+        whatsapp = request.form.get("whatsapp", "").strip()
+        hubungan = request.form.get("hubungan", "").strip()
+        qr = request.form.get("qr", "").strip() or nis
+
+        try:
+            anak_ke = int(anak_ke_raw) if anak_ke_raw else None
+        except ValueError:
+            anak_ke = None
+
+        foto_url = s["foto"] if "foto" in s.keys() else ""
+        foto_file = request.files.get("foto")
+        if foto_file and foto_file.filename:
+            hasil_foto = upload_foto_siswa(foto_file)
+            if hasil_foto:
+                foto_url = hasil_foto
+
+        c = db()
+        try:
+            c.execute("""
+                UPDATE siswa SET
+                    nis=?,
+                    nisn=?,
+                    nama=?,
+                    nama_panggilan=?,
+                    kelas=?,
+                    jenis_kelamin=?,
+                    tempat_lahir=?,
+                    tanggal_lahir=?,
+                    nik=?,
+                    agama=?,
+                    anak_ke=?,
+                    status_dalam_keluarga=?,
+                    qr=?,
+                    orang_tua=?,
+                    whatsapp=?,
+                    hubungan=?,
+                    foto=?
+                WHERE id=?
+            """, (
+                nis, nisn, nama, nama_panggilan, kelas,
+                jenis_kelamin, tempat_lahir, tanggal_lahir,
+                nik, agama, anak_ke, status_dalam_keluarga,
+                qr, orang_tua, whatsapp, hubungan, foto_url, sid
+            ))
+            c.commit()
+        except Exception as e:
+            c.close()
+            return page(
+                "Edit Siswa",
+                f'<div class="card"><h3>⚠️ Gagal menyimpan</h3>'
+                f'<p>{escape(str(e))}</p>'
+                f'<p><a class="btn" href="/edit_siswa/{sid}">Kembali</a></p></div>'
+            )
+
+        c.close()
+        return redirect(url_for("buku_induk"))
+
+    def val(key):
+        try:
+            return escape(s[key] or "")
+        except Exception:
+            return ""
+
+    tgl = val("tanggal_lahir")
+
+    body = f"""
+    <div class="card">
+      <h2>📚 Buku Induk — Identitas Siswa</h2>
+      <p style="opacity:.75">Lengkapi data identitas siswa berikut.</p>
+
+      <form method="POST" enctype="multipart/form-data">
+
+        <div style="margin:18px 0 10px;font-weight:700;font-size:18px">
+          👤 Identitas Peserta Didik
+        </div>
+
+        <div class="grid">
+          <div>
+            <label>NIS</label>
+            <input name="nis" value="{val('nis')}" required>
+          </div>
+
+          <div>
+            <label>NISN</label>
+            <input name="nisn" value="{val('nisn')}">
+          </div>
+
+          <div>
+            <label>Nama Lengkap</label>
+            <input name="nama" value="{val('nama')}" required>
+          </div>
+
+          <div>
+            <label>Nama Panggilan</label>
+            <input name="nama_panggilan" value="{val('nama_panggilan')}">
+          </div>
+
+          <div>
+            <label>Jenis Kelamin</label>
+            <select name="jenis_kelamin">
+              <option value="">-- Pilih --</option>
+              <option value="L" {"selected" if str(s["jenis_kelamin"] or "") == "L" else ""}>Laki-laki</option>
+              <option value="P" {"selected" if str(s["jenis_kelamin"] or "") == "P" else ""}>Perempuan</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Kelas</label>
+            <input name="kelas" value="{val('kelas')}" required>
+          </div>
+
+          <div>
+            <label>Tempat Lahir</label>
+            <input name="tempat_lahir" value="{val('tempat_lahir')}">
+          </div>
+
+          <div>
+            <label>Tanggal Lahir</label>
+            <input type="date" name="tanggal_lahir" value="{tgl}">
+          </div>
+
+          <div>
+            <label>NIK</label>
+            <input name="nik" value="{val('nik')}">
+          </div>
+
+          <div>
+            <label>Agama</label>
+            <select name="agama">
+              <option value="">-- Pilih Agama --</option>
+              <option {"selected" if str(s["agama"] or "") == "Islam" else ""}>Islam</option>
+              <option {"selected" if str(s["agama"] or "") == "Kristen" else ""}>Kristen</option>
+              <option {"selected" if str(s["agama"] or "") == "Katolik" else ""}>Katolik</option>
+              <option {"selected" if str(s["agama"] or "") == "Hindu" else ""}>Hindu</option>
+              <option {"selected" if str(s["agama"] or "") == "Buddha" else ""}>Buddha</option>
+              <option {"selected" if str(s["agama"] or "") == "Konghucu" else ""}>Konghucu</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Anak Ke-</label>
+            <input type="number" min="1" name="anak_ke" value="{val('anak_ke')}">
+          </div>
+
+          <div>
+            <label>Status Dalam Keluarga</label>
+            <select name="status_dalam_keluarga">
+              <option value="">-- Pilih --</option>
+              <option {"selected" if str(s["status_dalam_keluarga"] or "") == "Anak Kandung" else ""}>Anak Kandung</option>
+              <option {"selected" if str(s["status_dalam_keluarga"] or "") == "Anak Tiri" else ""}>Anak Tiri</option>
+              <option {"selected" if str(s["status_dalam_keluarga"] or "") == "Anak Angkat" else ""}>Anak Angkat</option>
+              <option {"selected" if str(s["status_dalam_keluarga"] or "") == "Lainnya" else ""}>Lainnya</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Foto Siswa</label>
+            <input type="file" name="foto" accept="image/*">
+          </div>
+        </div>
+
+        <div style="margin:22px 0 10px;font-weight:700;font-size:18px">
+          👨‍👩‍👦 Orang Tua / Wali
+        </div>
+
+        <div class="grid">
+          <div>
+            <label>Nama Orang Tua / Wali</label>
+            <input name="orang_tua" value="{val('orang_tua')}">
+          </div>
+
+          <div>
+            <label>Hubungan</label>
+            <select name="hubungan">
+              <option value="">-- Pilih --</option>
+              <option {"selected" if str(s["hubungan"] or "") == "Ayah" else ""}>Ayah</option>
+              <option {"selected" if str(s["hubungan"] or "") == "Ibu" else ""}>Ibu</option>
+              <option {"selected" if str(s["hubungan"] or "") == "Wali" else ""}>Wali</option>
+            </select>
+          </div>
+
+          <div>
+            <label>WhatsApp</label>
+            <input name="whatsapp" value="{val('whatsapp')}">
+          </div>
+        </div>
+
+        <div style="margin-top:22px">
+          <button class="btn" type="submit">💾 Simpan Data</button>
+          <a class="btn" href="/buku_induk" style="margin-left:8px">↩️ Kembali</a>
+        </div>
+
+      </form>
+    </div>
+    """
+
+    return page("Edit Buku Induk", body)
 
 @app.route("/hapus_siswa/<int:sid>")
 @admin_required
