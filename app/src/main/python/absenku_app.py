@@ -152,6 +152,24 @@ class SupabaseDB:
             fields=['nip','nama','jabatan','qr']; vals=params
             payload=dict(zip(fields, vals[:-1])); tid=vals[-1]
             return RemoteResult([RemoteRow(x) for x in self._patch('tenaga', {'id':f'eq.{tid}'}, payload)])
+        # UPDATE USERS
+        if u.startswith('UPDATE USERS SET'):
+            vals = list(params)
+            user_id = vals[-1]
+            payload = {}
+            fields = re.findall(r'([A-Z_]+)=\\?', u.split('SET', 1)[1].split('WHERE', 1)[0])
+
+            for i, field in enumerate(fields):
+                if i >= len(vals) - 1:
+                    break
+                payload[field.lower()] = vals[i]
+
+            return RemoteResult([RemoteRow(x) for x in self._patch(
+                'users',
+                {'id': f'eq.{user_id}'},
+                payload
+            )])
+
         # DELETE
         if u.startswith('DELETE FROM SISWA'):
             return RemoteResult([RemoteRow(x) for x in self._delete('siswa', {'id':f'eq.{params[0]}'} )])
@@ -327,70 +345,425 @@ def admin_required(f):
 
 
 def page(title, body):
-    user = escape(session.get("user", ""))
-    nav = ""
+    user = session.get("user", "")
+    role = session.get("role", "admin")
+
+    nama_profil = user
+    foto_profil = ""
+
     if user:
-        role = session.get("role", "admin")
-        if role == "guru":
-            nav = f"""
-<div class="nav">
-<a href="/dashboard_guru">🏠 Dashboard Guru</a>
-<a href="/scan?status=Masuk">📷 Masuk Siswa</a>
-<a href="/scan?status=Pulang">📷 Pulang Siswa</a>
-<a href="/laporan_siswa_harian">📅 Laporan Harian</a>
-<a href="/laporan_siswa_bulanan">📊 Laporan Bulanan</a>
-<a href="/logout">🚪 Keluar ({user})</a>
-</div>"""
-        else:
-            nav = f"""
-<div class="nav">
-<a href="/">🏠 Dashboard</a>
-<a href="/siswa">👨‍🎓 Siswa</a>
-<a href="/tenaga">👨‍🏫 Guru/Tendik</a>
-<a href="/scan?status=Masuk">📷 Masuk Siswa</a>
-<a href="/scan?status=Pulang">📷 Pulang Siswa</a>
-<a href="/scan_tenaga?status=Masuk">📷 Masuk Guru</a>
-<a href="/scan_tenaga?status=Pulang">📷 Pulang Guru</a>
-<a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 Laporan</a>
-<a href="/logout">🚪 Keluar ({user})</a>
-</div>"""
-    return f"""<!doctype html><html lang="id"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+        try:
+            c = db()
+            rows = c._get("users", {
+                "select": "nama,foto,username,role",
+                "username": f"eq.{user}",
+                "limit": "1"
+            })
+            c.close()
+
+            if rows:
+                nama_profil = rows[0].get("nama") or rows[0].get("username") or user
+                foto_profil = rows[0].get("foto") or ""
+        except Exception:
+            pass
+
+    nama_profil = escape(nama_profil)
+    user = escape(user)
+
+    role_text = "Guru" if role == "guru" else "Administrator"
+
+    if foto_profil:
+        avatar = f'<img class="menu-avatar" src="{escape(foto_profil)}" alt="Foto Profil">'
+    else:
+        avatar = '<div class="menu-avatar menu-avatar-default">👤</div>'
+
+    if role == "guru":
+        menu_links = f"""
+<a href="/dashboard_guru">🏠 <span>Dashboard Guru</span></a>
+<a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
+<a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
+<a href="/laporan_siswa_harian">📅 <span>Laporan Harian</span></a>
+<a href="/laporan_siswa_bulanan">📊 <span>Laporan Bulanan</span></a>
+"""
+    else:
+        menu_links = f"""
+<a href="/">🏠 <span>Dashboard</span></a>
+<a href="/siswa">👨‍🎓 <span>Siswa</span></a>
+<a href="/tenaga">👨‍🏫 <span>Guru / Tendik</span></a>
+<a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
+<a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
+<a href="/scan_tenaga?status=Masuk">📷 <span>Masuk Guru</span></a>
+<a href="/scan_tenaga?status=Pulang">📷 <span>Pulang Guru</span></a>
+<a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 <span>Laporan</span></a>
+"""
+
+    return f"""<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(title)} - {SEKOLAH}</title>
+
 <style>
-*{{box-sizing:border-box}} body{{margin:0;background:#f1f5f9;color:#0f172a;font-family:Arial,sans-serif}}
-header{{background:linear-gradient(135deg,#2563eb,#4f46e5);color:white;padding:20px;border-radius:0 0 25px 25px;text-align:center}}
-.logo{{width:88px;height:88px;object-fit:contain;background:white;border-radius:50%;padding:4px;box-shadow:0 4px 12px rgba(0,0,0,.2)}}
-header h1{{margin:4px 0;font-size:22px}} header p{{margin:0;opacity:.9}}
-main{{width:100%;max-width:1000px;margin:auto;padding:12px}} .nav{{display:flex;gap:7px;overflow-x:auto;padding:8px 0;scrollbar-width:none}} .nav::-webkit-scrollbar{{display:none}}
-.nav a{{flex:0 0 auto;white-space:nowrap;background:white;color:#1e40af;padding:9px 11px;border-radius:10px;text-decoration:none;font-size:13px}}
-.card{{background:white;padding:15px;border-radius:16px;margin:10px 0;box-shadow:0 4px 18px rgba(0,0,0,.07);overflow:hidden}}
-.grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
-.stat{{padding:13px;border-radius:14px;background:#eff6ff;min-width:0}} .stat b{{font-size:25px}}
-.btn{{display:block;width:100%;padding:12px;border:0;border-radius:12px;background:#2563eb;color:white;text-decoration:none;text-align:center;font-weight:bold;margin-top:7px;cursor:pointer}}
-.green{{background:#16a34a}} .orange{{background:#ea580c}} .red{{background:#dc2626}} .gray{{background:#475569}} .purple{{background:#7c3aed}}
-input,select{{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10px;margin:5px 0 10px;font-size:16px}}
-.table-wrap{{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}} table{{width:100%;border-collapse:collapse;font-size:13px;min-width:620px;display:block;overflow-x:auto}} th,td{{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}}
-.small{{font-size:13px;color:#64748b}} .ok{{background:#dcfce7;color:#166534;padding:12px;border-radius:10px}}
-.warn{{background:#fef3c7;color:#92400e;padding:12px;border-radius:10px}}
-#reader{{width:100%;max-width:520px;margin:12px auto}}#reader video{{width:100%!important;height:auto!important;border-radius:16px}}.scan-status{{text-align:center;font-weight:bold;margin:10px 0}}.actions a{{margin-right:5px}}.actions{{white-space:nowrap}}@media(max-width:650px){{#reader{{max-width:100%}}#reader__dashboard_section{{padding:4px!important}}#reader__dashboard_section_csr button,#reader__dashboard_section_csr select{{font-size:14px!important}}}}
-@media(max-width:650px){{header{{padding:14px 10px;border-radius:0 0 18px 18px}} .logo{{width:68px;height:68px}} header h1{{font-size:18px}} header p{{font-size:12px}} main{{padding:8px}} .card{{padding:12px;border-radius:14px}} .grid{{grid-template-columns:1fr 1fr;gap:8px}} .stat{{padding:10px;font-size:12px}} .stat b{{font-size:21px}} .btn{{padding:11px 8px;font-size:13px}} table{{font-size:11px}}}}
-@media(max-width:380px){{.grid{{grid-template-columns:1fr}} .stat{{padding:11px}} header h1{{font-size:17px}} .nav a{{font-size:12px;padding:8px 9px}} .card{{padding:10px}} input,select{{font-size:16px}} #reader{{max-width:100vw;margin-left:auto;margin-right:auto}}}}
-@media(min-width:651px){{main{{max-width:1100px;padding:18px}} .card{{padding:18px}} .grid{{grid-template-columns:repeat(4,minmax(0,1fr))}} #reader{{max-width:560px}}}}
-.scan-overlay{{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.48)}}
-.scan-overlay.show{{display:flex}}
-.scan-popup{{width:min(92vw,520px);background:white;border-radius:24px;padding:26px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.28);transform:scale(.72);animation:popIn .28s ease-out forwards}}
-.scan-popup .icon{{font-size:64px}}
-.scan-popup h2{{margin:8px 0;font-size:26px}}
-.scan-popup p{{margin:5px 0;font-size:17px}}
-.scan-popup.success h2{{color:#15803d}}
-.scan-popup.error h2{{color:#b91c1c}}
-@keyframes popIn{{to{{transform:scale(1)}}}}
-@media(max-width:480px){{.scan-popup{{padding:22px 16px}}.scan-popup .icon{{font-size:52px}}.scan-popup h2{{font-size:22px}}.scan-popup p{{font-size:15px}}}}
-@media print{{body{{background:white!important}} header,nav,.nav,.btn,button,.small{{display:none!important}} main{{padding:0!important}} .card{{box-shadow:none!important;border:0!important;margin:0!important}} table{{min-width:0!important;display:table!important;font-size:11px!important}} #reader{{display:none!important}}}}
-</style></head><body>
-<header><img class="logo" src="data:image/png;base64,{LOGO_B64}" alt="Logo Sekolah"><h1>{SEKOLAH}</h1><p>ABSENKU SEKOLAH • Siswa • Guru • Tendik</p></header>
-<main>{nav}{body}</main></body></html>"""
+*{{box-sizing:border-box}}
+
+body{{
+margin:0;
+background:#f1f5f9;
+color:#0f172a;
+font-family:Arial,sans-serif;
+}}
+
+header{{
+background:linear-gradient(135deg,#2563eb,#4f46e5);
+color:white;
+padding:20px;
+border-radius:0 0 25px 25px;
+text-align:center;
+}}
+
+.logo{{
+width:88px;
+height:88px;
+object-fit:contain;
+background:white;
+border-radius:50%;
+padding:4px;
+box-shadow:0 4px 12px rgba(0,0,0,.2)
+}}
+
+header h1{{margin:4px 0;font-size:22px}}
+header p{{margin:0;opacity:.9}}
+
+main{{
+width:100%;
+max-width:1000px;
+margin:auto;
+padding:12px
+}}
+
+.topbar{{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:white;
+padding:10px 14px;
+border-radius:14px;
+margin-bottom:10px;
+box-shadow:0 3px 12px rgba(0,0,0,.08);
+position:relative;
+z-index:1001;
+}}
+
+.menu-button{{
+width:44px;
+height:44px;
+border:0;
+border-radius:12px;
+background:#2563eb;
+color:white;
+font-size:23px;
+cursor:pointer;
+}}
+
+.topbar-title{{
+font-weight:bold;
+font-size:16px;
+color:#1e3a8a;
+}}
+
+.side-menu{{
+position:fixed;
+top:0;
+left:-310px;
+width:290px;
+height:100vh;
+background:white;
+z-index:2000;
+box-shadow:8px 0 30px rgba(0,0,0,.18);
+transition:left .25s ease;
+overflow-y:auto;
+}}
+
+.side-menu.open{{left:0}}
+
+.menu-head{{
+background:linear-gradient(135deg,#2563eb,#4f46e5);
+color:white;
+padding:25px 18px 20px;
+text-align:center;
+}}
+
+.menu-avatar{{
+width:82px;
+height:82px;
+border-radius:50%;
+object-fit:cover;
+display:block;
+margin:0 auto 10px;
+background:white;
+border:3px solid rgba(255,255,255,.8);
+box-shadow:0 4px 14px rgba(0,0,0,.2);
+}}
+
+.menu-avatar-default{{
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:42px;
+color:#475569;
+}}
+
+.menu-name{{
+font-size:17px;
+font-weight:bold;
+margin:4px 0;
+}}
+
+.menu-role{{
+font-size:13px;
+opacity:.85;
+}}
+
+.menu-section{{
+padding:10px;
+}}
+
+.menu-section a{{
+display:flex;
+align-items:center;
+gap:12px;
+padding:13px 14px;
+margin:3px 0;
+border-radius:12px;
+text-decoration:none;
+color:#1e293b;
+font-size:14px;
+}}
+
+.menu-section a:hover{{
+background:#eff6ff;
+color:#1d4ed8;
+}}
+
+.menu-profile{{
+border-top:1px solid #e2e8f0;
+padding-top:10px;
+}}
+
+.menu-profile a{{
+font-weight:bold;
+}}
+
+.menu-logout{{
+color:#dc2626!important;
+}}
+
+.menu-overlay{{
+position:fixed;
+inset:0;
+background:rgba(15,23,42,.35);
+z-index:1999;
+display:none;
+}}
+
+.menu-overlay.show{{display:block}}
+
+.card{{
+background:white;
+padding:15px;
+border-radius:16px;
+margin:10px 0;
+box-shadow:0 4px 18px rgba(0,0,0,.07);
+overflow:hidden
+}}
+
+.grid{{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px
+}}
+
+.stat{{
+padding:13px;
+border-radius:14px;
+background:#eff6ff;
+min-width:0
+}}
+
+.stat b{{font-size:25px}}
+
+.btn{{
+display:block;
+width:100%;
+padding:12px;
+border:0;
+border-radius:12px;
+background:#2563eb;
+color:white;
+text-decoration:none;
+text-align:center;
+font-weight:bold;
+margin-top:7px;
+cursor:pointer
+}}
+
+.green{{background:#16a34a}}
+.orange{{background:#ea580c}}
+.red{{background:#dc2626}}
+.gray{{background:#475569}}
+.purple{{background:#7c3aed}}
+
+input,select{{
+width:100%;
+padding:11px;
+border:1px solid #cbd5e1;
+border-radius:10px;
+margin:5px 0 10px;
+font-size:16px
+}}
+
+.table-wrap{{
+width:100%;
+overflow-x:auto;
+-webkit-overflow-scrolling:touch
+}}
+
+table{{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+min-width:620px;
+display:block;
+overflow-x:auto
+}}
+
+th,td{{
+padding:8px;
+border-bottom:1px solid #e2e8f0;
+text-align:left
+}}
+
+.small{{
+font-size:13px;
+color:#64748b
+}}
+
+.ok{{
+background:#dcfce7;
+color:#166534;
+padding:12px;
+border-radius:10px
+}}
+
+.warn{{
+background:#fef3c7;
+color:#92400e;
+padding:12px;
+border-radius:10px
+}}
+
+#reader{{
+width:100%;
+max-width:520px;
+margin:12px auto
+}}
+
+#reader video{{
+width:100%!important;
+height:auto!important;
+border-radius:16px
+}}
+
+.scan-status{{
+text-align:center;
+font-weight:bold;
+margin:10px 0
+}}
+
+.actions a{{margin-right:5px}}
+.actions{{white-space:nowrap}}
+
+@media(max-width:650px){{
+header{{padding:14px 10px;border-radius:0 0 18px 18px}}
+.logo{{width:68px;height:68px}}
+header h1{{font-size:18px}}
+header p{{font-size:12px}}
+main{{padding:8px}}
+.card{{padding:12px;border-radius:14px}}
+.grid{{grid-template-columns:1fr 1fr;gap:8px}}
+.stat{{padding:10px;font-size:12px}}
+.stat b{{font-size:21px}}
+.btn{{padding:11px 8px;font-size:13px}}
+table{{font-size:11px}}
+}}
+
+@media(max-width:380px){{
+.side-menu{{width:275px}}
+.topbar-title{{font-size:14px}}
+}}
+</style>
+</head>
+
+<body>
+
+<div class="side-menu" id="sideMenu">
+
+<div class="menu-head">
+{avatar}
+<div class="menu-name">{nama_profil}</div>
+<div class="menu-role">{role_text}</div>
+</div>
+
+<div class="menu-section">
+{menu_links}
+</div>
+
+<div class="menu-section menu-profile">
+<a href="/profil">👤 <span>Ubah Profil</span></a>
+<a class="menu-logout" href="/logout">🚪 <span>Logout</span></a>
+</div>
+
+</div>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+<header>
+<img class="logo" src="{LOGO_URL}" alt="Logo">
+<h1>{SEKOLAH}</h1>
+<p>{escape(title)}</p>
+</header>
+
+<main>
+
+<div class="topbar">
+<button class="menu-button" onclick="openMenu()" aria-label="Buka Menu">☰</button>
+<div class="topbar-title">ABSENKU SEKOLAH</div>
+<div style="width:44px"></div>
+</div>
+
+{body}
+
+</main>
+
+<script>
+function openMenu(){{
+document.getElementById('sideMenu').classList.add('open');
+document.getElementById('menuOverlay').classList.add('show');
+}}
+
+function closeMenu(){{
+document.getElementById('sideMenu').classList.remove('open');
+document.getElementById('menuOverlay').classList.remove('show');
+}}
+
+document.addEventListener('keydown',function(e){{
+if(e.key==='Escape') closeMenu();
+}});
+</script>
+
+</body>
+</html>"""
 
 
 @app.route("/login", methods=["GET","POST"])
@@ -423,6 +796,132 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
+
+@app.route("/profil", methods=["GET","POST"])
+@login_required
+def profil():
+    username_lama = session.get("user", "")
+    c = db()
+    rows = c._get("users", {
+        "select": "*",
+        "username": f"eq.{username_lama}",
+        "limit": "1"
+    })
+    c.close()
+
+    if not rows:
+        session.clear()
+        return redirect(url_for("login"))
+
+    row = rows[0]
+    msg = ""
+
+    if request.method == "POST":
+        nama = request.form.get("nama", "").strip() or username_lama
+        username = request.form.get("username", "").strip() or username_lama
+        password = request.form.get("password", "")
+        foto = request.files.get("foto")
+        foto_url = row.get("foto") or ""
+
+        try:
+            if foto and foto.filename:
+                nama_file = foto.filename.rsplit("/", 1)[-1].strip()
+                ext = nama_file.rsplit(".", 1)[-1].lower() if "." in nama_file else ""
+
+                if ext not in ("jpg", "jpeg", "png", "webp"):
+                    raise ValueError("Format foto harus JPG, JPEG, PNG, atau WEBP.")
+
+                data = foto.read()
+
+                if len(data) > 6 * 1024 * 1024:
+                    raise ValueError("Ukuran foto maksimal 6 MB.")
+
+                import uuid
+                nama_storage = f"profil/{uuid.uuid4().hex}.{ext}"
+                content_type = foto.mimetype or "image/jpeg"
+
+                c = db()
+                try:
+                    foto_url = c._upload_storage(
+                        "foto-tenaga",
+                        nama_storage,
+                        data,
+                        content_type
+                    )
+                finally:
+                    c.close()
+
+            payload = {
+                "nama": nama,
+                "username": username,
+                "foto": foto_url
+            }
+
+            if password:
+                payload["password"] = password
+
+            c = db()
+            c._patch(
+                "users",
+                {"id": f"eq.{row['id']}"},
+                payload
+            )
+            c.close()
+
+            session["user"] = username
+            msg = '<div class="ok">✅ Profil berhasil diperbarui.</div>'
+
+            row["nama"] = nama
+            row["username"] = username
+            row["foto"] = foto_url
+
+        except Exception as e:
+            try:
+                c.close()
+            except Exception:
+                pass
+            msg = f'<div class="warn">❌ Gagal menyimpan profil:<br><small>{escape(str(e))}</small></div>'
+
+    nama_tampil = escape(row.get("nama") or row.get("username") or username_lama)
+    username_tampil = escape(row.get("username") or username_lama)
+    foto = row.get("foto") or ""
+    role = "Guru" if session.get("role") == "guru" else "Administrator"
+
+    if foto:
+        avatar = f'<img class="profile-big" src="{escape(foto)}" alt="Foto Profil">'
+    else:
+        avatar = '<div class="profile-big profile-default">👤</div>'
+
+    body = f"""
+<div class="card profile-card">
+<h2>👤 Ubah Profil</h2>
+{msg}
+<div class="profile-center">
+{avatar}
+<h3>{nama_tampil}</h3>
+<div class="small">{role}</div>
+</div>
+<form method="post" enctype="multipart/form-data">
+<label>Nama</label>
+<input name="nama" value="{nama_tampil}" required>
+
+<label>Username</label>
+<input name="username" value="{username_tampil}" required>
+
+<label>Password Baru</label>
+<input type="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah">
+
+<label>Foto Profil</label>
+<input type="file" name="foto" accept="image/jpeg,image/png,image/webp">
+<div class="small">JPG, PNG, WEBP • Maksimal 6 MB</div>
+
+<button class="btn green" type="submit">💾 Simpan Profil</button>
+</form>
+</div>
+"""
+
+    return page("Ubah Profil", body)
 
 @app.route("/dashboard_guru")
 @login_required
