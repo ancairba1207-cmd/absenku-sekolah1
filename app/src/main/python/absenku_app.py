@@ -245,6 +245,11 @@ class SupabaseDB:
                 if 'KELAS<>\'\'' in u and not k: continue
                 if k not in seen: seen.append(k)
             return RemoteResult([RemoteRow({'kelas':k}) for k in seen])
+        # lookup siswa berdasarkan NIS (dashboard orang tua)
+        if 'FROM SISWA WHERE NIS=?' in u:
+            rows=self._get('siswa', {'select':'*','nis':f'eq.{params[0]}','limit':'1'})
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         # single records by id
         if 'FROM SISWA WHERE ID=?' in u:
             rows=self._get('siswa', {'select':'*','id':f'eq.{params[0]}','limit':'1'})
