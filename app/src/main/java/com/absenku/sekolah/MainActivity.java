@@ -44,6 +44,20 @@ public class MainActivity extends Activity {
                                 .edit()
                                 .putString("token", token)
                                 .apply();
+
+                        runOnUiThread(() -> {
+                            if (webView != null) {
+                                webView.evaluateJavascript(
+                                        "(function(){"
+                                        + "try {"
+                                        + "if (window.simpanFCMToken) { window.simpanFCMToken(); }"
+                                        + "} catch(e) {}"
+                                        + "})()",
+                                        null
+                                );
+                            }
+                        });
+
                         android.util.Log.d("ABSENKU_FCM", "TOKEN=" + token);
                     } else {
                         android.util.Log.e("ABSENKU_FCM", "Gagal mendapatkan FCM token", task.getException());

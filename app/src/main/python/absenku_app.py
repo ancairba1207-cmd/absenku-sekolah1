@@ -1321,41 +1321,34 @@ def simpan_fcm_token():
 
         c = db()
 
-        # Cek apakah token sudah ada
-        lama = c.execute(
-            "SELECT * FROM device_tokens WHERE token=?",
-            (token,)
-        ).fetchone()
+        # Cek token langsung melalui REST API Supabase
+        lama = c._get(
+            "device_tokens",
+            {
+                "select": "*",
+                "token": f"eq.{token}",
+                "limit": "1"
+            }
+        )
+
+        payload = {
+            "username": username,
+            "nis": nis,
+            "platform": "android",
+            "aktif": True,
+            "updated_at": "now()"
+        }
 
         if lama:
-            c.execute(
-                """UPDATE device_tokens
-                   SET user_id=?, username=?, nis=?, platform=?, aktif=?, updated_at=NOW()
-                   WHERE token=?""",
-                (
-                    lama.get("user_id"),
-                    username,
-                    nis,
-                    "android",
-                    True,
-                    token
-                )
+            c._patch(
+                "device_tokens",
+                {"id": f"eq.{lama[0]["id"]}"},
+                payload
             )
         else:
-            c.execute(
-                """INSERT INTO device_tokens
-                   (username, nis, token, platform, aktif)
-                   VALUES(?,?,?,?,?)""",
-                (
-                    username,
-                    nis,
-                    token,
-                    "android",
-                    True
-                )
-            )
+            payload["token"] = token
+            c._post("device_tokens", payload)
 
-        c.commit()
         c.close()
 
         return jsonify(
