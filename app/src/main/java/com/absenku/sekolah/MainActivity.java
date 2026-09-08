@@ -29,10 +29,28 @@ import androidx.core.content.ContextCompat;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 
 public class MainActivity extends Activity {
+
+    private void ambilFCMToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String token = task.getResult();
+                        getSharedPreferences("absenku_fcm", MODE_PRIVATE)
+                                .edit()
+                                .putString("token", token)
+                                .apply();
+                        android.util.Log.d("ABSENKU_FCM", "TOKEN=" + token);
+                    } else {
+                        android.util.Log.e("ABSENKU_FCM", "Gagal mendapatkan FCM token", task.getException());
+                    }
+                });
+    }
+
     private WebView webView;
     private FrameLayout mainLayout;
     private AdView adView;
@@ -43,11 +61,19 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ambilFCMToken();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, CAMERA_REQ);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                        != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1003);
         }
 
         mainLayout = new FrameLayout(this);
@@ -73,7 +99,21 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(true);
         s.setMediaPlaybackRequiresUserGesture(false);
 
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+
+                view.evaluateJavascript(
+                        "(function(){"
+                        + "try {"
+                        + "if (window.simpanFCMToken) { window.simpanFCMToken(); }"
+                        + "} catch(e) {}"
+                        + "})()",
+                        null
+                );
+            }
+        });
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidPrint");
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -149,6 +189,12 @@ public class MainActivity extends Activity {
     }
 
     private class AndroidBridge {
+        @JavascriptInterface
+        public String getFCMToken() {
+            return getSharedPreferences("absenku_fcm", MODE_PRIVATE)
+                    .getString("token", "");
+        }
+
         @JavascriptInterface
         public void printPage() {
             runOnUiThread(() -> {

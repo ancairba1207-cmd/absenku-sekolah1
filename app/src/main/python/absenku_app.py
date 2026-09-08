@@ -999,6 +999,26 @@ table{{font-size:11px}}
 .topbar-title{{font-size:14px}}
 }}
 </style>
+<script>
+function simpanFCMToken() {{
+    try {{
+        if (!window.AndroidPrint || !AndroidPrint.getFCMToken) return;
+
+        const token = AndroidPrint.getFCMToken();
+        if (!token) return;
+
+        fetch("/simpan_fcm_token", {{
+            method: "POST",
+            headers: {{"Content-Type": "application/json"}},
+            body: JSON.stringify({{token: token}})
+        }}).catch(function(){{}});
+    }} catch(e) {{}}
+}}
+
+document.addEventListener("DOMContentLoaded", function() {{
+    setTimeout(simpanFCMToken, 1500);
+}});
+</script>
 </head>
 
 <body>
@@ -1081,6 +1101,7 @@ def login():
             session["user"] = row["username"]
             session["role"] = row["role"]
             session["kelas"] = row["kelas"] or ""
+            session["nis"] = row["nis"] or ""
 
             if row["role"] == "guru":
                 return redirect(url_for("dashboard_guru"))
@@ -1282,6 +1303,75 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
+
+@app.route("/simpan_fcm_token", methods=["POST"])
+@login_required
+def simpan_fcm_token():
+    data = request.get_json(silent=True) or {}
+    token = (data.get("token") or "").strip()
+
+    if not token:
+        return jsonify(ok=False, message="Token FCM kosong."), 400
+
+    try:
+        username = session.get("user", "")
+        role = session.get("role", "")
+        nis = session.get("nis", "") or ""
+
+        c = db()
+
+        # Cek apakah token sudah ada
+        lama = c.execute(
+            "SELECT * FROM device_tokens WHERE token=?",
+            (token,)
+        ).fetchone()
+
+        if lama:
+            c.execute(
+                """UPDATE device_tokens
+                   SET user_id=?, username=?, nis=?, platform=?, aktif=?, updated_at=NOW()
+                   WHERE token=?""",
+                (
+                    lama.get("user_id"),
+                    username,
+                    nis,
+                    "android",
+                    True,
+                    token
+                )
+            )
+        else:
+            c.execute(
+                """INSERT INTO device_tokens
+                   (username, nis, token, platform, aktif)
+                   VALUES(?,?,?,?,?)""",
+                (
+                    username,
+                    nis,
+                    token,
+                    "android",
+                    True
+                )
+            )
+
+        c.commit()
+        c.close()
+
+        return jsonify(
+            ok=True,
+            message="Token FCM berhasil disimpan.",
+            username=username,
+            role=role,
+            nis=nis
+        )
+
+    except Exception as e:
+        try:
+            c.close()
+        except Exception:
+            pass
+        return jsonify(ok=False, message=str(e)), 500
 
 
 @app.route("/akun_orangtua", methods=["GET", "POST"])

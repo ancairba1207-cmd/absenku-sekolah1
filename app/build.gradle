@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'com.chaquo.python'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -40,6 +41,7 @@ chaquopy {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-messaging:25.0.1'
     implementation 'androidx.webkit:webkit:1.12.1'
     implementation 'com.google.android.gms:play-services-ads:25.4.0'
 }

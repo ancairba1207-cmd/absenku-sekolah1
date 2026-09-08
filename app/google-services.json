@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "979041366333",
+    "project_id": "absenku-sekolah",
+    "storage_bucket": "absenku-sekolah.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979041366333:android:8ab9076df2f02d8553d554",
+        "android_client_info": {
+          "package_name": "com.absenku.sekolah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmzB91ZAu-F_JGf--l8gCMV5DcU-ZzVXc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
