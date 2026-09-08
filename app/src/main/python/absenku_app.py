@@ -355,6 +355,18 @@ class SupabaseDB:
             })
             return RemoteResult([RemoteRow(x) for x in rows])
 
+        if 'FROM NILAI_AKADEMIK WHERE NIS=? AND MATA_PELAJARAN=? AND SEMESTER=? AND TAHUN_AJARAN=? ORDER BY CREATED_AT DESC' in u:
+            rows=self._get('nilai_akademik', {
+                'select':'*',
+                'nis':f'eq.{params[0]}',
+                'mata_pelajaran':f'eq.{params[1]}',
+                'semester':f'eq.{params[2]}',
+                'tahun_ajaran':f'eq.{params[3]}',
+                'order':'created_at.desc',
+                'limit':'1'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         if 'FROM NILAI_AKADEMIK WHERE NIS=? ORDER BY' in u:
             rows=self._get('nilai_akademik', {
                 'select':'*',
@@ -371,6 +383,91 @@ class SupabaseDB:
                 'limit':'1000'
             })
             return RemoteResult([RemoteRow(x) for x in rows])
+
+        if u.startswith('INSERT INTO NILAI_TUGAS'):
+            fields=[
+                'nis','nama','kelas','mata_pelajaran',
+                'tanggal_tugas','nilai','keterangan',
+                'semester','tahun_ajaran'
+            ]
+            vals=dict(zip(fields, params))
+            return RemoteResult([RemoteRow(x) for x in self._post('nilai_tugas', vals)])
+
+        if 'FROM NILAI_TUGAS WHERE KELAS=? ORDER BY TANGGAL_TUGAS DESC, CREATED_AT DESC' in u:
+            rows=self._get('nilai_tugas', {
+                'select':'*',
+                'kelas':f'eq.{params[0]}',
+                'order':'tanggal_tugas.desc,created_at.desc',
+                'limit':'2000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        if 'FROM NILAI_TUGAS WHERE ID=?' in u:
+            rows=self._get('nilai_tugas', {
+                'select':'*',
+                'id':f'eq.{params[0]}',
+                'limit':'1'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        if 'FROM NILAI_TUGAS WHERE NIS=? AND MATA_PELAJARAN=? AND SEMESTER=? AND TAHUN_AJARAN=?' in u:
+            rows=self._get('nilai_tugas', {
+                'select':'*',
+                'nis':f'eq.{params[0]}',
+                'mata_pelajaran':f'eq.{params[1]}',
+                'semester':f'eq.{params[2]}',
+                'tahun_ajaran':f'eq.{params[3]}',
+                'order':'tanggal_tugas.asc,created_at.asc',
+                'limit':'1000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        if 'FROM NILAI_TUGAS WHERE NIS=? ORDER BY TANGGAL_TUGAS DESC' in u:
+            rows=self._get('nilai_tugas', {
+                'select':'*',
+                'nis':f'eq.{params[0]}',
+                'order':'tanggal_tugas.desc,created_at.desc',
+                'limit':'1000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        if 'FROM NILAI_TUGAS ORDER BY TANGGAL_TUGAS DESC' in u:
+            rows=self._get('nilai_tugas', {
+                'select':'*',
+                'order':'tanggal_tugas.desc,created_at.desc',
+                'limit':'2000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
+        if u.startswith('UPDATE NILAI_TUGAS SET'):
+            fields=[
+                'tanggal_tugas','nilai','keterangan',
+                'semester','tahun_ajaran'
+            ]
+            vals=dict(zip(fields, params[:-1]))
+            tugas_id=params[-1]
+            return RemoteResult([
+                RemoteRow(x) for x in self._patch(
+                    'nilai_tugas',
+                    {'id':f'eq.{tugas_id}'},
+                    vals
+                )
+            ])
+
+        if u.startswith('UPDATE NILAI_AKADEMIK SET'):
+            fields=[
+                'tugas','ulangan','pts','pas',
+                'nilai_akhir','predikat'
+            ]
+            vals=dict(zip(fields, params[:-1]))
+            nilai_id=params[-1]
+            return RemoteResult([
+                RemoteRow(x) for x in self._patch(
+                    'nilai_akademik',
+                    {'id':f'eq.{nilai_id}'},
+                    vals
+                )
+            ])
 
         # reports
         if 'FROM ABSENSI WHERE TANGGAL BETWEEN ? AND ?' in u:
@@ -1799,6 +1896,50 @@ def kehadiran_orangtua():
     if not trs:
         trs = '<tr><td colspan="3" style="text-align:center;padding:25px;color:#64748b;">Belum ada riwayat kehadiran.</td></tr>'
 
+    tugas_rows = ""
+    try:
+        c2 = db()
+
+        if session.get("role") == "guru":
+            kelas_guru = str(session.get("kelas") or "").strip()
+            tugas_data = c2.execute(
+                "SELECT * FROM nilai_tugas WHERE kelas=? ORDER BY tanggal_tugas DESC, created_at DESC",
+                (kelas_guru,)
+            ).fetchall()
+        else:
+            tugas_data = c2.execute(
+                "SELECT * FROM nilai_tugas ORDER BY tanggal_tugas DESC, created_at DESC"
+            ).fetchall()
+
+        c2.close()
+
+        for t in tugas_data:
+            tugas_rows += (
+                "<tr>"
+                f"<td>{escape(str(t['tanggal_tugas'] or '-'))}</td>"
+                f"<td>{escape(str(t['nama'] or '-'))}</td>"
+                f"<td>{escape(str(t['kelas'] or '-'))}</td>"
+                f"<td>{escape(str(t['mata_pelajaran'] or '-'))}</td>"
+                f"<td><strong>{escape(str(t['nilai'] if t['nilai'] is not None else '-'))}</strong></td>"
+                f"<td>{escape(str(t['keterangan'] or '-'))}</td>"
+                f"<td><a href='/edit_nilai_tugas/{t['id']}' class='edit-btn'>Edit</a></td>"
+                "</tr>"
+            )
+
+        if not tugas_rows:
+            tugas_rows = (
+                '<tr><td colspan="7" style="text-align:center;padding:25px;color:#64748b;">'
+                'Belum ada tugas harian.'
+                '</td></tr>'
+            )
+
+    except Exception:
+        tugas_rows = (
+            '<tr><td colspan="6" style="text-align:center;padding:25px;color:#64748b;">'
+            'Belum ada tugas harian.'
+            '</td></tr>'
+        )
+
     body = f"""
     <style>
     .kehadiran-wrap{{max-width:1000px;margin:auto}}
@@ -2214,6 +2355,89 @@ def dashboard_orangtua():
     return page("Dashboard Orang Tua", body)
 
 
+def sync_nilai_tugas(nis, mata_pelajaran, semester, tahun_ajaran):
+    """
+    Menghitung rata-rata seluruh Tugas Harian untuk
+    siswa + mata pelajaran + semester + tahun ajaran.
+    """
+    c = db()
+    try:
+        tugas_data = c.execute(
+            """SELECT * FROM nilai_tugas
+               WHERE nis=? AND mata_pelajaran=? AND semester=? AND tahun_ajaran=?""",
+            (nis, mata_pelajaran, semester, tahun_ajaran)
+        ).fetchall()
+
+        if not tugas_data:
+            return
+
+        nilai_tugas_list = []
+        for t in tugas_data:
+            try:
+                nilai_tugas_list.append(float(t["nilai"] or 0))
+            except Exception:
+                pass
+
+        if not nilai_tugas_list:
+            return
+
+        rata_tugas = round(
+            sum(nilai_tugas_list) / len(nilai_tugas_list),
+            2
+        )
+
+        nilai_row = c.execute(
+            """SELECT * FROM nilai_akademik
+               WHERE nis=? AND mata_pelajaran=? AND semester=? AND tahun_ajaran=?
+               ORDER BY created_at DESC""",
+            (nis, mata_pelajaran, semester, tahun_ajaran)
+        ).fetchone()
+
+        if not nilai_row:
+            return
+
+        try:
+            ulangan = float(nilai_row["ulangan"] or 0)
+            pts = float(nilai_row["pts"] or 0)
+            pas = float(nilai_row["pas"] or 0)
+        except Exception:
+            ulangan = pts = pas = 0
+
+        nilai_akhir = round(
+            (rata_tugas + ulangan + pts + pas) / 4,
+            2
+        )
+
+        if nilai_akhir >= 90:
+            predikat = "A"
+        elif nilai_akhir >= 80:
+            predikat = "B+"
+        elif nilai_akhir >= 75:
+            predikat = "B"
+        elif nilai_akhir >= 70:
+            predikat = "C"
+        elif nilai_akhir >= 60:
+            predikat = "D"
+        else:
+            predikat = "E"
+
+        c.execute(
+            """UPDATE nilai_akademik
+               SET tugas=?, nilai_akhir=?, predikat=?
+               WHERE id=?""",
+            (
+                rata_tugas,
+                nilai_akhir,
+                predikat,
+                nilai_row["id"]
+            )
+        )
+        c.commit()
+
+    finally:
+        c.close()
+
+
 @app.route("/nilai_siswa", methods=["GET", "POST"])
 @login_required
 def nilai_siswa():
@@ -2268,6 +2492,8 @@ def nilai_siswa():
 
                     if not siswa_row:
                         pesan = '<div class="warn">Siswa tidak ditemukan.</div>'
+                    elif session.get("role") == "guru" and str(siswa_row["kelas"] or "").strip() != str(session.get("kelas") or "").strip():
+                        pesan = '<div class="warn">Guru hanya dapat memasukkan nilai untuk siswa dari kelasnya sendiri.</div>'
                     else:
                         nama = siswa_row["nama"] or ""
                         kelas = siswa_row["kelas"] or ""
@@ -2297,9 +2523,19 @@ def nilai_siswa():
                 except ValueError:
                     pesan = '<div class="warn">Nilai Tugas, Ulangan, PTS dan PAS harus berupa angka.</div>'
 
-        siswa_data = c.execute(
-            "SELECT * FROM siswa ORDER BY kelas,nama"
-        ).fetchall()
+        if session.get("role") == "guru":
+            kelas_guru = str(session.get("kelas") or "").strip()
+            if kelas_guru:
+                siswa_data = c.execute(
+                    "SELECT * FROM siswa WHERE kelas=? ORDER BY nama",
+                    (kelas_guru,)
+                ).fetchall()
+            else:
+                siswa_data = []
+        else:
+            siswa_data = c.execute(
+                "SELECT * FROM siswa ORDER BY kelas,nama"
+            ).fetchall()
 
         nilai_data = c.execute(
             "SELECT * FROM nilai_akademik ORDER BY created_at DESC"
@@ -2513,6 +2749,90 @@ def nilai_siswa():
             </form>
         </div>
 
+        <div class="nilai-form-card" style="margin-top:20px;">
+            <h3 style="margin-top:0;">Tugas Harian</h3>
+            <p style="color:#64748b;margin-top:-5px;">
+                Input tugas harian siswa berdasarkan tanggal. Tugas dapat dimasukkan berkali-kali.
+            </p>
+
+            <form method="post" action="/nilai_tugas">
+                <div class="nilai-form-grid">
+
+                    <div class="nilai-full">
+                        <label>Siswa</label>
+                        <select name="nis" required>
+                            <option value="">Pilih siswa</option>
+                            {pilihan_siswa}
+                        </select>
+                    </div>
+
+                    <div class="nilai-full">
+                        <label>Mata Pelajaran</label>
+                        <select name="mata_pelajaran" required>
+                            <option value="">Pilih Mata Pelajaran</option>
+                            {pilihan_mapel}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Tanggal Tugas</label>
+                        <input type="date" name="tanggal_tugas" required>
+                    </div>
+
+                    <div>
+                        <label>Nilai</label>
+                        <input type="number" name="nilai" min="0" max="100" step="0.01" value="0" required>
+                    </div>
+
+                    <div class="nilai-full">
+                        <label>Keterangan</label>
+                        <input name="keterangan" placeholder="Contoh: Tugas halaman 20">
+                    </div>
+
+                    <div>
+                        <label>Semester</label>
+                        <select name="semester">
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Tahun Ajaran</label>
+                        <input name="tahun_ajaran" placeholder="2026/2027" value="2026/2027">
+                    </div>
+
+                </div>
+
+                <button class="btn green" type="submit" style="margin-top:15px;">
+                    Simpan Tugas Harian
+                </button>
+            </form>
+        </div>
+
+        <div class="nilai-table-card" style="margin-top:20px;">
+            <h3 style="margin-top:0;">Riwayat Tugas Harian</h3>
+            <p style="color:#64748b;">
+                Setiap tugas disimpan berdasarkan tanggal dan dapat diperbaiki pada langkah berikutnya.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Siswa</th>
+                        <th>Kelas</th>
+                        <th>Mata Pelajaran</th>
+                        <th>Nilai</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {tugas_rows}
+                </tbody>
+            </table>
+        </div>
+
         <div class="nilai-table-card">
             <h3 style="margin-top:0;">Daftar Nilai Siswa</h3>
 
@@ -2540,6 +2860,196 @@ def nilai_siswa():
     """
 
     return page("Nilai Siswa", body)
+
+@app.route("/edit_nilai_tugas/<int:tugas_id>", methods=["GET", "POST"])
+@login_required
+def edit_nilai_tugas(tugas_id):
+    if session.get("role") not in ("admin", "guru"):
+        return redirect(url_for("home"))
+
+    c = db()
+
+    tugas = c.execute(
+        "SELECT * FROM nilai_tugas WHERE id=?",
+        (tugas_id,)
+    ).fetchone()
+
+    if not tugas:
+        c.close()
+        flash("Data tugas harian tidak ditemukan.")
+        return redirect(url_for("nilai_siswa"))
+
+    if session.get("role") == "guru":
+        kelas_guru = str(session.get("kelas") or "").strip()
+        if kelas_guru and str(tugas["kelas"] or "").strip() != kelas_guru:
+            c.close()
+            flash("Guru hanya dapat mengedit tugas siswa dari kelasnya sendiri.")
+            return redirect(url_for("nilai_siswa"))
+
+    if request.method == "POST":
+        tanggal_tugas = (request.form.get("tanggal_tugas") or "").strip()
+        nilai = (request.form.get("nilai") or "0").strip()
+        keterangan = (request.form.get("keterangan") or "").strip()
+        semester = (request.form.get("semester") or "").strip()
+        tahun_ajaran = (request.form.get("tahun_ajaran") or "").strip()
+
+        try:
+            nilai_num = float(nilai)
+        except Exception:
+            nilai_num = -1
+
+        if not tanggal_tugas or nilai_num < 0 or nilai_num > 100:
+            c.close()
+            flash("Tanggal dan nilai harus diisi dengan benar (0-100).")
+            return redirect(url_for("edit_nilai_tugas", tugas_id=tugas_id))
+
+        c.execute(
+            """UPDATE nilai_tugas
+               SET tanggal_tugas=?, nilai=?, keterangan=?, semester=?, tahun_ajaran=?
+               WHERE id=?""",
+            (
+                tanggal_tugas,
+                nilai_num,
+                keterangan,
+                semester,
+                tahun_ajaran,
+                tugas_id
+            )
+        )
+        c.commit()
+
+        # Sinkronkan rata-rata Tugas Harian setelah diedit
+        sync_nilai_tugas(
+            tugas["nis"],
+            tugas["mata_pelajaran"],
+            semester,
+            tahun_ajaran
+        )
+
+        c.close()
+
+        flash("Tugas Harian berhasil diperbarui.")
+        return redirect(url_for("nilai_siswa"))
+
+    body = f"""
+    <div class="nilai-form-card">
+        <h2>Edit Tugas Harian</h2>
+        <p><b>{escape(str(tugas["nama"] or "-"))}</b> —
+           {escape(str(tugas["mata_pelajaran"] or "-"))}</p>
+
+        <form method="post">
+            <label>Tanggal Tugas</label>
+            <input type="date" name="tanggal_tugas"
+                   value="{escape(str(tugas["tanggal_tugas"] or ""))}" required>
+
+            <label>Nilai</label>
+            <input type="number" name="nilai" min="0" max="100"
+                   step="0.01"
+                   value="{escape(str(tugas["nilai"] or "0"))}" required>
+
+            <label>Keterangan</label>
+            <input type="text" name="keterangan"
+                   value="{escape(str(tugas["keterangan"] or ""))}">
+
+            <label>Semester</label>
+            <select name="semester">
+                <option value="1" {"selected" if str(tugas["semester"] or "") == "1" else ""}>Semester 1</option>
+                <option value="2" {"selected" if str(tugas["semester"] or "") == "2" else ""}>Semester 2</option>
+            </select>
+
+            <label>Tahun Ajaran</label>
+            <input type="text" name="tahun_ajaran"
+                   value="{escape(str(tugas["tahun_ajaran"] or ""))}">
+
+            <button type="submit">Simpan Perubahan</button>
+            <a href="/nilai_siswa">Batal</a>
+        </form>
+    </div>
+    """
+
+    c.close()
+    return render_page("Edit Tugas Harian", body)
+
+
+@app.route("/nilai_tugas", methods=["POST"])
+@login_required
+def nilai_tugas():
+    if session.get("role") not in ("admin", "guru"):
+        return redirect(url_for("home"))
+
+    nis = request.form.get("nis", "").strip()
+    mata_pelajaran = request.form.get("mata_pelajaran", "").strip()
+    tanggal_tugas = request.form.get("tanggal_tugas", "").strip()
+    nilai = request.form.get("nilai", "0").strip() or "0"
+    keterangan = request.form.get("keterangan", "").strip()
+    semester = request.form.get("semester", "").strip()
+    tahun_ajaran = request.form.get("tahun_ajaran", "").strip()
+
+    if not nis or not mata_pelajaran or not tanggal_tugas:
+        flash("Siswa, mata pelajaran, dan tanggal tugas wajib diisi.", "warn")
+        return redirect(url_for("nilai_siswa"))
+
+    try:
+        angka = float(nilai)
+        if angka < 0 or angka > 100:
+            raise ValueError
+    except ValueError:
+        flash("Nilai tugas harus berupa angka 0 sampai 100.", "warn")
+        return redirect(url_for("nilai_siswa"))
+
+    c = db()
+    try:
+        siswa_row = c.execute(
+            "SELECT * FROM siswa WHERE nis=?",
+            (nis,)
+        ).fetchone()
+
+        if not siswa_row:
+            flash("Siswa tidak ditemukan.", "warn")
+            return redirect(url_for("nilai_siswa"))
+
+        if (
+            session.get("role") == "guru"
+            and str(siswa_row["kelas"] or "").strip()
+            != str(session.get("kelas") or "").strip()
+        ):
+            flash("Guru hanya dapat memasukkan tugas untuk siswa dari kelasnya sendiri.", "warn")
+            return redirect(url_for("nilai_siswa"))
+
+        c.execute(
+            """INSERT INTO nilai_tugas
+            (nis,nama,kelas,mata_pelajaran,tanggal_tugas,nilai,keterangan,semester,tahun_ajaran)
+            VALUES(?,?,?,?,?,?,?,?,?)""",
+            (
+                nis,
+                siswa_row["nama"] or "",
+                siswa_row["kelas"] or "",
+                mata_pelajaran,
+                tanggal_tugas,
+                angka,
+                keterangan,
+                semester,
+                tahun_ajaran
+            )
+        )
+        c.commit()
+
+        # Sinkronkan rata-rata Tugas Harian ke Nilai Akademik
+        sync_nilai_tugas(
+            nis,
+            mata_pelajaran,
+            semester,
+            tahun_ajaran
+        )
+
+        flash("Tugas harian berhasil disimpan.", "ok")
+    except Exception as e:
+        flash(f"Gagal menyimpan tugas harian: {escape(str(e))}", "warn")
+    finally:
+        c.close()
+
+    return redirect(url_for("nilai_siswa"))
+
 
 @app.route("/nilai_orangtua")
 @login_required
