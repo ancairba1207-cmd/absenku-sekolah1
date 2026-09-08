@@ -287,6 +287,16 @@ class SupabaseDB:
             })
             return RemoteResult([RemoteRow(x) for x in rows])
 
+        # kehadiran orang tua - riwayat berdasarkan NIS siswa
+        if 'FROM ABSENSI WHERE NIS=? ORDER BY' in u:
+            rows=self._get('absensi', {
+                'select':'tanggal,jam,nama,kelas,status',
+                'nis':f'eq.{params[0]}',
+                'order':'tanggal.desc,jam.desc',
+                'limit':'1000'
+            })
+            return RemoteResult([RemoteRow(x) for x in rows])
+
         # reports
         if 'FROM ABSENSI WHERE TANGGAL BETWEEN ? AND ?' in u:
             rows=self._get(
@@ -1620,6 +1630,183 @@ def laporan_siswa_bulanan():
     """
 
     return page("Laporan Bulanan Siswa", body)
+
+@app.route("/kehadiran_orangtua")
+@login_required
+def kehadiran_orangtua():
+    if session.get("role") != "orangtua":
+        return redirect(url_for("home"))
+
+    username = session.get("user", "")
+    nis = ""
+    anak = None
+    rows = []
+
+    try:
+        c = db()
+
+        user_row = c.execute(
+            "SELECT * FROM users WHERE username=?",
+            (username,)
+        ).fetchone()
+
+        if user_row:
+            nis = user_row["nis"] or ""
+
+        if nis:
+            anak = c.execute(
+                "SELECT * FROM siswa WHERE nis=?",
+                (nis,)
+            ).fetchone()
+
+            rows = c.execute(
+                "SELECT tanggal,jam,nama,kelas,status FROM absensi WHERE nis=? ORDER BY tanggal DESC, jam DESC",
+                (nis,)
+            ).fetchall()
+
+        c.close()
+    except Exception:
+        pass
+
+    nama_anak = anak["nama"] if anak else "Data anak belum terhubung"
+    kelas_anak = anak["kelas"] if anak else "-"
+
+    rekap = {
+        "Hadir": 0,
+        "Izin": 0,
+        "Sakit": 0,
+        "Alpa": 0
+    }
+
+    for r in rows:
+        status = str(r["status"] or "").strip().capitalize()
+        if status in rekap:
+            rekap[status] += 1
+
+    trs = ""
+
+    for r in rows:
+        tanggal = escape(str(r["tanggal"] or "-"))
+        jam = escape(str(r["jam"] or "-"))
+        status = str(r["status"] or "-").strip()
+
+        if status.lower() == "hadir":
+            badge = '<span style="background:#dcfce7;color:#166534;padding:5px 10px;border-radius:20px;font-weight:600;">Hadir</span>'
+        elif status.lower() == "izin":
+            badge = '<span style="background:#fef3c7;color:#92400e;padding:5px 10px;border-radius:20px;font-weight:600;">Izin</span>'
+        elif status.lower() == "sakit":
+            badge = '<span style="background:#dbeafe;color:#1d4ed8;padding:5px 10px;border-radius:20px;font-weight:600;">Sakit</span>'
+        elif status.lower() == "alpa":
+            badge = '<span style="background:#fee2e2;color:#b91c1c;padding:5px 10px;border-radius:20px;font-weight:600;">Alpa</span>'
+        else:
+            badge = escape(status)
+
+        trs += f"""
+        <tr>
+            <td>{tanggal}</td>
+            <td>{jam}</td>
+            <td>{badge}</td>
+        </tr>
+        """
+
+    if not trs:
+        trs = '<tr><td colspan="3" style="text-align:center;padding:25px;color:#64748b;">Belum ada riwayat kehadiran.</td></tr>'
+
+    body = f"""
+    <style>
+    .kehadiran-wrap{{max-width:1000px;margin:auto}}
+    .kehadiran-head{{
+        background:linear-gradient(135deg,#2563eb,#4f46e5);
+        color:white;
+        border-radius:20px;
+        padding:22px;
+        margin-bottom:16px;
+        box-shadow:0 8px 25px rgba(37,99,235,.18)
+    }}
+    .kehadiran-head h2{{margin:0 0 5px}}
+    .kehadiran-head p{{margin:0;opacity:.9}}
+    .rekap-grid{{
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:12px;
+        margin-bottom:16px
+    }}
+    .rekap-card{{
+        background:white;
+        border-radius:16px;
+        padding:16px;
+        box-shadow:0 4px 16px rgba(15,23,42,.07);
+        text-align:center
+    }}
+    .rekap-card strong{{display:block;font-size:25px;margin-bottom:4px}}
+    .rekap-card span{{font-size:13px;color:#64748b}}
+    .riwayat-card{{
+        background:white;
+        border-radius:18px;
+        padding:18px;
+        box-shadow:0 4px 16px rgba(15,23,42,.07);
+        overflow:auto
+    }}
+    .riwayat-card table{{width:100%;border-collapse:collapse}}
+    .riwayat-card th,.riwayat-card td{{
+        padding:12px;
+        border-bottom:1px solid #e2e8f0;
+        text-align:left;
+        white-space:nowrap
+    }}
+    .riwayat-card th{{background:#f8fafc;color:#475569}}
+    @media(max-width:650px){{
+        .rekap-grid{{grid-template-columns:repeat(2,1fr)}}
+    }}
+    </style>
+
+    <div class="kehadiran-wrap">
+
+        <div class="kehadiran-head">
+            <h2>Kehadiran Anak</h2>
+            <p>{escape(nama_anak)} • Kelas {escape(kelas_anak)} • NIS {escape(nis or "-")}</p>
+        </div>
+
+        <div class="rekap-grid">
+            <div class="rekap-card">
+                <strong>{rekap["Hadir"]}</strong>
+                <span>Hadir</span>
+            </div>
+            <div class="rekap-card">
+                <strong>{rekap["Izin"]}</strong>
+                <span>Izin</span>
+            </div>
+            <div class="rekap-card">
+                <strong>{rekap["Sakit"]}</strong>
+                <span>Sakit</span>
+            </div>
+            <div class="rekap-card">
+                <strong>{rekap["Alpa"]}</strong>
+                <span>Alpa</span>
+            </div>
+        </div>
+
+        <div class="riwayat-card">
+            <h3 style="margin-top:0;">Riwayat Kehadiran</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Jam</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {trs}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    """
+
+    return page("Kehadiran Anak", body)
 
 @app.route("/dashboard_orangtua")
 @login_required
