@@ -4111,11 +4111,7 @@ def obrolan_guru_detail(nis):
                 </div>
             </form>
 
-            <div style="margin-top:12px">
-                <a class="btn" href="/obrolan_guru">
-                    ← Kembali ke Daftar Obrolan
-                </a>
-            </div>
+
         </div>
 
         <style>
