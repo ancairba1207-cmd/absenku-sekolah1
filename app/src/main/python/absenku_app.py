@@ -1181,49 +1181,47 @@ if(e.key==='Escape') closeMenu();
 @login_required
 def realtime_status():
     """
-    Menghasilkan fingerprint perubahan data utama.
-    Dipakai dashboard untuk mendeteksi INSERT maupun UPDATE
-    tanpa harus reload terus-menerus.
+    Fingerprint perubahan data utama menggunakan REST Supabase langsung.
+    Mendeteksi INSERT maupun UPDATE pada absensi, nilai akademik,
+    dan nilai tugas harian.
     """
     try:
         c = db()
 
-        absensi = c.execute(
-            """SELECT id,nis,nama,kelas,tanggal,jam,status
-               FROM absensi
-               ORDER BY id DESC"""
-        ).fetchall()
+        absensi = c._get(
+            "absensi",
+            {
+                "select": "id,nis,nama,kelas,tanggal,jam,status",
+                "order": "id.desc",
+                "limit": "10000"
+            }
+        )
 
-        nilai_akademik = c.execute(
-            """SELECT id,nis,nama,kelas,mata_pelajaran,tugas,ulangan,pts,pas,
-                      nilai_akhir,predikat,semester,tahun_ajaran
-               FROM nilai_akademik
-               ORDER BY id DESC"""
-        ).fetchall()
+        nilai_akademik = c._get(
+            "nilai_akademik",
+            {
+                "select": "id,nis,nama,kelas,mata_pelajaran,tugas,ulangan,pts,pas,nilai_akhir,predikat,semester,tahun_ajaran",
+                "order": "id.desc",
+                "limit": "10000"
+            }
+        )
 
-        nilai_tugas = c.execute(
-            """SELECT id,nis,nama,kelas,mata_pelajaran,tanggal_tugas,nilai,
-                      keterangan,semester,tahun_ajaran
-               FROM nilai_tugas
-               ORDER BY id DESC"""
-        ).fetchall()
+        nilai_tugas = c._get(
+            "nilai_tugas",
+            {
+                "select": "id,nis,nama,kelas,mata_pelajaran,tanggal_tugas,nilai,keterangan,semester,tahun_ajaran",
+                "order": "id.desc",
+                "limit": "10000"
+            }
+        )
 
         import hashlib
         import json
 
-        def normalisasi(rows):
-            hasil = []
-            for row in rows:
-                try:
-                    hasil.append(dict(row))
-                except Exception:
-                    hasil.append({k: row[k] for k in row.keys()})
-            return hasil
-
         payload = {
-            "absensi": normalisasi(absensi),
-            "nilai_akademik": normalisasi(nilai_akademik),
-            "nilai_tugas": normalisasi(nilai_tugas)
+            "absensi": absensi,
+            "nilai_akademik": nilai_akademik,
+            "nilai_tugas": nilai_tugas
         }
 
         raw = json.dumps(
@@ -1233,7 +1231,9 @@ def realtime_status():
             ensure_ascii=False
         )
 
-        fingerprint = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+        fingerprint = hashlib.sha256(
+            raw.encode("utf-8")
+        ).hexdigest()
 
         c.close()
 
@@ -3313,8 +3313,8 @@ def edit_nilai_tugas(tugas_id):
 
         kirim_notifikasi_fcm(
             tugas["nis"],
-            "Nilai Tugas Harian Diperbarui",
-            f"Nilai tugas {mapel_tugas} untuk {nama_tugas} telah diperbarui menjadi {nilai_num}.",
+            f"Nilai Tugas {mapel_tugas}",
+            f"{nama_tugas} mendapatkan nilai {nilai_num:g} pada hari ini.",
             {
                 "jenis": "nilai_tugas",
                 "nis": str(tugas["nis"]),
@@ -3431,27 +3431,28 @@ def nilai_tugas():
         )
         c.commit()
 
-        # Sinkronkan rata-rata Tugas Harian ke Nilai Akademik
-        sync_nilai_tugas(
-            nis,
-            mata_pelajaran,
-            semester,
-            tahun_ajaran
-        )
-
-        # Kirim notifikasi setelah tugas harian berhasil disimpan
+        # Kirim notifikasi segera setelah tugas berhasil disimpan.
+        # Tidak bergantung pada proses sinkronisasi Nilai Akademik.
         nama_siswa_tugas = str(siswa_row["nama"] or "")
 
         kirim_notifikasi_fcm(
             nis,
-            "Nilai Tugas Harian Baru",
-            f"Nilai tugas {mata_pelajaran} untuk {nama_siswa_tugas} telah ditambahkan: {angka}.",
+            f"Nilai Tugas {mata_pelajaran}",
+            f"{nama_siswa_tugas} mendapatkan nilai {angka:g} pada hari ini.",
             {
                 "jenis": "nilai_tugas",
                 "nis": str(nis),
                 "mata_pelajaran": str(mata_pelajaran),
                 "route": "/dashboard_orangtua"
             }
+        )
+
+        # Sinkronkan rata-rata Tugas Harian ke Nilai Akademik
+        sync_nilai_tugas(
+            nis,
+            mata_pelajaran,
+            semester,
+            tahun_ajaran
         )
 
         flash("Tugas harian berhasil disimpan.", "ok")
