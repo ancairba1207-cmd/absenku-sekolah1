@@ -4136,14 +4136,21 @@ def obrolan_guru_detail(nis):
         }}
 
 
+        html, body {{
+            overflow:hidden;
+            height:100%;
+        }}
+
         .chat-card {{
             max-width:760px;
             margin:0 auto;
-            height:calc(100dvh - 150px);
-            min-height:420px;
+            height:calc(100dvh - 300px);
+            max-height:calc(100dvh - 300px);
+            min-height:0;
             display:flex;
             flex-direction:column;
             box-sizing:border-box;
+            overflow:hidden;
         }}
         .chat-student {{
             display:flex;
@@ -4735,14 +4742,21 @@ def obrolan_orangtua():
         }}
 
 
+        html, body {{
+            overflow:hidden;
+            height:100%;
+        }}
+
         .chat-card {{
             max-width:760px;
             margin:0 auto;
-            height:calc(100dvh - 150px);
-            min-height:420px;
+            height:calc(100dvh - 300px);
+            max-height:calc(100dvh - 300px);
+            min-height:0;
             display:flex;
             flex-direction:column;
             box-sizing:border-box;
+            overflow:hidden;
         }}
 
         .chat-student {{
@@ -4780,7 +4794,6 @@ def obrolan_orangtua():
             border-radius:14px;
             padding:14px;
             max-height:none;
-            overflow-y:auto;
             overscroll-behavior:contain;
             scrollbar-width:thin;
         }}
