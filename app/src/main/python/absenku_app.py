@@ -904,6 +904,33 @@ font-size:24px;
 .submenu{{padding:0 0 5px 18px}}
 .submenu a{{padding:10px 14px;font-size:14px}}
 .menu-chat-icon{{width:22px;height:22px;min-width:22px;object-fit:contain;display:block}}
+
+        /* UKURAN IKON OBROLAN GLOBAL */
+        .chat-title-icon {{
+            width:32px !important;
+            height:32px !important;
+            min-width:32px !important;
+            max-width:32px !important;
+            min-height:32px !important;
+            max-height:32px !important;
+            object-fit:contain !important;
+            vertical-align:middle !important;
+            display:inline-block !important;
+            margin-right:6px !important;
+        }}
+
+        .open-chat-icon {{
+            width:20px !important;
+            height:20px !important;
+            min-width:20px !important;
+            max-width:20px !important;
+            min-height:20px !important;
+            max-height:20px !important;
+            object-fit:contain !important;
+            vertical-align:middle !important;
+            display:inline-block !important;
+            margin-right:5px !important;
+        }}
 .menu-label{{
 font-size:11px;
 font-weight:bold;
