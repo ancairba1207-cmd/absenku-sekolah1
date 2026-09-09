@@ -2842,6 +2842,20 @@ def nilai_siswa():
 
                         c.commit()
 
+                        # Kirim notifikasi setelah nilai akademik berhasil disimpan/diperbarui
+                        kirim_notifikasi_fcm(
+                            nis,
+                            "Nilai Akademik Diperbarui",
+                            f"Nilai {mata_pelajaran} untuk {nama} telah diperbarui. Nilai akhir: {nilai_akhir} ({predikat}).",
+                            {
+                                "jenis": "nilai_akademik",
+                                "nis": str(nis),
+                                "mata_pelajaran": str(mata_pelajaran),
+                                "route": "/dashboard_orangtua"
+                            }
+                        )
+
+
                 except ValueError:
                     pesan = '<div class="warn">Nilai Tugas, Ulangan, PTS dan PAS harus berupa angka.</div>'
 
@@ -3293,6 +3307,22 @@ def edit_nilai_tugas(tugas_id):
             tahun_ajaran
         )
 
+        # Kirim notifikasi setelah tugas harian berhasil diperbarui
+        nama_tugas = str(tugas["nama"] or "")
+        mapel_tugas = str(tugas["mata_pelajaran"] or "")
+
+        kirim_notifikasi_fcm(
+            tugas["nis"],
+            "Nilai Tugas Harian Diperbarui",
+            f"Nilai tugas {mapel_tugas} untuk {nama_tugas} telah diperbarui menjadi {nilai_num}.",
+            {
+                "jenis": "nilai_tugas",
+                "nis": str(tugas["nis"]),
+                "mata_pelajaran": mapel_tugas,
+                "route": "/dashboard_orangtua"
+            }
+        )
+
         c.close()
 
         flash("Tugas Harian berhasil diperbarui.")
@@ -3407,6 +3437,21 @@ def nilai_tugas():
             mata_pelajaran,
             semester,
             tahun_ajaran
+        )
+
+        # Kirim notifikasi setelah tugas harian berhasil disimpan
+        nama_siswa_tugas = str(siswa_row["nama"] or "")
+
+        kirim_notifikasi_fcm(
+            nis,
+            "Nilai Tugas Harian Baru",
+            f"Nilai tugas {mata_pelajaran} untuk {nama_siswa_tugas} telah ditambahkan: {angka}.",
+            {
+                "jenis": "nilai_tugas",
+                "nis": str(nis),
+                "mata_pelajaran": str(mata_pelajaran),
+                "route": "/dashboard_orangtua"
+            }
         )
 
         flash("Tugas harian berhasil disimpan.", "ok")
