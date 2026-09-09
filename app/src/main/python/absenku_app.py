@@ -4250,7 +4250,7 @@ def obrolan_guru_detail(nis):
         }}
 
         .chat-right {{
-            justify-content:flex-end;
+            justify-content:flex-start;
             flex-direction:row-reverse;
         }}
 
