@@ -5254,6 +5254,14 @@ def obrolan_orangtua():
             if (versiChat === null) {{
                 versiChat = data.version;
                 renderChat(data.rows || []);
+
+                const box = document.getElementById("chat-box");
+                if (box) {{
+                    setTimeout(function() {{
+                        box.scrollTop = box.scrollHeight;
+                    }}, 0);
+                }}
+
                 return;
             }}
 
@@ -5269,6 +5277,18 @@ def obrolan_orangtua():
     }}
 
     document.addEventListener("DOMContentLoaded", function() {{
+        const form = document.querySelector(".chat-form");
+        const textarea = form ? form.querySelector("textarea[name='pesan']") : null;
+
+        if (form && textarea) {{
+            form.addEventListener("submit", function() {{
+                setTimeout(function() {{
+                    textarea.value = "";
+                    textarea.style.height = "42px";
+                }}, 0);
+            }});
+        }}
+
         cekChat();
         setInterval(cekChat, 3000);
     }});
