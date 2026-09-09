@@ -4445,10 +4445,7 @@ def obrolan_guru_detail(nis):
 
         if (box.innerHTML !== html) {{
             box.innerHTML = html;
-
-            if (dekatBawah) {{
-                box.scrollTop = box.scrollHeight;
-            }}
+            box.scrollTop = box.scrollHeight;
         }}
     }}
 
@@ -4473,6 +4470,14 @@ def obrolan_guru_detail(nis):
             if (versiChat === null) {{
                 versiChat = data.version;
                 renderChat(data.rows || []);
+
+                const box = document.getElementById("chat-box");
+                if (box) {{
+                    setTimeout(function() {{
+                        box.scrollTop = box.scrollHeight;
+                    }}, 0);
+                }}
+
                 return;
             }}
 
@@ -4488,6 +4493,18 @@ def obrolan_guru_detail(nis):
     }}
 
     document.addEventListener("DOMContentLoaded", function() {{
+        const form = document.querySelector(".chat-form");
+        const textarea = form ? form.querySelector("textarea[name='pesan']") : null;
+
+        if (form && textarea) {{
+            form.addEventListener("submit", function() {{
+                setTimeout(function() {{
+                    textarea.value = "";
+                    textarea.style.height = "42px";
+                }}, 0);
+            }});
+        }}
+
         cekChat();
         setInterval(cekChat, 3000);
     }});
