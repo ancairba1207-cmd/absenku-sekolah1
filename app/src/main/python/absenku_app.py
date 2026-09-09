@@ -1122,8 +1122,136 @@ if(e.key==='Escape') closeMenu();
 }});
 </script>
 
+
+
+
+<script>
+(function() {{
+    let realtimeVersion = null;
+    let realtimeChecking = false;
+
+    async function cekPerubahanData() {{
+        if (realtimeChecking || document.hidden) return;
+        realtimeChecking = true;
+
+        try {{
+            const response = await fetch("/realtime_status", {{
+                method: "GET",
+                cache: "no-store",
+                credentials: "same-origin"
+            }});
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            if (!data.ok || !data.version) return;
+
+            if (realtimeVersion === null) {{
+                realtimeVersion = data.version;
+                return;
+            }}
+
+            if (realtimeVersion !== data.version) {{
+                realtimeVersion = data.version;
+
+                if (!window.__absenkuReloading) {{
+                    window.__absenkuReloading = true;
+                    window.location.reload();
+                }}
+            }}
+        }} catch (e) {{
+            // Abaikan error jaringan sementara.
+        }} finally {{
+            realtimeChecking = false;
+        }}
+    }}
+
+    document.addEventListener("DOMContentLoaded", function() {{
+        cekPerubahanData();
+        setInterval(cekPerubahanData, 3000);
+    }});
+}})();
+</script>
 </body>
 </html>"""
+
+
+@app.route("/realtime_status")
+@login_required
+def realtime_status():
+    """
+    Menghasilkan fingerprint perubahan data utama.
+    Dipakai dashboard untuk mendeteksi INSERT maupun UPDATE
+    tanpa harus reload terus-menerus.
+    """
+    try:
+        c = db()
+
+        absensi = c.execute(
+            """SELECT id,nis,nama,kelas,tanggal,jam,status
+               FROM absensi
+               ORDER BY id DESC"""
+        ).fetchall()
+
+        nilai_akademik = c.execute(
+            """SELECT id,nis,nama,kelas,mata_pelajaran,tugas,ulangan,pts,pas,
+                      nilai_akhir,predikat,semester,tahun_ajaran
+               FROM nilai_akademik
+               ORDER BY id DESC"""
+        ).fetchall()
+
+        nilai_tugas = c.execute(
+            """SELECT id,nis,nama,kelas,mata_pelajaran,tanggal_tugas,nilai,
+                      keterangan,semester,tahun_ajaran
+               FROM nilai_tugas
+               ORDER BY id DESC"""
+        ).fetchall()
+
+        import hashlib
+        import json
+
+        def normalisasi(rows):
+            hasil = []
+            for row in rows:
+                try:
+                    hasil.append(dict(row))
+                except Exception:
+                    hasil.append({k: row[k] for k in row.keys()})
+            return hasil
+
+        payload = {
+            "absensi": normalisasi(absensi),
+            "nilai_akademik": normalisasi(nilai_akademik),
+            "nilai_tugas": normalisasi(nilai_tugas)
+        }
+
+        raw = json.dumps(
+            payload,
+            sort_keys=True,
+            default=str,
+            ensure_ascii=False
+        )
+
+        fingerprint = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+        c.close()
+
+        return jsonify(
+            ok=True,
+            version=fingerprint
+        )
+
+    except Exception as e:
+        try:
+            c.close()
+        except Exception:
+            pass
+
+        return jsonify(
+            ok=False,
+            message=str(e)
+        ), 500
 
 
 @app.route("/login", methods=["GET","POST"])
