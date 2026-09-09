@@ -702,6 +702,7 @@ def page(title, body):
         menu_links = f"""
         <a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
         <a href="/nilai_siswa">📊 <span>Nilai Siswa</span></a>
+        <a href="/obrolan_guru">💬 <span>Obrolan</span></a>
 
         <details class="menu-group">
             <summary>📋 <span>ABSENSI</span></summary>
