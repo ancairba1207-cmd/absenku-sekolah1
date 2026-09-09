@@ -58,9 +58,16 @@ public class MainActivity extends Activity {
                             }
                         });
 
-                        android.util.Log.d("ABSENKU_FCM", "TOKEN=" + token);
+                        android.util.Log.d(
+                                "ABSENKU_FCM",
+                                "FCM TOKEN BERHASIL | panjang=" + token.length() + " | webView=" + (webView != null)
+                        );
                     } else {
-                        android.util.Log.e("ABSENKU_FCM", "Gagal mendapatkan FCM token", task.getException());
+                        android.util.Log.e(
+                                "ABSENKU_FCM",
+                                "GAGAL mendapatkan FCM token",
+                                task.getException()
+                        );
                     }
                 });
     }
@@ -131,7 +138,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        ambilFCMToken();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -175,14 +181,7 @@ public class MainActivity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
-                view.evaluateJavascript(
-                        "(function(){"
-                        + "try {"
-                        + "if (window.simpanFCMToken) { window.simpanFCMToken(); }"
-                        + "} catch(e) {}"
-                        + "})()",
-                        null
-                );
+                ambilFCMToken();
 
                 if (!notificationRoute.isEmpty()) {
                     final String route = notificationRoute;
