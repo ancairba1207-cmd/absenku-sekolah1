@@ -4066,15 +4066,21 @@ def obrolan_guru_detail(nis):
             </div>
 
             <form method="post" class="chat-form">
-                <textarea
-                    name="pesan"
-                    rows="3"
-                    placeholder="Tulis balasan kepada orang tua..."
-                    required></textarea>
+                <div class="chat-composer">
+                    <textarea
+                        name="pesan"
+                        rows="1"
+                        placeholder="Tulis pesan di sini..."
+                        required></textarea>
 
-                <button class="btn green" type="submit">
-                    📤 Kirim Balasan
-                </button>
+                    <button class="chat-send" type="submit" aria-label="Kirim pesan">
+                        <span class="send-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21.7 2.3a1 1 0 0 0-1.05-.22L2.65 9.1a1 1 0 0 0 .08 1.87l7.1 2.37 2.37 7.1a1 1 0 0 0 .92.68h.04a1 1 0 0 0 .91-.61l7.02-18a1 1 0 0 0-.39-1.21ZM4.2 10.02 18.3 4.5l-7.02 7.02-7.08-1.5Zm8.98 8.98-1.5-4.5 7.02-7.02-5.52 11.52Z"/>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
             </form>
 
             <div style="margin-top:12px">
