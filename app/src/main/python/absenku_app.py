@@ -4650,15 +4650,19 @@ def obrolan_orangtua():
             if peran == "orangtua":
                 bubble_class = "chat-right"
                 nama_pengirim = "Anda"
+                avatar_pesan = "/static/images/avatarorangtua.png"
             elif peran == "guru":
                 bubble_class = "chat-left chat-guru"
                 nama_pengirim = "Wali Kelas"
+                avatar_pesan = "/static/images/avatarguru.png"
             else:
                 bubble_class = "chat-left"
                 nama_pengirim = "Administrator"
+                avatar_pesan = "/static/images/avatar_administrator.png"
 
             isi_pesan += f"""
             <div class="chat-row {bubble_class}">
+                <img class="chat-avatar" src="{avatar_pesan}" alt="">
                 <div class="chat-bubble">
                     <div class="chat-sender">{escape(nama_pengirim)}</div>
                     <div class="chat-text">{pesan}</div>
@@ -4881,6 +4885,22 @@ def obrolan_orangtua():
         }}
         .chat-form {{
             margin-top:12px;
+        }}
+
+        /* AVATAR OBROLAN ORANG TUA */
+        .chat-avatar {{
+            width:36px;
+            height:36px;
+            min-width:36px;
+            max-width:36px;
+            min-height:36px;
+            max-height:36px;
+            object-fit:cover;
+            border-radius:50%;
+            display:block;
+            flex:0 0 36px;
+            border:2px solid #ffffff;
+            box-shadow:0 2px 6px rgba(0,0,0,.12);
         }}
 
         /* COMPOSER ORANG TUA */
