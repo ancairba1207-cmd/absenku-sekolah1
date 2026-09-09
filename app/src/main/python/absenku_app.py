@@ -526,6 +526,51 @@ class SupabaseDB:
     def close(self): pass
 
 
+def kirim_notifikasi_fcm_ke_username(username, judul, pesan, data=None):
+    """Kirim notifikasi FCM berdasarkan username akun.
+    Digunakan untuk notifikasi Guru/Wali Kelas.
+    """
+    try:
+        import requests
+
+        username = str(username or "").strip()
+        if not username:
+            return False
+
+        url = SUPABASE_URL.rstrip("/") + "/functions/v1/send-notification"
+
+        payload = {
+            "username": username,
+            "title": str(judul),
+            "message": str(pesan),
+            "data": data or {}
+        }
+
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Content-Type": "application/json"
+        }
+
+        r = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=15
+        )
+
+        if not r.ok:
+            print("FCM USERNAME GAGAL:", r.status_code, r.text[:500])
+            return False
+
+        print("FCM USERNAME BERHASIL:", r.text[:500])
+        return True
+
+    except Exception as e:
+        print("FCM USERNAME ERROR:", str(e))
+        return False
+
+
 def kirim_notifikasi_fcm(nis, judul, pesan, data=None):
     """Kirim notifikasi FCM melalui Supabase Edge Function.
     Jika pengiriman gagal, proses utama aplikasi tetap berjalan.
@@ -3476,6 +3521,875 @@ def nilai_tugas():
         c.close()
 
     return redirect(url_for("nilai_siswa"))
+
+
+
+
+@app.route("/obrolan_guru", methods=["GET"])
+@login_required
+def obrolan_guru():
+    if session.get("role") != "guru":
+        return redirect(url_for("home"))
+
+    kelas_guru = str(session.get("kelas") or "").strip()
+
+    if not kelas_guru:
+        return page(
+            "Obrolan Guru",
+            '<div class="card"><h2>💬 Obrolan</h2>'
+            '<div class="warn">Kelas guru belum terhubung.</div></div>'
+        )
+
+    c = db()
+
+    try:
+        siswa_rows = c._get(
+            "siswa",
+            {
+                "select": "nis,nama,kelas",
+                "kelas": f"eq.{kelas_guru}",
+                "order": "nama.asc",
+                "limit": "1000"
+            }
+        )
+
+        daftar_nis = [
+            str(s.get("nis") or "").strip()
+            for s in siswa_rows
+            if s.get("nis")
+        ]
+
+        if not daftar_nis:
+            c.close()
+            return page(
+                "Obrolan Guru",
+                f'<div class="card"><h2>💬 Obrolan</h2>'
+                f'<div class="warn">Belum ada siswa pada kelas {escape(kelas_guru)}.</div></div>'
+            )
+
+        semua_obrolan = c._get(
+            "obrolan",
+            {
+                "select": "*",
+                "order": "created_at.desc,id.desc",
+                "limit": "1000"
+            }
+        )
+
+        c.close()
+
+        siswa_map = {
+            str(s.get("nis") or "").strip(): s
+            for s in siswa_rows
+        }
+
+        percakapan = {}
+
+        for row in semua_obrolan:
+            nis = str(row.get("nis") or "").strip()
+
+            if nis not in daftar_nis:
+                continue
+
+            if nis not in percakapan:
+                percakapan[nis] = row
+
+        trs = ""
+
+        for nis, row in percakapan.items():
+            siswa = siswa_map.get(nis, {})
+            nama = escape(str(siswa.get("nama") or "-"))
+            status = escape(str(row.get("status") or "-"))
+            pesan = escape(str(row.get("pesan") or ""))
+            pesan = pesan.replace("\n", " ")
+
+            diteruskan = bool(row.get("diteruskan"))
+            tujuan = str(row.get("diteruskan_ke") or "").strip()
+
+            if diteruskan and tujuan:
+                status_tampil = f"🔄 {status}"
+            else:
+                status_tampil = status
+
+            trs += f"""
+            <tr>
+                <td>
+                    <strong>{nama}</strong><br>
+                    <small>NIS: {escape(nis)}</small>
+                </td>
+                <td>{status_tampil}</td>
+                <td>{escape(pesan[:120])}</td>
+                <td>
+                    <a class="btn" href="/obrolan_guru/{escape(nis)}">
+                        💬 Buka
+                    </a>
+                </td>
+            </tr>
+            """
+
+        if not trs:
+            trs = """
+            <tr>
+                <td colspan="4" style="text-align:center;padding:25px">
+                    Belum ada percakapan untuk kelas ini.
+                </td>
+            </tr>
+            """
+
+        body = f"""
+        <div class="card">
+            <h2>💬 Obrolan Kelas {escape(kelas_guru)}</h2>
+
+            <div class="small" style="margin-bottom:12px">
+                Percakapan orang tua dari siswa kelas {escape(kelas_guru)}.
+            </div>
+
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Siswa</th>
+                            <th>Status</th>
+                            <th>Pesan Terakhir</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {trs}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        """
+
+        return page("Obrolan Guru", body)
+
+    except Exception as e:
+        try:
+            c.close()
+        except Exception:
+            pass
+
+        return page(
+            "Obrolan Guru",
+            f'<div class="card"><h2>💬 Obrolan</h2>'
+            f'<div class="warn">Gagal membuka obrolan guru:<br>'
+            f'<small>{escape(str(e))}</small></div></div>'
+        )
+
+
+
+
+@app.route("/alih_obrolan_wali_kelas", methods=["POST"])
+@login_required
+def alih_obrolan_wali_kelas():
+    if session.get("role") != "orangtua":
+        return redirect(url_for("home"))
+
+    nis = str(session.get("nis") or "").strip()
+
+    if not nis:
+        return redirect(url_for("obrolan_orangtua"))
+
+    c = db()
+
+    try:
+        # Cari data siswa berdasarkan NIS akun orang tua.
+        siswa_rows = c._get(
+            "siswa",
+            {
+                "select": "nis,nama,kelas",
+                "nis": f"eq.{nis}",
+                "limit": "1"
+            }
+        )
+
+        if not siswa_rows:
+            c.close()
+            return redirect(url_for("obrolan_orangtua"))
+
+        siswa = siswa_rows[0]
+        kelas_siswa = str(siswa.get("kelas") or "").strip()
+
+        if not kelas_siswa:
+            c.close()
+            return redirect(url_for("obrolan_orangtua"))
+
+        # Cari wali kelas secara otomatis berdasarkan role guru + kelas.
+        guru_rows = c._get(
+            "users",
+            {
+                "select": "username,nama,role,kelas",
+                "role": "eq.guru",
+                "kelas": f"eq.{kelas_siswa}",
+                "limit": "1"
+            }
+        )
+
+        if not guru_rows:
+            c.close()
+            return redirect(url_for("obrolan_orangtua"))
+
+        guru = guru_rows[0]
+        username_guru = str(guru.get("username") or "").strip()
+
+        if not username_guru:
+            c.close()
+            return redirect(url_for("obrolan_orangtua"))
+
+        # Cek apakah percakapan sudah pernah dialihkan.
+        rows = c._get(
+            "obrolan",
+            {
+                "select": "*",
+                "nis": f"eq.{nis}",
+                "order": "created_at.desc,id.desc",
+                "limit": "1"
+            }
+        )
+
+        if rows:
+            terakhir = rows[0]
+
+            if bool(terakhir.get("diteruskan")):
+                c.close()
+                return redirect(url_for("obrolan_orangtua"))
+
+        # Tambahkan penanda transfer sebagai bagian dari percakapan yang sama.
+        c._post(
+            "obrolan",
+            {
+                "nis": nis,
+                "pengirim": "admin",
+                "penerima": username_guru,
+                "peran_pengirim": "admin",
+                "peran_penerima": "guru",
+                "jenis": "Pengalihan",
+                "pesan": (
+                    f"Percakapan dialihkan kepada Wali Kelas "
+                    f"kelas {kelas_siswa} ({username_guru})."
+                ),
+                "status": "Dialihkan ke Wali Kelas",
+                "diteruskan": True,
+                "diteruskan_ke": username_guru
+            }
+        )
+
+        # Kirim notifikasi kepada Wali Kelas berdasarkan username akun guru.
+        kirim_notifikasi_fcm_ke_username(
+            username_guru,
+            "Obrolan Dialihkan ke Anda",
+            f"Percakapan orang tua {siswa.get('nama') or nis} "
+            f"telah dialihkan kepada Wali Kelas.",
+            {
+                "jenis": "obrolan_dialihkan",
+                "nis": str(nis),
+                "kelas": str(kelas_siswa),
+                "guru": str(username_guru),
+                "route": f"/obrolan_guru/{nis}"
+            }
+        )
+
+        c.close()
+
+        return redirect(url_for("obrolan_orangtua"))
+
+    except Exception:
+        try:
+            c.close()
+        except Exception:
+            pass
+
+        return redirect(url_for("obrolan_orangtua"))
+
+
+@app.route("/obrolan_guru/<nis>", methods=["GET", "POST"])
+@login_required
+def obrolan_guru_detail(nis):
+    if session.get("role") != "guru":
+        return redirect(url_for("home"))
+
+    nis = str(nis or "").strip()
+    kelas_guru = str(session.get("kelas") or "").strip()
+
+    if not nis or not kelas_guru:
+        return page(
+            "Obrolan Guru",
+            '<div class="card"><h2>💬 Obrolan</h2>'
+            '<div class="warn">Data guru atau siswa tidak valid.</div></div>'
+        )
+
+    c = db()
+
+    try:
+        siswa_rows = c._get(
+            "siswa",
+            {
+                "select": "*",
+                "nis": f"eq.{nis}",
+                "kelas": f"eq.{kelas_guru}",
+                "limit": "1"
+            }
+        )
+
+        if not siswa_rows:
+            c.close()
+            return page(
+                "Obrolan Guru",
+                '<div class="card"><h2>💬 Obrolan</h2>'
+                '<div class="warn">Siswa tidak ditemukan atau bukan siswa di kelas Anda.</div></div>'
+            )
+
+        siswa = siswa_rows[0]
+
+        if request.method == "POST":
+            pesan_baru = request.form.get("pesan", "").strip()
+
+            if pesan_baru:
+                c._post(
+                    "obrolan",
+                    {
+                        "nis": nis,
+                        "pengirim": str(session.get("user") or "guru"),
+                        "penerima": "orangtua",
+                        "peran_pengirim": "guru",
+                        "peran_penerima": "orangtua",
+                        "jenis": "Obrolan",
+                        "pesan": pesan_baru,
+                        "status": "Ditangani Wali Kelas",
+                        "diteruskan": True,
+                        "diteruskan_ke": str(session.get("user") or "")
+                    }
+                )
+
+            c.close()
+            return redirect(url_for("obrolan_guru_detail", nis=nis))
+
+        rows = c._get(
+            "obrolan",
+            {
+                "select": "*",
+                "nis": f"eq.{nis}",
+                "order": "created_at.asc,id.asc",
+                "limit": "500"
+            }
+        )
+
+        c.close()
+
+        nama_anak = escape(str(siswa.get("nama") or "-"))
+        kelas_anak = escape(str(siswa.get("kelas") or "-"))
+
+        isi_pesan = ""
+        tombol_alih = ""
+
+        sudah_dialihkan = any(
+            bool(row.get("diteruskan"))
+            for row in rows
+        )
+
+        tombol_alih = ""
+
+        if not sudah_dialihkan:
+            tombol_alih = """
+            <form method="post" action="/alih_obrolan_wali_kelas"
+                  onsubmit="return confirm('Alihkan percakapan ini ke Wali Kelas?');"
+                  style="margin-top:12px">
+                <button class="btn" type="submit">
+                    🔄 Alihkan ke Wali Kelas
+                </button>
+            </form>
+            """
+
+        for row in rows:
+            peran = str(row.get("peran_pengirim") or "")
+            pesan = escape(str(row.get("pesan") or "")).replace("\n", "<br>")
+
+            if peran == "orangtua":
+                bubble_class = "chat-right"
+                nama_pengirim = "Orang Tua"
+            elif peran == "guru":
+                bubble_class = "chat-left chat-guru"
+                nama_pengirim = "Wali Kelas"
+            else:
+                bubble_class = "chat-left"
+                nama_pengirim = "Administrator"
+
+            isi_pesan += f"""
+            <div class="chat-row {bubble_class}">
+                <div class="chat-bubble">
+                    <div class="chat-sender">{escape(nama_pengirim)}</div>
+                    <div class="chat-text">{pesan}</div>
+                </div>
+            </div>
+            """
+
+        if not isi_pesan:
+            isi_pesan = """
+            <div style="text-align:center;padding:25px">
+                Belum ada pesan.
+            </div>
+            """
+
+        if "tombol_alih" not in locals():
+            tombol_alih = ""
+
+        body = f"""
+        <div class="card chat-card">
+            <h2>💬 Obrolan dengan Orang Tua</h2>
+
+            <div class="chat-student">
+                <strong>{nama_anak}</strong>
+                <span>Kelas {kelas_anak}</span>
+            </div>
+
+            <div class="chat-info">
+                Percakapan ini terkait dengan siswa tersebut.
+            </div>
+
+            <div class="chat-box">
+                {isi_pesan}
+            </div>
+
+            <form method="post" class="chat-form">
+                <textarea
+                    name="pesan"
+                    rows="3"
+                    placeholder="Tulis balasan kepada orang tua..."
+                    required></textarea>
+
+                <button class="btn green" type="submit">
+                    📤 Kirim Balasan
+                </button>
+            </form>
+
+            <div style="margin-top:12px">
+                <a class="btn" href="/obrolan_guru">
+                    ← Kembali ke Daftar Obrolan
+                </a>
+            </div>
+        </div>
+
+        <style>
+        .chat-card {{
+            max-width:760px;
+            margin:0 auto;
+        }}
+        .chat-student {{
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            padding:12px;
+            margin:10px 0;
+            border-radius:10px;
+            background:#f5f5f5;
+        }}
+        .chat-info {{
+            padding:10px;
+            margin-bottom:12px;
+            border-radius:8px;
+            background:#eef6ff;
+            font-size:14px;
+        }}
+        .chat-box {{
+            max-height:55vh;
+            overflow-y:auto;
+            padding:12px;
+            border:1px solid #ddd;
+            border-radius:12px;
+            background:#fafafa;
+        }}
+        .chat-row {{
+            display:flex;
+            margin:8px 0;
+        }}
+        .chat-left {{
+            justify-content:flex-start;
+        }}
+        .chat-right {{
+            justify-content:flex-end;
+        }}
+        .chat-bubble {{
+            max-width:80%;
+            padding:10px 13px;
+            border-radius:14px;
+            background:#eeeeee;
+        }}
+        .chat-right .chat-bubble {{
+            background:#dff5df;
+        }}
+        .chat-guru .chat-bubble {{
+            background:#e5efff;
+        }}
+        .chat-sender {{
+            font-size:12px;
+            font-weight:bold;
+            margin-bottom:4px;
+        }}
+        .chat-text {{
+            line-height:1.45;
+            word-break:break-word;
+        }}
+        .chat-form {{
+            margin-top:12px;
+        }}
+        .chat-form textarea {{
+            width:100%;
+            box-sizing:border-box;
+            padding:10px;
+            border-radius:10px;
+            border:1px solid #ccc;
+            resize:vertical;
+        }}
+        </style>
+        """
+
+        return page("Obrolan Guru", body)
+
+    except Exception as e:
+        try:
+            c.close()
+        except Exception:
+            pass
+
+        return page(
+            "Obrolan Guru",
+            f'<div class="card"><h2>💬 Obrolan</h2>'
+            f'<div class="warn">Gagal membuka percakapan:<br>'
+            f'<small>{escape(str(e))}</small></div></div>'
+        )
+
+
+@app.route("/obrolan_orangtua", methods=["GET", "POST"])
+@login_required
+def obrolan_orangtua():
+    if session.get("role") != "orangtua":
+        return redirect(url_for("home"))
+
+    nis = str(session.get("nis") or "").strip()
+
+    if not nis:
+        return page(
+            "Obrolan",
+            '<div class="card"><h2>💬 Obrolan</h2>'
+            '<div class="warn">Data anak belum terhubung dengan akun orang tua.</div></div>'
+        )
+
+    c = db()
+
+    try:
+        siswa_rows = c._get(
+            "siswa",
+            {
+                "select": "*",
+                "nis": f"eq.{nis}",
+                "limit": "1"
+            }
+        )
+
+        anak = siswa_rows[0] if siswa_rows else None
+
+        if not anak:
+            c.close()
+            return page(
+                "Obrolan",
+                '<div class="card"><h2>💬 Obrolan</h2>'
+                '<div class="warn">Data siswa tidak ditemukan.</div></div>'
+            )
+
+        if request.method == "POST":
+            pesan_baru = request.form.get("pesan", "").strip()
+
+            if pesan_baru:
+                c._post(
+                    "obrolan",
+                    {
+                        "nis": nis,
+                        "pengirim": str(session.get("user") or "orangtua"),
+                        "penerima": "admin",
+                        "peran_pengirim": "orangtua",
+                        "peran_penerima": "admin",
+                        "jenis": "Obrolan",
+                        "pesan": pesan_baru,
+                        "status": "Baru",
+                        "diteruskan": False
+                    }
+                )
+
+            c.close()
+            return redirect(url_for("obrolan_orangtua"))
+
+        rows = c._get(
+            "obrolan",
+            {
+                "select": "*",
+                "nis": f"eq.{nis}",
+                "order": "created_at.asc,id.asc",
+                "limit": "500"
+            }
+        )
+
+        if not rows:
+            nama_awal = str(anak.get("nama") or "-")
+            kelas_awal = str(anak.get("kelas") or "-")
+
+            pesan_awal = (
+                "Halo, Ayah/Bunda. 👋\n\n"
+                "Selamat datang di Obrolan ABSENKU SEKOLAH.\n"
+                f"Percakapan ini terkait dengan {nama_awal} "
+                f"(Kelas {kelas_awal}).\n\n"
+                "Silakan sampaikan pertanyaan atau informasi "
+                "yang ingin disampaikan kepada pihak sekolah."
+            )
+
+            c._post(
+                "obrolan",
+                {
+                    "nis": nis,
+                    "pengirim": "admin",
+                    "penerima": str(session.get("user") or "orangtua"),
+                    "peran_pengirim": "admin",
+                    "peran_penerima": "orangtua",
+                    "jenis": "Obrolan",
+                    "pesan": pesan_awal,
+                    "status": "Ditangani Administrator",
+                    "diteruskan": False
+                }
+            )
+
+            rows = c._get(
+                "obrolan",
+                {
+                    "select": "*",
+                    "nis": f"eq.{nis}",
+                    "order": "created_at.asc,id.asc",
+                    "limit": "500"
+                }
+            )
+
+        c.close()
+
+        nama_anak = escape(str(anak.get("nama") or "-"))
+        kelas_anak = escape(str(anak.get("kelas") or "-"))
+
+        isi_pesan = ""
+
+        sudah_dialihkan = any(
+            bool(row.get("diteruskan"))
+            for row in rows
+        )
+
+        tombol_alih = ""
+
+        if not sudah_dialihkan:
+            tombol_alih = """
+            <form method="post" action="/alih_obrolan_wali_kelas"
+                  onsubmit="return confirm('Alihkan percakapan ini ke Wali Kelas?');"
+                  style="margin-top:12px">
+                <button class="btn" type="submit">
+                    🔄 Alihkan ke Wali Kelas
+                </button>
+            </form>
+            """
+
+        for row in rows:
+            peran = str(row.get("peran_pengirim") or "")
+            jenis = str(row.get("jenis") or "")
+
+            # Penanda khusus saat percakapan dialihkan ke Wali Kelas.
+            if jenis == "Pengalihan":
+                tujuan = escape(str(row.get("diteruskan_ke") or "Wali Kelas"))
+                status_alih = escape(str(row.get("status") or "Dialihkan ke Wali Kelas"))
+
+                isi_pesan += f"""
+                <div class="chat-transfer">
+                    <strong>🔄 {status_alih}</strong>
+                    <div>Wali Kelas: {tujuan}</div>
+                </div>
+                """
+                continue
+
+            pesan = escape(str(row.get("pesan") or "")).replace("\n", "<br>")
+
+            if peran == "orangtua":
+                bubble_class = "chat-right"
+                nama_pengirim = "Anda"
+            elif peran == "guru":
+                bubble_class = "chat-left chat-guru"
+                nama_pengirim = "Wali Kelas"
+            else:
+                bubble_class = "chat-left"
+                nama_pengirim = "Administrator"
+
+            isi_pesan += f"""
+            <div class="chat-row {bubble_class}">
+                <div class="chat-bubble">
+                    <div class="chat-sender">{escape(nama_pengirim)}</div>
+                    <div class="chat-text">{pesan}</div>
+                </div>
+            </div>
+            """
+
+        body = f"""
+        <div class="card chat-card">
+            <h2>💬 Obrolan</h2>
+
+            <div class="chat-student">
+                <strong>{nama_anak}</strong>
+                <span>Kelas {kelas_anak}</span>
+            </div>
+
+            <div class="chat-info">
+                Percakapan dimulai dengan Administrator.
+            </div>
+
+            <div class="chat-box">
+                {isi_pesan}
+            </div>
+
+            <form method="post" class="chat-form">
+                <textarea
+                    name="pesan"
+                    rows="3"
+                    placeholder="Tulis pesan kepada sekolah..."
+                    required></textarea>
+
+                <button class="btn green" type="submit">
+                    📤 Kirim Pesan
+                </button>
+            </form>
+
+            {tombol_alih}
+        </div>
+
+        <style>
+        .chat-card {{
+            max-width:760px;
+            margin:0 auto;
+        }}
+
+        .chat-student {{
+            background:#eff6ff;
+            padding:12px 14px;
+            border-radius:12px;
+            margin:12px 0;
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            flex-wrap:wrap;
+        }}
+
+        .chat-student span {{
+            color:#475569;
+            font-size:14px;
+        }}
+
+        .chat-info {{
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            border-radius:10px;
+            padding:10px 12px;
+            margin-bottom:12px;
+            font-size:13px;
+            color:#475569;
+        }}
+
+        .chat-box {{
+            background:#e2e8f0;
+            border-radius:14px;
+            padding:14px;
+            min-height:260px;
+            max-height:520px;
+            overflow-y:auto;
+        }}
+
+        .chat-row {{
+            display:flex;
+            margin-bottom:10px;
+        }}
+
+        .chat-left {{
+            justify-content:flex-start;
+        }}
+
+        .chat-right {{
+            justify-content:flex-end;
+        }}
+
+        .chat-bubble {{
+            max-width:82%;
+            padding:10px 13px;
+            border-radius:14px;
+            background:white;
+            box-shadow:0 2px 6px rgba(0,0,0,.08);
+        }}
+
+        .chat-right .chat-bubble {{
+            background:#dbeafe;
+        }}
+
+        .chat-guru .chat-bubble {{
+            background:#dcfce7;
+        }}
+
+        .chat-sender {{
+            font-size:11px;
+            font-weight:bold;
+            color:#475569;
+            margin-bottom:4px;
+        }}
+
+        .chat-text {{
+            font-size:14px;
+            line-height:1.5;
+            word-break:break-word;
+        }}
+
+        .chat-transfer {{
+            text-align:center;
+            margin:12px 0;
+            padding:12px;
+            border-radius:10px;
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            color:#9a3412;
+            font-size:13px;
+        }}
+        .chat-transfer strong {{
+            display:block;
+            margin-bottom:4px;
+        }}
+        .chat-form {{
+            margin-top:12px;
+        }}
+
+        .chat-form textarea {{
+            width:100%;
+            border:1px solid #cbd5e1;
+            border-radius:12px;
+            padding:12px;
+            resize:vertical;
+            font-family:Arial,sans-serif;
+            font-size:14px;
+            margin-bottom:8px;
+        }}
+        </style>
+        """
+
+        return page("Obrolan", body)
+
+    except Exception as e:
+        try:
+            c.close()
+        except Exception:
+            pass
+
+        return page(
+            "Obrolan",
+            f'<div class="card"><h2>💬 Obrolan</h2>'
+            f'<div class="warn">Gagal membuka obrolan:<br>'
+            f'<small>{escape(str(e))}</small></div></div>'
+        )
 
 
 @app.route("/nilai_orangtua")
