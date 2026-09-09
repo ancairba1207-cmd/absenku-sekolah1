@@ -695,14 +695,14 @@ def page(title, body):
         <a href="/dashboard_orangtua">🏠 <span>Beranda</span></a>
         <a href="/kehadiran_orangtua">📅 <span>Kehadiran</span></a>
         <a href="/nilai_orangtua">📊 <span>Nilai Akademik</span></a>
-        <a href="/obrolan_orangtua"><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> <span>Obrolan</span></a>
+        <a href="/obrolan_orangtua">💬 <span>Obrolan</span></a>
         <a href="/profil">👤 <span>Profil</span></a>
         """
     elif role == "guru":
         menu_links = f"""
         <a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
         <a href="/nilai_siswa">📊 <span>Nilai Siswa</span></a>
-        <a href="/obrolan_guru"><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> <span>Obrolan</span></a>
+        <a href="/obrolan_guru">💬 <span>Obrolan</span></a>
 
         <details class="menu-group">
             <summary>📋 <span>ABSENSI</span></summary>
@@ -3712,7 +3712,7 @@ def obrolan_guru():
                 <td>{escape(pesan[:120])}</td>
                 <td>
                     <a class="btn" href="/obrolan_guru/{escape(nis)}">
-                        <img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Buka
+                        <img class="open-chat-icon" src="/static/images/iconbukaobrolan.png" alt=""> Buka
                     </a>
                 </td>
             </tr>
@@ -4048,7 +4048,7 @@ def obrolan_guru_detail(nis):
                 <span>Kembali</span>
             </a>
             <div class="chat-title">
-                <strong>💬 Obrolan ABSENKU</strong>
+                <strong><img class="chat-title-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan ABSENKU</strong>
                 <small>Pesan dengan Orang Tua</small>
             </div>
         </div>
@@ -4131,6 +4131,26 @@ def obrolan_guru_detail(nis):
             min-width:0;
         }}
 
+        .chat-title-icon {{
+            width:32px;
+            height:32px;
+            min-width:32px;
+            object-fit:contain;
+            vertical-align:middle;
+            display:inline-block;
+            margin-right:6px;
+        }}
+
+        .open-chat-icon {{
+            width:20px;
+            height:20px;
+            min-width:20px;
+            object-fit:contain;
+            vertical-align:middle;
+            display:inline-block;
+            margin-right:5px;
+        }}
+
         .chat-title strong {{
             font-size:18px;
             color:#0f172a;
@@ -4190,16 +4210,41 @@ def obrolan_guru_detail(nis):
         }}
         .chat-row {{
             display:flex;
+            align-items:flex-end;
+            gap:8px;
+            width:100%;
+            box-sizing:border-box;
             margin:8px 0;
         }}
+
         .chat-left {{
             justify-content:flex-start;
+            flex-direction:row;
         }}
+
         .chat-right {{
             justify-content:flex-end;
+            flex-direction:row-reverse;
         }}
-        .chat-bubble {{
-            max-width:80%;
+
+        .chat-row .chat-avatar {{
+            width:40px;
+            height:40px;
+            min-width:40px;
+            max-width:40px;
+            min-height:40px;
+            max-height:40px;
+            flex:0 0 40px;
+            object-fit:cover;
+            border-radius:50%;
+            display:block;
+            border:2px solid #ffffff;
+            box-shadow:0 2px 6px rgba(0,0,0,.12);
+        }}
+
+        .chat-row .chat-bubble {{
+            max-width:calc(100% - 48px);
+            box-sizing:border-box;
             padding:10px 13px;
             border-radius:14px;
             background:#eeeeee;
@@ -4345,19 +4390,28 @@ def obrolan_guru_detail(nis):
             const peran = String(row.peran_pengirim || "").toLowerCase();
 
             if (peran === "orangtua") {{
-                html += '<div class="chat-bubble me">' +
-                    '<div class="chat-sender">Anda</div>' +
+                html += '<div class="chat-row chat-left">' +
+                    '<img class="chat-avatar" src="/static/images/avatarorangtua.png" alt="">' +
+                    '<div class="chat-bubble">' +
+                    '<div class="chat-sender">Orang Tua</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>' +
                     '</div>';
             }} else if (peran === "guru") {{
-                html += '<div class="chat-bubble">' +
+                html += '<div class="chat-row chat-right chat-guru">' +
+                    '<img class="chat-avatar" src="/static/images/avatarguru.png" alt="">' +
+                    '<div class="chat-bubble">' +
                     '<div class="chat-sender">Wali Kelas</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>' +
                     '</div>';
             }} else {{
-                html += '<div class="chat-bubble">' +
+                html += '<div class="chat-row chat-left">' +
+                    '<img class="chat-avatar" src="/static/images/avatar_administrator.png" alt="">' +
+                    '<div class="chat-bubble">' +
                     '<div class="chat-sender">Administrator</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>' +
                     '</div>';
             }}
         }});
@@ -4681,7 +4735,7 @@ def obrolan_orangtua():
                 <span>Kembali</span>
             </a>
             <div class="chat-title">
-                <strong>💬 Obrolan ABSENKU</strong>
+                <strong><img class="chat-title-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan ABSENKU</strong>
                 <small>Pesan dengan sekolah</small>
             </div>
         </div>
@@ -4830,15 +4884,39 @@ def obrolan_orangtua():
 
         .chat-row {{
             display:flex;
+            align-items:flex-end;
+            gap:8px;
+            width:100%;
+            box-sizing:border-box;
             margin-bottom:10px;
         }}
 
         .chat-left {{
             justify-content:flex-start;
+            flex-direction:row;
         }}
 
         .chat-right {{
             justify-content:flex-end;
+            flex-direction:row-reverse;
+        }}
+
+        .chat-row .chat-avatar {{
+            width:40px;
+            height:40px;
+            min-width:40px;
+            max-width:40px;
+            min-height:40px;
+            max-height:40px;
+            flex:0 0 40px;
+            object-fit:cover;
+            border-radius:50%;
+            display:block;
+        }}
+
+        .chat-row .chat-bubble {{
+            max-width:calc(100% - 48px);
+            box-sizing:border-box;
         }}
 
         .chat-bubble {{
@@ -4939,6 +5017,36 @@ def obrolan_orangtua():
 
         .chat-row .chat-bubble {{
             max-width:calc(100% - 48px);
+        }}
+
+        /* POSISI FINAL CHAT ORANG TUA */
+        #chat-box .chat-row.chat-left {{
+            display:flex !important;
+            flex-direction:row !important;
+            justify-content:flex-start !important;
+            align-items:flex-end !important;
+            gap:8px !important;
+            width:100% !important;
+        }}
+
+        #chat-box .chat-row.chat-right {{
+            display:flex !important;
+            flex-direction:row-reverse !important;
+            justify-content:flex-start !important;
+            align-items:flex-end !important;
+            gap:8px !important;
+            width:100% !important;
+        }}
+
+        #chat-box .chat-row .chat-avatar {{
+            flex:0 0 40px !important;
+            width:40px !important;
+            height:40px !important;
+        }}
+
+        #chat-box .chat-row .chat-bubble {{
+            flex:0 1 auto !important;
+            max-width:calc(100% - 48px) !important;
         }}
 
         /* COMPOSER ORANG TUA */

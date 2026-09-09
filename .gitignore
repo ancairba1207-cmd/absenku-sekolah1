@@ -1,2 +1,8 @@
 **/__pycache__/
 *.pyc
+.gradle/
+**/build/
+gradle-8.9/
+gradle-8.9-bin.zip
+local.properties
+*.backup_*
