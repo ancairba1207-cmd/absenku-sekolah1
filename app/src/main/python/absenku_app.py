@@ -702,7 +702,7 @@ def page(title, body):
         menu_links = f"""
         <a href="/dashboard_guru">🏠 <span>Dashboard</span></a>
         <a href="/nilai_siswa">📊 <span>Nilai Siswa</span></a>
-        <a href="/obrolan_guru">💬 <span>Obrolan</span></a>
+        <a href="/obrolan_guru"><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> <span>Obrolan</span></a>
 
         <details class="menu-group">
             <summary>📋 <span>ABSENSI</span></summary>
@@ -903,6 +903,7 @@ font-size:24px;
 .menu-group summary:hover{{background:#f1f5f9}}
 .submenu{{padding:0 0 5px 18px}}
 .submenu a{{padding:10px 14px;font-size:14px}}
+.menu-chat-icon{{width:22px;height:22px;min-width:22px;object-fit:contain;display:block}}
 .menu-label{{
 font-size:11px;
 font-weight:bold;
@@ -3626,7 +3627,7 @@ def obrolan_guru():
     if not kelas_guru:
         return page(
             "Obrolan Guru",
-            '<div class="card"><h2>💬 Obrolan</h2>'
+            '<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
             '<div class="warn">Kelas guru belum terhubung.</div></div>'
         )
 
@@ -3653,7 +3654,7 @@ def obrolan_guru():
             c.close()
             return page(
                 "Obrolan Guru",
-                f'<div class="card"><h2>💬 Obrolan</h2>'
+                f'<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
                 f'<div class="warn">Belum ada siswa pada kelas {escape(kelas_guru)}.</div></div>'
             )
 
@@ -3711,7 +3712,7 @@ def obrolan_guru():
                 <td>{escape(pesan[:120])}</td>
                 <td>
                     <a class="btn" href="/obrolan_guru/{escape(nis)}">
-                        💬 Buka
+                        <img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Buka
                     </a>
                 </td>
             </tr>
@@ -3762,7 +3763,7 @@ def obrolan_guru():
 
         return page(
             "Obrolan Guru",
-            f'<div class="card"><h2>💬 Obrolan</h2>'
+            f'<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
             f'<div class="warn">Gagal membuka obrolan guru:<br>'
             f'<small>{escape(str(e))}</small></div></div>'
         )
@@ -3905,7 +3906,7 @@ def obrolan_guru_detail(nis):
     if not nis or not kelas_guru:
         return page(
             "Obrolan Guru",
-            '<div class="card"><h2>💬 Obrolan</h2>'
+            '<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
             '<div class="warn">Data guru atau siswa tidak valid.</div></div>'
         )
 
@@ -3926,7 +3927,7 @@ def obrolan_guru_detail(nis):
             c.close()
             return page(
                 "Obrolan Guru",
-                '<div class="card"><h2>💬 Obrolan</h2>'
+                '<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
                 '<div class="warn">Siswa tidak ditemukan atau bukan siswa di kelas Anda.</div></div>'
             )
 
@@ -4436,7 +4437,7 @@ def obrolan_guru_detail(nis):
 
         return page(
             "Obrolan Guru",
-            f'<div class="card"><h2>💬 Obrolan</h2>'
+            f'<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
             f'<div class="warn">Gagal membuka percakapan:<br>'
             f'<small>{escape(str(e))}</small></div></div>'
         )
@@ -4453,7 +4454,7 @@ def obrolan_orangtua():
     if not nis:
         return page(
             "Obrolan",
-            '<div class="card"><h2>💬 Obrolan</h2>'
+            '<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
             '<div class="warn">Data anak belum terhubung dengan akun orang tua.</div></div>'
         )
 
@@ -4475,7 +4476,7 @@ def obrolan_orangtua():
             c.close()
             return page(
                 "Obrolan",
-                '<div class="card"><h2>💬 Obrolan</h2>'
+                '<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
                 '<div class="warn">Data siswa tidak ditemukan.</div></div>'
             )
 
@@ -5163,7 +5164,7 @@ def obrolan_orangtua():
 
         return page(
             "Obrolan",
-            f'<div class="card"><h2>💬 Obrolan</h2>'
+            f'<div class="card"><h2><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan</h2>'
             f'<div class="warn">Gagal membuka obrolan:<br>'
             f'<small>{escape(str(e))}</small></div></div>'
         )
