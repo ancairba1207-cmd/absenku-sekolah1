@@ -4039,7 +4039,18 @@ def obrolan_guru_detail(nis):
 
         body = f"""
         <div class="card chat-card">
-            <h2>💬 Obrolan dengan Orang Tua</h2>
+            <div class="chat-header">
+            <a class="chat-back" href="/obrolan_guru" aria-label="Kembali">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14.7 5.3a1 1 0 0 1 0 1.4L10.41 11H20a1 1 0 1 1 0 2h-9.59l4.29 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/>
+                </svg>
+                <span>Kembali</span>
+            </a>
+            <div class="chat-title">
+                <strong>💬 Obrolan ABSENKU</strong>
+                <small>Pesan dengan Orang Tua</small>
+            </div>
+        </div>
 
             <div class="chat-student">
                 <strong>{nama_anak}</strong>
@@ -4074,6 +4085,58 @@ def obrolan_guru_detail(nis):
         </div>
 
         <style>
+        <style>
+        .chat-header {{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:12px;
+            padding:4px 0;
+        }}
+
+        .chat-back {{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            flex:0 0 auto;
+            padding:9px 12px;
+            border-radius:12px;
+            background:#eff6ff;
+            color:#2563eb;
+            text-decoration:none;
+            font-size:13px;
+            font-weight:bold;
+            border:1px solid #dbeafe;
+        }}
+
+        .chat-back svg {{
+            width:18px;
+            height:18px;
+            fill:currentColor;
+        }}
+
+        .chat-back:active {{
+            transform:scale(.96);
+        }}
+
+        .chat-title {{
+            display:flex;
+            flex-direction:column;
+            min-width:0;
+        }}
+
+        .chat-title strong {{
+            font-size:18px;
+            color:#0f172a;
+        }}
+
+        .chat-title small {{
+            margin-top:2px;
+            color:#64748b;
+            font-size:12px;
+        }}
+
+
         .chat-card {{
             max-width:760px;
             margin:0 auto;
@@ -4104,6 +4167,8 @@ def obrolan_guru_detail(nis):
             min-height:0;
             max-height:none;
             overflow-y:auto;
+            overscroll-behavior:contain;
+            scrollbar-width:thin;
             -webkit-overflow-scrolling:touch;
             padding:12px;
             border:1px solid #ddd;
@@ -4144,13 +4209,73 @@ def obrolan_guru_detail(nis):
         .chat-form {{
             margin-top:12px;
         }}
+        .chat-form {{
+            margin-top:10px;
+        }}
+
+        .chat-composer {{
+            display:flex;
+            align-items:flex-end;
+            gap:8px;
+            background:#ffffff;
+            border:1px solid #dbe3ef;
+            border-radius:18px;
+            padding:6px;
+            box-shadow:0 3px 12px rgba(0,0,0,.08);
+        }}
+
         .chat-form textarea {{
+            flex:1;
             width:100%;
+            min-height:42px;
+            max-height:110px;
             box-sizing:border-box;
-            padding:10px;
-            border-radius:10px;
-            border:1px solid #ccc;
-            resize:vertical;
+            padding:10px 12px;
+            border:0;
+            outline:none;
+            resize:none;
+            background:transparent;
+            font-family:Arial,sans-serif;
+            font-size:14px;
+            line-height:20px;
+        }}
+
+        .chat-form textarea:focus {{
+            outline:none;
+        }}
+
+        .chat-send {{
+            flex:0 0 44px;
+            width:44px;
+            height:44px;
+            border:0;
+            border-radius:50%;
+            background:#2563eb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            padding:0;
+            box-shadow:0 3px 8px rgba(37,99,235,.35);
+            transition:transform .15s ease, box-shadow .15s ease;
+        }}
+
+        .chat-send:active {{
+            transform:scale(.92);
+        }}
+
+        .chat-send svg {{
+            width:21px;
+            height:21px;
+            fill:#ffffff;
+        }}
+
+        .send-icon {{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            width:100%;
+            height:100%;
         }}
         </style>
 
@@ -4511,7 +4636,18 @@ def obrolan_orangtua():
 
         body = f"""
         <div class="card chat-card">
-            <h2>💬 Obrolan</h2>
+            <div class="chat-header">
+            <a class="chat-back" href="/dashboard_orangtua" aria-label="Kembali">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14.7 5.3a1 1 0 0 1 0 1.4L10.41 11H20a1 1 0 1 1 0 2h-9.59l4.29 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/>
+                </svg>
+                <span>Kembali</span>
+            </a>
+            <div class="chat-title">
+                <strong>💬 Obrolan ABSENKU</strong>
+                <small>Pesan dengan sekolah</small>
+            </div>
+        </div>
 
             <div class="chat-student">
                 <strong>{nama_anak}</strong>
@@ -4534,7 +4670,11 @@ def obrolan_orangtua():
                     required></textarea>
 
                 <button class="btn green" type="submit">
-                    📤 Kirim Pesan
+                    <span class="send-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24">
+        <path d="M21.7 2.3a1 1 0 0 0-1.05-.22L2.65 9.1a1 1 0 0 0 .08 1.87l7.1 2.37 2.37 7.1a1 1 0 0 0 .92.68h.04a1 1 0 0 0 .91-.61l7.02-18a1 1 0 0 0-.39-1.21ZM4.2 10.02 18.3 4.5l-7.02 7.02-7.08-1.5Zm8.98 8.98-1.5-4.5 7.02-7.02-5.52 11.52Z"/>
+    </svg>
+</span>
                 </button>
             </form>
 
@@ -4542,6 +4682,58 @@ def obrolan_orangtua():
         </div>
 
         <style>
+        <style>
+        .chat-header {{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:12px;
+            padding:4px 0;
+        }}
+
+        .chat-back {{
+            display:flex;
+            align-items:center;
+            gap:6px;
+            flex:0 0 auto;
+            padding:9px 12px;
+            border-radius:12px;
+            background:#eff6ff;
+            color:#2563eb;
+            text-decoration:none;
+            font-size:13px;
+            font-weight:bold;
+            border:1px solid #dbeafe;
+        }}
+
+        .chat-back svg {{
+            width:18px;
+            height:18px;
+            fill:currentColor;
+        }}
+
+        .chat-back:active {{
+            transform:scale(.96);
+        }}
+
+        .chat-title {{
+            display:flex;
+            flex-direction:column;
+            min-width:0;
+        }}
+
+        .chat-title strong {{
+            font-size:18px;
+            color:#0f172a;
+        }}
+
+        .chat-title small {{
+            margin-top:2px;
+            color:#64748b;
+            font-size:12px;
+        }}
+
+
         .chat-card {{
             max-width:760px;
             margin:0 auto;
@@ -4586,9 +4778,10 @@ def obrolan_orangtua():
             background:#e2e8f0;
             border-radius:14px;
             padding:14px;
-            min-height:260px;
-            max-height:520px;
+            max-height:none;
             overflow-y:auto;
+            overscroll-behavior:contain;
+            scrollbar-width:thin;
         }}
 
         .chat-row {{
