@@ -4903,6 +4903,43 @@ def obrolan_orangtua():
             box-shadow:0 2px 6px rgba(0,0,0,.12);
         }}
 
+        /* POSISI AVATAR CHAT ORANG TUA */
+        .chat-row {{
+            display:flex;
+            align-items:flex-end;
+            gap:8px;
+            margin-bottom:10px;
+            width:100%;
+            box-sizing:border-box;
+        }}
+
+        .chat-left {{
+            justify-content:flex-start;
+            flex-direction:row;
+        }}
+
+        .chat-right {{
+            justify-content:flex-end;
+            flex-direction:row-reverse;
+        }}
+
+        .chat-row .chat-avatar {{
+            width:40px;
+            height:40px;
+            min-width:40px;
+            max-width:40px;
+            min-height:40px;
+            max-height:40px;
+            flex:0 0 40px;
+            object-fit:cover;
+            border-radius:50%;
+            display:block;
+        }}
+
+        .chat-row .chat-bubble {{
+            max-width:calc(100% - 48px);
+        }}
+
         /* COMPOSER ORANG TUA */
         .chat-form .chat-composer {{
             display:flex !important;
