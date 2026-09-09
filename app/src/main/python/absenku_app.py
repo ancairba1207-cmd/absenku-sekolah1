@@ -5024,22 +5024,31 @@ def obrolan_orangtua():
 
             const peran = String(row.peran_pengirim || "").toLowerCase();
 
-            if (peran === "orangtua") {{
-                html += '<div class="chat-bubble">' +
-                    '<div class="chat-sender">Orang Tua</div>' +
-                    '<div class="chat-text">' + pesan + '</div>' +
-                    '</div>';
-            }} else if (peran === "guru") {{
-                html += '<div class="chat-bubble me">' +
-                    '<div class="chat-sender">Wali Kelas</div>' +
-                    '<div class="chat-text">' + pesan + '</div>' +
-                    '</div>';
-            }} else {{
-                html += '<div class="chat-bubble">' +
-                    '<div class="chat-sender">Administrator</div>' +
-                    '<div class="chat-text">' + pesan + '</div>' +
-                    '</div>';
-            }}
+              if (peran === "orangtua") {{
+                  html += '<div class="chat-row chat-right">' +
+                      '<img class="chat-avatar" src="/static/images/avatarorangtua.png" alt="">' +
+                      '<div class="chat-bubble">' +
+                      '<div class="chat-sender">Orang Tua</div>' +
+                      '<div class="chat-text">' + pesan + '</div>' +
+                      '</div>' +
+                      '</div>';
+              }} else if (peran === "guru") {{
+                  html += '<div class="chat-row chat-left chat-guru">' +
+                      '<img class="chat-avatar" src="/static/images/avatarguru.png" alt="">' +
+                      '<div class="chat-bubble me">' +
+                      '<div class="chat-sender">Wali Kelas</div>' +
+                      '<div class="chat-text">' + pesan + '</div>' +
+                      '</div>' +
+                      '</div>';
+              }} else {{
+                  html += '<div class="chat-row chat-left">' +
+                      '<img class="chat-avatar" src="/static/images/avatar_administrator.png" alt="">' +
+                      '<div class="chat-bubble">' +
+                      '<div class="chat-sender">Administrator</div>' +
+                      '<div class="chat-text">' + pesan + '</div>' +
+                      '</div>' +
+                      '</div>';
+              }}
         }});
 
         if (box.innerHTML !== html) {{
