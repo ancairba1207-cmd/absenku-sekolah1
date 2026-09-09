@@ -4883,6 +4883,83 @@ def obrolan_orangtua():
             margin-top:12px;
         }}
 
+        /* COMPOSER ORANG TUA */
+        .chat-form .chat-composer {{
+            display:flex !important;
+            flex-direction:row !important;
+            align-items:flex-end !important;
+            gap:8px !important;
+            width:100% !important;
+            box-sizing:border-box !important;
+            background:#ffffff !important;
+            border:1px solid #dbe3ef !important;
+            border-radius:18px !important;
+            padding:6px !important;
+            margin:0 !important;
+            box-shadow:0 3px 12px rgba(0,0,0,.08) !important;
+        }}
+
+        .chat-form .chat-composer textarea {{
+            flex:1 1 auto !important;
+            width:auto !important;
+            min-width:0 !important;
+            height:42px !important;
+            min-height:42px !important;
+            max-height:110px !important;
+            box-sizing:border-box !important;
+            padding:10px 12px !important;
+            margin:0 !important;
+            border:0 !important;
+            border-radius:12px !important;
+            outline:none !important;
+            resize:none !important;
+            background:transparent !important;
+            font-family:Arial,sans-serif !important;
+            font-size:14px !important;
+            line-height:20px !important;
+        }}
+
+        .chat-form .chat-composer .chat-send {{
+            flex:0 0 44px !important;
+            width:44px !important;
+            height:44px !important;
+            min-width:44px !important;
+            min-height:44px !important;
+            max-width:44px !important;
+            max-height:44px !important;
+            box-sizing:border-box !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            padding:0 !important;
+            margin:0 !important;
+            border:0 !important;
+            border-radius:50% !important;
+            background:#2563eb !important;
+            color:#ffffff !important;
+            cursor:pointer !important;
+            box-shadow:0 3px 8px rgba(37,99,235,.35) !important;
+        }}
+
+        .chat-form .chat-composer .chat-send .send-icon {{
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            width:21px !important;
+            height:21px !important;
+        }}
+
+        .chat-form .chat-composer .chat-send svg {{
+            display:block !important;
+            width:21px !important;
+            height:21px !important;
+            min-width:21px !important;
+            min-height:21px !important;
+            max-width:21px !important;
+            max-height:21px !important;
+            fill:#ffffff !important;
+        }}
+
         .chat-form textarea {{
             width:100%;
             border:1px solid #cbd5e1;
