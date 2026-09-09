@@ -4250,18 +4250,25 @@ def obrolan_guru_detail(nis):
             outline:none;
         }}
 
-        .chat-send {{
-            flex:0 0 44px;
-            width:44px;
-            height:44px;
-            border:0;
-            border-radius:50%;
-            background:#2563eb;
-            display:flex;
-            align-items:center;
-            justify-content:center;
+        .chat-composer .chat-send {{
+            flex:0 0 44px !important;
+            width:44px !important;
+            height:44px !important;
+            min-width:44px !important;
+            min-height:44px !important;
+            max-width:44px !important;
+            max-height:44px !important;
+            box-sizing:border-box !important;
+            border:0 !important;
+            border-radius:50% !important;
+            background:#2563eb !important;
+            color:#ffffff !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
             cursor:pointer;
-            padding:0;
+            padding:0 !important;
+            margin:0 !important;
             box-shadow:0 3px 8px rgba(37,99,235,.35);
             transition:transform .15s ease, box-shadow .15s ease;
         }}
@@ -4270,10 +4277,23 @@ def obrolan_guru_detail(nis):
             transform:scale(.92);
         }}
 
-        .chat-send svg {{
-            width:21px;
-            height:21px;
-            fill:#ffffff;
+        .chat-composer .chat-send .send-icon {{
+            width:21px !important;
+            height:21px !important;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }}
+
+        .chat-composer .chat-send .send-icon svg {{
+            display:block;
+            width:21px !important;
+            height:21px !important;
+            min-width:21px !important;
+            min-height:21px !important;
+            max-width:21px !important;
+            max-height:21px !important;
+            fill:#ffffff !important;
         }}
 
         .send-icon {{
