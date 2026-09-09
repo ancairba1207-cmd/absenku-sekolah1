@@ -695,7 +695,7 @@ def page(title, body):
         <a href="/dashboard_orangtua">🏠 <span>Beranda</span></a>
         <a href="/kehadiran_orangtua">📅 <span>Kehadiran</span></a>
         <a href="/nilai_orangtua">📊 <span>Nilai Akademik</span></a>
-        <a href="/obrolan_orangtua">💬 <span>Obrolan</span></a>
+        <a href="/obrolan_orangtua"><img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt=""> <span>Obrolan</span></a>
         <a href="/profil">👤 <span>Profil</span></a>
         """
     elif role == "guru":
