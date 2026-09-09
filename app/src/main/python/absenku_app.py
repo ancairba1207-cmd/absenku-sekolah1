@@ -1171,6 +1171,20 @@ if(e.key==='Escape') closeMenu();
         cekPerubahanData();
         setInterval(cekPerubahanData, 3000);
     }});
+
+    // Saat aplikasi kembali aktif setelah HP standby,
+    // langsung cek perubahan data tanpa menunggu interval berikutnya.
+    document.addEventListener("visibilitychange", function() {{
+        if (!document.hidden) {{
+            setTimeout(cekPerubahanData, 300);
+        }}
+    }});
+
+    window.addEventListener("pageshow", function() {{
+        if (!document.hidden) {{
+            setTimeout(cekPerubahanData, 300);
+        }}
+    }});
 }})();
 </script>
 </body>
