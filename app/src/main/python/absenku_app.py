@@ -1314,6 +1314,95 @@ def realtime_status():
         ), 500
 
 
+@app.route("/realtime_obrolan/<nis>")
+@login_required
+def realtime_obrolan(nis):
+    """Fingerprint percakapan untuk realtime chat."""
+    try:
+        nis = str(nis or "").strip()
+
+        if not nis:
+            return jsonify(ok=False, message="NIS tidak valid"), 400
+
+        role = session.get("role")
+        session_nis = str(session.get("nis") or "").strip()
+
+        # Orang tua hanya boleh memeriksa percakapan anaknya sendiri.
+        if role == "orangtua":
+            if session_nis != nis:
+                return jsonify(ok=False, message="Akses ditolak"), 403
+
+        # Guru hanya boleh memeriksa siswa di kelasnya.
+        elif role == "guru":
+            kelas_guru = str(session.get("kelas") or "").strip()
+
+            c = db()
+            siswa_rows = c._get(
+                "siswa",
+                {
+                    "select": "nis,kelas",
+                    "nis": f"eq.{nis}",
+                    "kelas": f"eq.{kelas_guru}",
+                    "limit": "1"
+                }
+            )
+
+            if not siswa_rows:
+                c.close()
+                return jsonify(ok=False, message="Akses ditolak"), 403
+
+            c.close()
+
+        elif role != "admin":
+            return jsonify(ok=False, message="Akses ditolak"), 403
+
+        c = db()
+
+        rows = c._get(
+            "obrolan",
+            {
+                "select": "id,nis,pengirim,penerima,peran_pengirim,peran_penerima,jenis,pesan,status,diteruskan,diteruskan_ke,created_at",
+                "nis": f"eq.{nis}",
+                "order": "created_at.asc,id.asc",
+                "limit": "500"
+            }
+        )
+
+        import hashlib
+        import json
+
+        raw = json.dumps(
+            rows,
+            sort_keys=True,
+            default=str,
+            ensure_ascii=False
+        )
+
+        fingerprint = hashlib.sha256(
+            raw.encode("utf-8")
+        ).hexdigest()
+
+        c.close()
+
+        return jsonify(
+            ok=True,
+            version=fingerprint,
+            count=len(rows),
+            rows=rows
+        )
+
+    except Exception as e:
+        try:
+            c.close()
+        except Exception:
+            pass
+
+        return jsonify(
+            ok=False,
+            message=str(e)
+        ), 500
+
+
 @app.route("/login", methods=["GET","POST"])
 def login():
     msg = ""
@@ -3863,6 +3952,19 @@ def obrolan_guru_detail(nis):
                     }
                 )
 
+            # Kirim notifikasi kepada semua perangkat orang tua berdasarkan NIS siswa.
+            kirim_notifikasi_fcm(
+                nis,
+                "Pesan dari Wali Kelas",
+                f"Wali Kelas {session.get('user') or ''} mengirim pesan tentang {siswa.get('nama') or nis}.",
+                {
+                    "jenis": "obrolan_guru",
+                    "nis": str(nis),
+                    "guru": str(session.get('user') or ""),
+                    "route": "/obrolan_orangtua"
+                }
+            )
+
             c.close()
             return redirect(url_for("obrolan_guru_detail", nis=nis))
 
@@ -3948,7 +4050,7 @@ def obrolan_guru_detail(nis):
                 Percakapan ini terkait dengan siswa tersebut.
             </div>
 
-            <div class="chat-box">
+            <div id="chat-box" class="chat-box">
                 {isi_pesan}
             </div>
 
@@ -3975,6 +4077,11 @@ def obrolan_guru_detail(nis):
         .chat-card {{
             max-width:760px;
             margin:0 auto;
+            height:calc(100dvh - 150px);
+            min-height:420px;
+            display:flex;
+            flex-direction:column;
+            box-sizing:border-box;
         }}
         .chat-student {{
             display:flex;
@@ -3993,8 +4100,11 @@ def obrolan_guru_detail(nis):
             font-size:14px;
         }}
         .chat-box {{
-            max-height:55vh;
+            flex:1;
+            min-height:0;
+            max-height:none;
             overflow-y:auto;
+            -webkit-overflow-scrolling:touch;
             padding:12px;
             border:1px solid #ddd;
             border-radius:12px;
@@ -4043,6 +4153,120 @@ def obrolan_guru_detail(nis):
             resize:vertical;
         }}
         </style>
+
+<script>
+(function() {{
+    let versiChat = null;
+    let sedangCek = false;
+
+    function escapeHtml(text) {{
+        const div = document.createElement("div");
+        div.textContent = text == null ? "" : String(text);
+        return div.innerHTML;
+    }}
+
+    function renderChat(rows) {{
+        const box = document.getElementById("chat-box");
+        if (!box) return;
+
+        const dekatBawah =
+            box.scrollHeight - box.scrollTop - box.clientHeight < 100;
+
+        let html = "";
+
+        (rows || []).forEach(function(row) {{
+            const pesan = escapeHtml(row.pesan || "").replace(/\\n/g, "<br>");
+
+            if (row.jenis === "Pengalihan") {{
+                html += '<div class="chat-system">' +
+                    escapeHtml(row.pesan || "") +
+                    '</div>';
+                return;
+            }}
+
+            const peran = String(row.peran_pengirim || "").toLowerCase();
+
+            if (peran === "orangtua") {{
+                html += '<div class="chat-bubble me">' +
+                    '<div class="chat-sender">Anda</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>';
+            }} else if (peran === "guru") {{
+                html += '<div class="chat-bubble">' +
+                    '<div class="chat-sender">Wali Kelas</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>';
+            }} else {{
+                html += '<div class="chat-bubble">' +
+                    '<div class="chat-sender">Administrator</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>';
+            }}
+        }});
+
+        if (box.innerHTML !== html) {{
+            box.innerHTML = html;
+
+            if (dekatBawah) {{
+                box.scrollTop = box.scrollHeight;
+            }}
+        }}
+    }}
+
+    async function cekChat() {{
+        if (sedangCek || document.hidden) return;
+
+        sedangCek = true;
+
+        try {{
+            const response = await fetch("/realtime_obrolan/{nis}", {{
+                method: "GET",
+                cache: "no-store",
+                credentials: "same-origin"
+            }});
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            if (!data.ok) return;
+
+            if (versiChat === null) {{
+                versiChat = data.version;
+                renderChat(data.rows || []);
+                return;
+            }}
+
+            if (versiChat !== data.version) {{
+                versiChat = data.version;
+                renderChat(data.rows || []);
+            }}
+        }} catch (e) {{
+            // Abaikan error jaringan sementara.
+        }} finally {{
+            sedangCek = false;
+        }}
+    }}
+
+    document.addEventListener("DOMContentLoaded", function() {{
+        cekChat();
+        setInterval(cekChat, 3000);
+    }});
+
+    document.addEventListener("visibilitychange", function() {{
+        if (!document.hidden) {{
+            setTimeout(cekChat, 300);
+        }}
+    }});
+
+    window.addEventListener("pageshow", function() {{
+        if (!document.hidden) {{
+            setTimeout(cekChat, 300);
+        }}
+    }});
+}})();
+</script>
+
         """
 
         return page("Obrolan Guru", body)
@@ -4102,20 +4326,74 @@ def obrolan_orangtua():
             pesan_baru = request.form.get("pesan", "").strip()
 
             if pesan_baru:
+                # Cek apakah percakapan sudah dialihkan ke Wali Kelas.
+                rows_sebelum = c._get(
+                    "obrolan",
+                    {
+                        "select": "id,diteruskan,diteruskan_ke",
+                        "nis": f"eq.{nis}",
+                        "order": "created_at.desc,id.desc",
+                        "limit": "1"
+                    }
+                )
+
+                sudah_dialihkan = bool(
+                    rows_sebelum
+                    and rows_sebelum[0].get("diteruskan")
+                )
+
                 c._post(
                     "obrolan",
                     {
                         "nis": nis,
                         "pengirim": str(session.get("user") or "orangtua"),
-                        "penerima": "admin",
+                        "penerima": "orangtua" if sudah_dialihkan else "admin",
                         "peran_pengirim": "orangtua",
-                        "peran_penerima": "admin",
+                        "peran_penerima": "guru" if sudah_dialihkan else "admin",
                         "jenis": "Obrolan",
                         "pesan": pesan_baru,
-                        "status": "Baru",
-                        "diteruskan": False
+                        "status": "Ditangani Wali Kelas" if sudah_dialihkan else "Baru",
+                        "diteruskan": sudah_dialihkan,
+                        "diteruskan_ke": (
+                            str(rows_sebelum[0].get("diteruskan_ke") or "")
+                            if sudah_dialihkan and rows_sebelum
+                            else None
+                        )
                     }
                 )
+
+                # Setelah dialihkan, kirim notifikasi ke Wali Kelas.
+                if sudah_dialihkan:
+                    kelas_siswa = str(anak.get("kelas") or "").strip()
+
+                    if kelas_siswa:
+                        guru_rows = c._get(
+                            "users",
+                            {
+                                "select": "username,role,kelas",
+                                "role": "eq.guru",
+                                "kelas": f"eq.{kelas_siswa}",
+                                "limit": "1"
+                            }
+                        )
+
+                        if guru_rows:
+                            username_guru = str(
+                                guru_rows[0].get("username") or ""
+                            ).strip()
+
+                            if username_guru:
+                                kirim_notifikasi_fcm_ke_username(
+                                    username_guru,
+                                    "Pesan Baru dari Orang Tua",
+                                    f"Orang tua {anak.get('nama') or nis} mengirim pesan.",
+                                    {
+                                        "jenis": "obrolan_orangtua",
+                                        "nis": str(nis),
+                                        "kelas": str(kelas_siswa),
+                                        "route": f"/obrolan_guru/{nis}"
+                                    }
+                                )
 
             c.close()
             return redirect(url_for("obrolan_orangtua"))
@@ -4244,7 +4522,7 @@ def obrolan_orangtua():
                 Percakapan dimulai dengan Administrator.
             </div>
 
-            <div class="chat-box">
+            <div id="chat-box" class="chat-box">
                 {isi_pesan}
             </div>
 
@@ -4267,6 +4545,11 @@ def obrolan_orangtua():
         .chat-card {{
             max-width:760px;
             margin:0 auto;
+            height:calc(100dvh - 150px);
+            min-height:420px;
+            display:flex;
+            flex-direction:column;
+            box-sizing:border-box;
         }}
 
         .chat-student {{
@@ -4296,6 +4579,10 @@ def obrolan_orangtua():
         }}
 
         .chat-box {{
+            flex:1;
+            min-height:0;
+            overflow-y:auto;
+            -webkit-overflow-scrolling:touch;
             background:#e2e8f0;
             border-radius:14px;
             padding:14px;
@@ -4375,6 +4662,120 @@ def obrolan_orangtua():
             margin-bottom:8px;
         }}
         </style>
+
+<script>
+(function() {{
+    let versiChat = null;
+    let sedangCek = false;
+
+    function escapeHtml(text) {{
+        const div = document.createElement("div");
+        div.textContent = text == null ? "" : String(text);
+        return div.innerHTML;
+    }}
+
+    function renderChat(rows) {{
+        const box = document.getElementById("chat-box");
+        if (!box) return;
+
+        const dekatBawah =
+            box.scrollHeight - box.scrollTop - box.clientHeight < 100;
+
+        let html = "";
+
+        (rows || []).forEach(function(row) {{
+            const pesan = escapeHtml(row.pesan || "").replace(/\\n/g, "<br>");
+
+            if (row.jenis === "Pengalihan") {{
+                html += '<div class="chat-system">' +
+                    escapeHtml(row.pesan || "") +
+                    '</div>';
+                return;
+            }}
+
+            const peran = String(row.peran_pengirim || "").toLowerCase();
+
+            if (peran === "orangtua") {{
+                html += '<div class="chat-bubble">' +
+                    '<div class="chat-sender">Orang Tua</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>';
+            }} else if (peran === "guru") {{
+                html += '<div class="chat-bubble me">' +
+                    '<div class="chat-sender">Wali Kelas</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>';
+            }} else {{
+                html += '<div class="chat-bubble">' +
+                    '<div class="chat-sender">Administrator</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>';
+            }}
+        }});
+
+        if (box.innerHTML !== html) {{
+            box.innerHTML = html;
+
+            if (dekatBawah) {{
+                box.scrollTop = box.scrollHeight;
+            }}
+        }}
+    }}
+
+    async function cekChat() {{
+        if (sedangCek || document.hidden) return;
+
+        sedangCek = true;
+
+        try {{
+            const response = await fetch("/realtime_obrolan/{nis}", {{
+                method: "GET",
+                cache: "no-store",
+                credentials: "same-origin"
+            }});
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            if (!data.ok) return;
+
+            if (versiChat === null) {{
+                versiChat = data.version;
+                renderChat(data.rows || []);
+                return;
+            }}
+
+            if (versiChat !== data.version) {{
+                versiChat = data.version;
+                renderChat(data.rows || []);
+            }}
+        }} catch (e) {{
+            // Abaikan error jaringan sementara.
+        }} finally {{
+            sedangCek = false;
+        }}
+    }}
+
+    document.addEventListener("DOMContentLoaded", function() {{
+        cekChat();
+        setInterval(cekChat, 3000);
+    }});
+
+    document.addEventListener("visibilitychange", function() {{
+        if (!document.hidden) {{
+            setTimeout(cekChat, 300);
+        }}
+    }});
+
+    window.addEventListener("pageshow", function() {{
+        if (!document.hidden) {{
+            setTimeout(cekChat, 300);
+        }}
+    }});
+}})();
+</script>
+
         """
 
         return page("Obrolan", body)
