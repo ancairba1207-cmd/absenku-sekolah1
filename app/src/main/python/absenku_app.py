@@ -4592,6 +4592,36 @@ def obrolan_admin_detail(nis):
 
         nama_anak = escape(str(siswa.get("nama") or "-"))
         kelas_anak = escape(str(siswa.get("kelas") or "-"))
+        foto_siswa = str(siswa.get("foto") or "").strip()
+
+        chat_aktif = bool(sesi_id_aktif)
+        status_chat = "🟢 Chat Aktif" if chat_aktif else "🔴 Chat Selesai"
+
+        waktu_terakhir = "-"
+        if rows:
+            created_terakhir = rows[-1].get("created_at")
+            if created_terakhir:
+                try:
+                    from datetime import datetime, timedelta
+                    dt = datetime.fromisoformat(
+                        str(created_terakhir).replace("Z", "+00:00")
+                    )
+                    if dt.tzinfo is not None:
+                        dt = dt + timedelta(hours=8)
+                        dt = dt.replace(tzinfo=None)
+
+                    nama_bulan = [
+                        "Januari", "Februari", "Maret", "April",
+                        "Mei", "Juni", "Juli", "Agustus",
+                        "September", "Oktober", "November", "Desember"
+                    ]
+
+                    waktu_terakhir = (
+                        f"{dt.day} {nama_bulan[dt.month - 1]} {dt.year}, "
+                        f"{dt.strftime('%H:%M')}"
+                    )
+                except Exception:
+                    waktu_terakhir = escape(str(created_terakhir))
 
         foto_siswa = str(siswa.get("foto") or "").strip()
 
@@ -5487,13 +5517,26 @@ def obrolan_guru_detail(nis):
             </div>
         </div>
 
-            <div class="chat-student">
-                <strong>{nama_anak}</strong>
-                <span>Kelas {kelas_anak}</span>
-            </div>
-
-            <div class="chat-info">
-                Percakapan ini terkait dengan siswa tersebut.
+            <div class="guru-student-info">
+                {(
+                    f'<img class="guru-student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
+                    if foto_siswa
+                    else '<div class="guru-student-photo-fallback">👤</div>'
+                )}
+                <div class="guru-student-main">
+                    <div class="guru-student-name">{nama_anak}</div>
+                    <div class="guru-student-meta">
+                        NIS: {escape(nis)} • Kelas: {kelas_anak}
+                    </div>
+                </div>
+                <div class="guru-student-status">
+                    <div class="guru-status-badge{' selesai' if not chat_aktif else ''}">
+                        {status_chat}
+                    </div>
+                    <div class="guru-last-seen">
+                        Terakhir: {waktu_terakhir}
+                    </div>
+                </div>
             </div>
 
             <div id="chat-box" class="chat-box">
@@ -5614,6 +5657,115 @@ def obrolan_guru_detail(nis):
             box-sizing:border-box;
             overflow:hidden;
         }}
+        .guru-student-info {{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:1px 2px 6px 2px;
+        }}
+
+        .guru-student-photo,
+        .guru-student-photo-fallback {{
+            width:45px;
+            height:45px;
+            min-width:45px;
+            border-radius:50%;
+            object-fit:cover;
+            border:3px solid #fff;
+            box-shadow:0 2px 7px rgba(0,0,0,.12);
+            background:#eef3f8;
+        }}
+
+        .guru-student-photo-fallback {{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:22px;
+        }}
+
+        .guru-student-main {{
+            flex:1;
+            min-width:0;
+        }}
+
+        .guru-student-name {{
+            font-size:17px;
+            font-weight:700;
+            margin-bottom:1px;
+            color:#17233c;
+        }}
+
+        .guru-student-meta {{
+            font-size:12px;
+            line-height:1.25;
+            color:#4b5563;
+        }}
+
+        .guru-student-status {{
+            min-width:175px;
+            padding-left:8px;
+            border-left:1px solid #e1e5eb;
+            text-align:right;
+        }}
+
+        .guru-status-badge {{
+            display:inline-block;
+            padding:6px 10px;
+            border-radius:20px;
+            font-size:12px;
+            font-weight:700;
+            background:#dcfce7;
+            color:#15803d;
+        }}
+
+        .guru-status-badge.selesai {{
+            background:#fee2e2;
+            color:#b91c1c;
+        }}
+
+        .guru-last-seen {{
+            margin-top:3px;
+            font-size:11px;
+            color:#777;
+            line-height:1.3;
+        }}
+
+        @media (max-width:600px) {{
+            .guru-student-info {{
+                gap:8px;
+                padding:1px 2px 6px 2px;
+            }}
+
+            .guru-student-photo,
+            .guru-student-photo-fallback {{
+                width:45px;
+                height:45px;
+                min-width:45px;
+            }}
+
+            .guru-student-name {{
+                font-size:17px;
+            }}
+
+            .guru-student-meta {{
+                font-size:12px;
+            }}
+
+            .guru-student-status {{
+                min-width:0;
+                padding-left:8px;
+            }}
+
+            .guru-status-badge {{
+                font-size:11px;
+                padding:5px 8px;
+            }}
+
+            .guru-last-seen {{
+                font-size:10px;
+            }}
+        }}
+
         .chat-student {{
             display:flex;
             justify-content:space-between;
