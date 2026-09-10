@@ -5790,10 +5790,13 @@ def obrolan_guru_detail(nis):
         }}
 
         .ortu-student-info {{
-            display:flex;
-            align-items:center;
-            gap:8px;
-            padding:1px 2px 6px 2px;
+            display:grid !important;
+            grid-template-columns:45px minmax(0,1fr) auto !important;
+            align-items:center !important;
+            column-gap:8px !important;
+            width:100% !important;
+            padding:1px 2px 6px 2px !important;
+            box-sizing:border-box !important;
         }}
 
         .ortu-student-photo,
