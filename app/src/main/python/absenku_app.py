@@ -4680,8 +4680,187 @@ def obrolan_admin_detail(nis):
             </form>
             """
 
+        css_admin_chat = """
+<style>
+html, body {
+    overflow: hidden;
+    height: 100%;
+}
+
+.card.admin-chat-card {
+    max-width: 760px;
+    margin: 0 auto;
+    height: calc(100dvh - 300px);
+    max-height: calc(100dvh - 300px);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.admin-chat-card #chat-box {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: #fafafa;
+    box-sizing: border-box;
+}
+
+.admin-chat-card .chat-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0;
+}
+
+.admin-chat-card .chat-left {
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.admin-chat-card .chat-right {
+    justify-content: flex-start;
+    flex-direction: row-reverse;
+}
+
+.admin-chat-card .chat-avatar {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    flex: 0 0 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
+}
+
+.admin-chat-card .chat-bubble {
+    max-width: calc(100% - 48px);
+    box-sizing: border-box;
+    padding: 10px 13px;
+    border-radius: 14px;
+    background: #eee;
+}
+
+.admin-chat-card .chat-right .chat-bubble {
+    background: #dff5df;
+}
+
+.admin-chat-card .chat-guru .chat-bubble {
+    background: #e5efff;
+}
+
+.admin-chat-card .chat-sender {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.admin-chat-card .chat-text {
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.admin-chat-card .chat-form {
+    margin-top: 10px;
+}
+
+.admin-chat-card .chat-composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #dbe3ef;
+    border-radius: 18px;
+    padding: 6px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+.admin-chat-card .chat-form textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 42px;
+    max-height: 110px;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 0;
+    outline: none;
+    resize: none;
+    background: transparent;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.admin-chat-card .chat-composer .chat-send {
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    box-sizing: border-box !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #2563eb !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: 0 3px 8px rgba(37,99,235,.35);
+}
+
+.admin-chat-card .chat-send:active {
+    transform: scale(.92);
+}
+
+.admin-chat-card .chat-composer .send-icon {
+    width: 21px !important;
+    height: 21px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-chat-card .chat-composer .send-icon svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+}
+
+@media (max-width: 600px) {
+    .card.admin-chat-card {
+        height: calc(100dvh - 250px);
+        max-height: calc(100dvh - 250px);
+    }
+
+    .admin-chat-card #chat-box {
+        padding: 8px;
+    }
+}
+</style>
+"""
+
         body = f"""
-        <div class="card">
+        {css_admin_chat}\n        <div class="card admin-chat-card">
             <h2>
                 <img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt="">
                 Obrolan Administrator
