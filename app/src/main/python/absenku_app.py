@@ -4593,6 +4593,32 @@ def obrolan_admin_detail(nis):
         nama_anak = escape(str(siswa.get("nama") or "-"))
         kelas_anak = escape(str(siswa.get("kelas") or "-"))
 
+        foto_siswa = str(siswa.get("foto") or "").strip()
+
+        # Status dan waktu pesan terakhir.
+        chat_aktif = bool(sesi_id_aktif)
+        status_chat = "🟢 Chat Aktif" if chat_aktif else "🔴 Chat Selesai"
+
+        waktu_terakhir = "-"
+        if rows:
+            created_terakhir = rows[-1].get("created_at")
+            if created_terakhir:
+                try:
+                    from datetime import datetime
+                    dt = datetime.fromisoformat(
+                        str(created_terakhir).replace("Z", "+00:00")
+                    )
+                    nama_bulan = [
+                        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+                    ]
+                    waktu_terakhir = (
+                        f"{dt.day} {nama_bulan[dt.month - 1]} {dt.year}, "
+                        f"{dt.strftime('%H:%M')}"
+                    )
+                except Exception:
+                    waktu_terakhir = escape(str(created_terakhir))
+
         isi_pesan = ""
 
         for row in rows:
@@ -4856,6 +4882,126 @@ html, body {
         padding: 8px;
     }
 }
+
+.admin-chat-card .student-chat-info {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 4px 4px 18px 4px;
+}
+
+.admin-chat-card .student-photo {
+    width: 92px;
+    height: 92px;
+    min-width: 92px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 3px 12px rgba(0,0,0,.15);
+    background: #eef3f8;
+}
+
+.admin-chat-card .student-photo-fallback {
+    width: 92px;
+    height: 92px;
+    min-width: 92px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    background: #eef3f8;
+    border: 4px solid #fff;
+    box-shadow: 0 3px 12px rgba(0,0,0,.15);
+}
+
+.admin-chat-card .student-info-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-chat-card .student-name {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #17233c;
+}
+
+.admin-chat-card .student-meta {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #4b5563;
+}
+
+.admin-chat-card .student-chat-status {
+    min-width: 245px;
+    padding-left: 18px;
+    border-left: 1px solid #e1e5eb;
+    text-align: right;
+}
+
+.admin-chat-card .status-badge {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.admin-chat-card .status-badge.selesai {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.admin-chat-card .last-seen {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #777;
+    line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+    .admin-chat-card .student-chat-info {
+        gap: 12px;
+        padding-bottom: 14px;
+    }
+
+    .admin-chat-card .student-photo,
+    .admin-chat-card .student-photo-fallback {
+        width: 72px;
+        height: 72px;
+        min-width: 72px;
+    }
+
+    .admin-chat-card .student-photo-fallback {
+        font-size: 32px;
+    }
+
+    .admin-chat-card .student-name {
+        font-size: 18px;
+    }
+
+    .admin-chat-card .student-meta {
+        font-size: 13px;
+    }
+
+    .admin-chat-card .student-chat-status {
+        min-width: 0;
+        padding-left: 10px;
+    }
+
+    .admin-chat-card .status-badge {
+        font-size: 12px;
+        padding: 7px 10px;
+    }
+
+    .admin-chat-card .last-seen {
+        font-size: 12px;
+    }
+}
+
 </style>
 """
 
@@ -4871,10 +5017,28 @@ html, body {
                 <span>Obrolan Administrator</span>
             </h2>
 
-            <div style="margin-bottom:12px">
-                <b>{nama_anak}</b><br>
-                NIS: {escape(nis)}<br>
-                Kelas: {kelas_anak}
+            <div class="student-chat-info">
+                {(
+                    f'<img class="student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
+                    if foto_siswa
+                    else '<div class="student-photo-fallback">👤</div>'
+                )}
+                <div class="student-info-main">
+                    <div class="student-name">{nama_anak}</div>
+                    <div class="student-meta">
+                        NIS: {escape(nis)}<br>
+                        Kelas: {kelas_anak}
+                    </div>
+                </div>
+
+                <div class="student-chat-status">
+                    <div class="status-badge{' selesai' if not chat_aktif else ''}">
+                        {status_chat}
+                    </div>
+                    <div class="last-seen">
+                        Terakhir: {waktu_terakhir}
+                    </div>
+                </div>
             </div>
 
             <div id="chat-box" class="chat-box">
