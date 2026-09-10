@@ -4605,9 +4605,16 @@ def obrolan_admin_detail(nis):
             if created_terakhir:
                 try:
                     from datetime import datetime
+                    from zoneinfo import ZoneInfo
+
                     dt = datetime.fromisoformat(
                         str(created_terakhir).replace("Z", "+00:00")
                     )
+
+                    # Tampilkan waktu sesuai zona sekolah: WITA.
+                    if dt.tzinfo is not None:
+                        dt = dt.astimezone(ZoneInfo("Asia/Makassar"))
+
                     nama_bulan = [
                         "Januari", "Februari", "Maret", "April", "Mei", "Juni",
                         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
