@@ -5843,11 +5843,6 @@ def obrolan_guru_detail(nis):
             font-size:22px;
         }}
 
-        .ortu-student-main {{
-            flex:1;
-            min-width:0;
-        }}
-
         .ortu-student-name {{
             font-size:17px;
             font-weight:700;
@@ -5859,13 +5854,6 @@ def obrolan_guru_detail(nis):
             font-size:12px;
             line-height:1.25;
             color:#4b5563;
-        }}
-
-        .ortu-student-status {{
-            min-width:175px;
-            padding-left:8px;
-            border-left:1px solid #e1e5eb;
-            text-align:right;
         }}
 
         .ortu-status-badge {{
@@ -6645,7 +6633,7 @@ def obrolan_orangtua():
             </div>
         </div>
 
-            <div class="ortu-student-info" style="display:flex!important;align-items:center!important;gap:8px!important;width:100%!important;box-sizing:border-box!important;">
+            <div class="ortu-student-info">
                 {(
                     f'<img class="ortu-student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}" style="width:45px!important;height:45px!important;min-width:45px!important;max-width:45px!important;min-height:45px!important;max-height:45px!important;object-fit:cover!important;display:block!important;border-radius:50%!important;">'
                     if foto_siswa
