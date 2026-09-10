@@ -5751,9 +5751,25 @@ def obrolan_orangtua():
 
         form_chat = ""
         if sesi_id_aktif:
-            form_chat = f"""
-{form_asli}
-"""
+            form_chat = """
+            <form method="post" class="chat-form">
+                <div class="chat-composer">
+                    <textarea
+                        name="pesan"
+                        rows="1"
+                        placeholder="Tulis pesan di sini..."
+                        required></textarea>
+
+                    <button class="chat-send" type="submit" aria-label="Kirim pesan">
+                        <span class="send-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21.7 2.3a1 1 0 0 0-1.05-.22L2.65 9.1a1 1 0 0 0 .08 1.87l7.1 2.37 2.37 7.1a1 1 0 0 0 .92.68h.04a1 1 0 0 0 .91-.61l7.02-18a1 1 0 0 0-.39-1.21ZM4.2 10.02 18.3 4.5l-7.02 7.02-7.08-1.5Zm8.98 8.98-1.5-4.5 7.02-7.02-5.52 11.52Z"/>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </form>
+            """
         tombol_akhiri = ""
         tombol_mulai_baru = ""
 
