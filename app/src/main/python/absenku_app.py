@@ -5434,6 +5434,7 @@ def obrolan_guru_detail(nis):
 
         nama_anak = escape(str(siswa.get("nama") or "-"))
         kelas_anak = escape(str(siswa.get("kelas") or "-"))
+        foto_siswa = str(siswa.get("foto") or "").strip()
 
         isi_pesan = ""
         tombol_alih = ""
