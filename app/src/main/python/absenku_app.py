@@ -4992,6 +4992,7 @@ html, body {
     .admin-chat-card .admin-chat-actions {
         gap: 5px;
         margin-top: 6px;
+        margin-bottom: 20px;
     }
 
     .admin-chat-card .admin-chat-actions .btn {
