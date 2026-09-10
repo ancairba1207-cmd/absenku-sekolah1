@@ -4861,9 +4861,14 @@ html, body {
 
         body = f"""
         {css_admin_chat}\n        <div class="card admin-chat-card">
-            <h2>
-                <img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt="">
-                Obrolan Administrator
+            <h2 style="display:flex;align-items:center;gap:10px;margin:0 0 16px 0;">
+                <img
+                    class="menu-chat-icon"
+                    src="/static/images/iconobrolanchatt.png"
+                    alt=""
+                    style="width:42px;height:42px;object-fit:contain;flex:0 0 42px;"
+                >
+                <span>Obrolan Administrator</span>
             </h2>
 
             <div style="margin-bottom:12px">
