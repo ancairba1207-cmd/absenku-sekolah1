@@ -6734,6 +6734,118 @@ def obrolan_orangtua():
             overflow:hidden;
         }}
 
+        .ortu-student-info {{
+            display:flex !important;
+            align-items:center !important;
+            gap:8px !important;
+            width:100% !important;
+            min-height:55px !important;
+            margin:2px 0 8px 0 !important;
+            padding:1px 2px 6px 2px !important;
+            box-sizing:border-box !important;
+        }}
+
+        .ortu-student-photo,
+        .ortu-student-photo-fallback {{
+            width:45px !important;
+            height:45px !important;
+            min-width:45px !important;
+            max-width:45px !important;
+            min-height:45px !important;
+            max-height:45px !important;
+            flex:0 0 45px !important;
+            object-fit:cover !important;
+            border-radius:50% !important;
+            display:block !important;
+            border:3px solid #fff !important;
+            box-shadow:0 2px 7px rgba(0,0,0,.12) !important;
+            background:#eef3f8 !important;
+        }}
+
+        .ortu-student-photo-fallback {{
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            font-size:22px !important;
+        }}
+
+        .ortu-student-main {{
+            flex:1 1 auto !important;
+            min-width:0 !important;
+        }}
+
+        .ortu-student-name {{
+            font-size:17px !important;
+            font-weight:700 !important;
+            margin-bottom:1px !important;
+            color:#17233c !important;
+            line-height:1.2 !important;
+        }}
+
+        .ortu-student-meta {{
+            font-size:12px !important;
+            line-height:1.25 !important;
+            color:#4b5563 !important;
+            white-space:nowrap !important;
+        }}
+
+        .ortu-student-status {{
+            flex:0 0 180px !important;
+            width:180px !important;
+            min-width:180px !important;
+            padding-left:8px !important;
+            border-left:1px solid #e1e5eb !important;
+            text-align:right !important;
+            box-sizing:border-box !important;
+        }}
+
+        .ortu-status-badge {{
+            display:inline-block !important;
+            padding:5px 8px !important;
+            border-radius:20px !important;
+            font-size:12px !important;
+            font-weight:700 !important;
+            white-space:nowrap !important;
+            background:#dcfce7 !important;
+            color:#15803d !important;
+        }}
+
+        .ortu-status-badge.selesai {{
+            background:#fee2e2 !important;
+            color:#b91c1c !important;
+        }}
+
+        .ortu-last-seen {{
+            margin-top:3px !important;
+            font-size:10px !important;
+            color:#777 !important;
+            line-height:1.3 !important;
+            white-space:nowrap !important;
+        }}
+
+        @media (max-width:600px) {{
+            .ortu-student-info {{
+                gap:8px !important;
+                min-height:55px !important;
+            }}
+
+            .ortu-student-status {{
+                flex:0 0 165px !important;
+                width:165px !important;
+                min-width:165px !important;
+                padding-left:6px !important;
+            }}
+
+            .ortu-status-badge {{
+                font-size:11px !important;
+                padding:5px 7px !important;
+            }}
+
+            .ortu-last-seen {{
+                font-size:9px !important;
+            }}
+        }}
+
         .chat-student {{
             background:#eff6ff;
             padding:12px 14px;
