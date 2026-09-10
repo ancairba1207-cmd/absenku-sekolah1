@@ -4037,6 +4037,19 @@ def mulai_obrolan_baru():
             }
         )
 
+        # Beri tahu Administrator bahwa Orang Tua memulai chat baru.
+        kirim_notifikasi_fcm_ke_username(
+            ADMIN_USER,
+            "Obrolan Baru dari Orang Tua",
+            f"Orang tua {nama_awal} memulai obrolan.",
+            {
+                "jenis": "obrolan_orangtua_baru",
+                "nis": str(nis),
+                "kelas": str(kelas_awal),
+                "route": "/obrolan_administrator"
+            }
+        )
+
         c.close()
         return redirect(url_for("obrolan_orangtua"))
 
