@@ -4602,17 +4602,23 @@ def obrolan_admin_detail(nis):
             if peran == "orangtua":
                 bubble_class = "chat-left"
                 nama_pengirim = "Orang Tua"
+                avatar_pesan = "/static/images/avatarorangtua.png"
             elif peran == "guru":
                 bubble_class = "chat-right chat-guru"
                 nama_pengirim = "Wali Kelas"
+                avatar_pesan = "/static/images/avatarguru.png"
             else:
                 bubble_class = "chat-right"
                 nama_pengirim = "Administrator"
+                avatar_pesan = "/static/images/avatar_administrator.png"
 
             isi_pesan += f"""
-            <div class="chat-bubble {bubble_class}">
-                <div class="chat-name">{escape(nama_pengirim)}</div>
-                <div>{pesan}</div>
+            <div class="chat-row {bubble_class}">
+                <img class="chat-avatar" src="{avatar_pesan}" alt="">
+                <div class="chat-bubble">
+                    <div class="chat-sender">{escape(nama_pengirim)}</div>
+                    <div class="chat-text">{pesan}</div>
+                </div>
             </div>
             """
 
@@ -4624,8 +4630,20 @@ def obrolan_admin_detail(nis):
         if sesi_id_aktif:
             form_chat = """
             <form method="post" class="chat-form">
-                <textarea name="pesan" placeholder="Tulis pesan..." required></textarea>
-                <button class="btn" type="submit">Kirim</button>
+                <div class="chat-composer">
+                    <textarea
+                        name="pesan"
+                        rows="1"
+                        placeholder="Tulis pesan di sini..."
+                        required></textarea>
+                    <button class="chat-send" type="submit" aria-label="Kirim pesan">
+                        <span class="send-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21.7 2.3a1 1 0 0 0-1.05-.22L2.65 9.1a1 1 0 0 0 .08 1.87l7.1 2.37 2.37 7.1a1 1 0 0 0 .92.68h.04a1 1 0 0 0 .91-.61l7.02-18a1 1 0 0 0-.39-1.21ZM4.2 10.02 18.3 4.5l-7.02 7.02-7.08-1.5Zm8.98 8.98-1.5-4.5 7.02-7.02-5.52 11.52Z"/>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
             </form>
             """
 
@@ -4714,23 +4732,29 @@ def obrolan_admin_detail(nis):
             const pesan = escapeHtml(row.pesan || "").replace(/\\n/g, "<br>");
 
             if (peran === "orangtua") {{
-                html += '<div class="chat-row chat-right">' +
-                    '<div class="chat-bubble">' +
-                    '<div class="chat-name">Orang Tua</div>' +
-                    '<div>' + pesan + '</div>' +
-                    '</div></div>';
-            }} else if (peran === "guru") {{
-                html += '<div class="chat-row chat-left chat-guru">' +
-                    '<div class="chat-bubble">' +
-                    '<div class="chat-name">Wali Kelas</div>' +
-                    '<div>' + pesan + '</div>' +
-                    '</div></div>';
-            }} else {{
                 html += '<div class="chat-row chat-left">' +
+                    '<img class="chat-avatar" src="/static/images/avatarorangtua.png" alt="">' +
                     '<div class="chat-bubble">' +
-                    '<div class="chat-name">Administrator</div>' +
-                    '<div>' + pesan + '</div>' +
-                    '</div></div>';
+                    '<div class="chat-sender">Orang Tua</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>' +
+                    '</div>';
+            }} else if (peran === "guru") {{
+                html += '<div class="chat-row chat-right chat-guru">' +
+                    '<img class="chat-avatar" src="/static/images/avatarguru.png" alt="">' +
+                    '<div class="chat-bubble">' +
+                    '<div class="chat-sender">Wali Kelas</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>' +
+                    '</div>';
+            }} else {{
+                html += '<div class="chat-row chat-right">' +
+                    '<img class="chat-avatar" src="/static/images/avatar_administrator.png" alt="">' +
+                    '<div class="chat-bubble">' +
+                    '<div class="chat-sender">Administrator</div>' +
+                    '<div class="chat-text">' + pesan + '</div>' +
+                    '</div>' +
+                    '</div>';
             }}
         }});
 
