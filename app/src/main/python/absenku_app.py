@@ -4604,16 +4604,17 @@ def obrolan_admin_detail(nis):
             created_terakhir = rows[-1].get("created_at")
             if created_terakhir:
                 try:
-                    from datetime import datetime
-                    from zoneinfo import ZoneInfo
+                    from datetime import datetime, timedelta
 
                     dt = datetime.fromisoformat(
                         str(created_terakhir).replace("Z", "+00:00")
                     )
 
-                    # Tampilkan waktu sesuai zona sekolah: WITA.
+                    # Supabase menyimpan created_at dalam UTC.
+                    # Sekolah menggunakan WITA (UTC+8).
                     if dt.tzinfo is not None:
-                        dt = dt.astimezone(ZoneInfo("Asia/Makassar"))
+                        dt = dt + timedelta(hours=8)
+                        dt = dt.replace(tzinfo=None)
 
                     nama_bulan = [
                         "Januari", "Februari", "Maret", "April", "Mei", "Juni",
