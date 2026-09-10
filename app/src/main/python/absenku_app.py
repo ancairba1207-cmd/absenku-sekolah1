@@ -4891,6 +4891,56 @@ html, body {
     }
 }
 
+.admin-chat-card .admin-chat-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+    align-items: stretch;
+}
+
+.admin-chat-card .admin-chat-actions > div {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-chat-card .admin-chat-actions form {
+    margin: 0 !important;
+    width: 100%;
+}
+
+.admin-chat-card .admin-chat-actions .btn {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 6px;
+    box-sizing: border-box;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.admin-chat-card .admin-action-back {
+    display: flex;
+}
+
+.admin-chat-card .admin-action-back .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 600px) {
+    .admin-chat-card .admin-chat-actions {
+        gap: 5px;
+        margin-top: 6px;
+    }
+
+    .admin-chat-card .admin-chat-actions .btn {
+        min-height: 38px;
+        padding: 7px 3px;
+        font-size: 10px;
+    }
+}
+
 .admin-chat-card .student-chat-info {
     display: flex;
     align-items: center;
@@ -5054,13 +5104,19 @@ html, body {
             </div>
 
             {form_chat}
-            {tombol_alih}
-            {tombol_akhiri}
 
-            <div style="margin-top:12px">
-                <a class="btn" href="/obrolan_admin">
-                    ← Kembali ke Daftar Obrolan
-                </a>
+            <div class="admin-chat-actions">
+                <div class="admin-action-transfer">
+                    {tombol_alih}
+                </div>
+                <div class="admin-action-end">
+                    {tombol_akhiri}
+                </div>
+                <div class="admin-action-back">
+                    <a class="btn" href="/obrolan_admin">
+                        ← Kembali
+                    </a>
+                </div>
             </div>
         </div>
         """
