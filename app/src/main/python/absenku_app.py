@@ -6383,6 +6383,20 @@ def obrolan_orangtua():
                     }
                 )
 
+                # Jika masih ditangani Administrator, kirim notifikasi
+                # setiap kali Orang Tua mengirim pesan.
+                if not sudah_dialihkan:
+                    kirim_notifikasi_fcm_ke_username(
+                        ADMIN_USER,
+                        "Pesan Baru dari Orang Tua",
+                        f"Orang tua {anak.get('nama') or nis} mengirim pesan.",
+                        {
+                            "jenis": "obrolan_orangtua",
+                            "nis": str(nis),
+                            "route": "/obrolan_administrator"
+                        }
+                    )
+
                 # Setelah dialihkan, kirim notifikasi ke Wali Kelas.
                 if sudah_dialihkan:
                     kelas_siswa = str(anak.get("kelas") or "").strip()
