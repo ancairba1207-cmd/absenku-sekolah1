@@ -4600,13 +4600,13 @@ def obrolan_admin_detail(nis):
             pesan = escape(str(row.get("pesan") or "")).replace("\n", "<br>")
 
             if peran == "orangtua":
-                bubble_class = "chat-right"
+                bubble_class = "chat-left"
                 nama_pengirim = "Orang Tua"
             elif peran == "guru":
-                bubble_class = "chat-left chat-guru"
+                bubble_class = "chat-right chat-guru"
                 nama_pengirim = "Wali Kelas"
             else:
-                bubble_class = "chat-left"
+                bubble_class = "chat-right"
                 nama_pengirim = "Administrator"
 
             isi_pesan += f"""
