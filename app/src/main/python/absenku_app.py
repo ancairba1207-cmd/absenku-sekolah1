@@ -5436,6 +5436,28 @@ def obrolan_guru_detail(nis):
         kelas_anak = escape(str(siswa.get("kelas") or "-"))
         foto_siswa = str(siswa.get("foto") or "").strip()
 
+        chat_aktif = bool(sesi_id_aktif)
+        status_chat = "🟢 Chat Aktif" if chat_aktif else "🔴 Chat Selesai"
+
+        waktu_terakhir = "-"
+        if rows:
+            created_terakhir = rows[-1].get("created_at")
+            if created_terakhir:
+                try:
+                    from datetime import datetime, timedelta
+                    dt = datetime.fromisoformat(str(created_terakhir).replace("Z","+00:00"))
+                    if dt.tzinfo is not None:
+                        dt = dt + timedelta(hours=8)
+                        dt = dt.replace(tzinfo=None)
+                    nama_bulan = ["Januari","Februari","Maret","April","Mei","Juni",
+                                  "Juli","Agustus","September","Oktober","November","Desember"]
+                    waktu_terakhir = (
+                        f"{dt.day} {nama_bulan[dt.month-1]} {dt.year}, "
+                        f"{dt.strftime('%H:%M')}"
+                    )
+                except Exception:
+                    waktu_terakhir = escape(str(created_terakhir))
+
         isi_pesan = ""
         tombol_alih = ""
 
