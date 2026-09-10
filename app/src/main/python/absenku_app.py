@@ -4944,14 +4944,14 @@ html, body {
 .admin-chat-card .student-chat-info {
     display: flex;
     align-items: center;
-    gap: 18px;
-    padding: 4px 4px 18px 4px;
+    gap: 12px;
+    padding: 2px 2px 10px 2px;
 }
 
 .admin-chat-card .student-photo {
-    width: 92px;
-    height: 92px;
-    min-width: 92px;
+    width: 78px;
+    height: 78px;
+    min-width: 78px;
     border-radius: 50%;
     object-fit: cover;
     border: 4px solid #fff;
@@ -4960,14 +4960,14 @@ html, body {
 }
 
 .admin-chat-card .student-photo-fallback {
-    width: 92px;
-    height: 92px;
-    min-width: 92px;
+    width: 78px;
+    height: 78px;
+    min-width: 78px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 42px;
+    font-size: 36px;
     background: #eef3f8;
     border: 4px solid #fff;
     box-shadow: 0 3px 12px rgba(0,0,0,.15);
@@ -4979,21 +4979,21 @@ html, body {
 }
 
 .admin-chat-card .student-name {
-    font-size: 21px;
+    font-size: 20px;
     font-weight: 700;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     color: #17233c;
 }
 
 .admin-chat-card .student-meta {
-    font-size: 15px;
-    line-height: 1.55;
+    font-size: 14px;
+    line-height: 1.4;
     color: #4b5563;
 }
 
 .admin-chat-card .student-chat-status {
-    min-width: 245px;
-    padding-left: 18px;
+    min-width: 210px;
+    padding-left: 12px;
     border-left: 1px solid #e1e5eb;
     text-align: right;
 }
