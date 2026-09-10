@@ -6586,7 +6586,7 @@ def obrolan_orangtua():
 
             <div class="ortu-student-info">
                 {(
-                    f'<img class="ortu-student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
+                    f'<img class="ortu-student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}" style="width:45px!important;height:45px!important;min-width:45px!important;max-width:45px!important;min-height:45px!important;max-height:45px!important;object-fit:cover!important;display:block!important;border-radius:50%!important;">'
                     if foto_siswa
                     else '<div class="ortu-student-photo-fallback">👤</div>'
                 )}
