@@ -5670,17 +5670,20 @@ def obrolan_orangtua():
             c.close()
             return redirect(url_for("obrolan_orangtua"))
 
-        rows = c._get(
-            "obrolan",
-            {
-                "select": "*",
-                "nis": f"eq.{nis}",
-                "sesi_id": f"eq.{sesi_id_aktif}",
-                "status_sesi": "eq.aktif",
-                "order": "created_at.asc,id.asc",
-                "limit": "500"
-            }
-        )
+        if sesi_id_aktif:
+            rows = c._get(
+                "obrolan",
+                {
+                    "select": "*",
+                    "nis": f"eq.{nis}",
+                    "sesi_id": f"eq.{sesi_id_aktif}",
+                    "status_sesi": "eq.aktif",
+                    "order": "created_at.asc,id.asc",
+                    "limit": "500"
+                }
+            )
+        else:
+            rows = []
 
         if not rows and sesi_id_aktif:
             nama_awal = str(anak.get("nama") or "-")
