@@ -10094,11 +10094,33 @@ function startScanner(){{
   scanner.start({{facingMode:{{exact:'environment'}}}},config,(decodedText)=>{{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
+
+    try{{scanner.pause(true);}}catch(_ ){{}}
+
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
-      .then(r=>r.json()).then(d=>{{if(d.ok) {{ successFeedback(); AndroidPrint.showSuccessPopup(d.nama,d.kelas,d.jam,{status!r}); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
-      .catch(()=>{{document.getElementById('scan-status').textContent='Gagal menghubungi server';}})
-      .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
-  }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
+      .then(r=>r.json())
+      .then(d=>{{
+        if(d.ok) {{
+          successFeedback();
+          AndroidPrint.showSuccessPopup(d.nama,d.kelas,d.jam,{status!r});
+          if({status!r}==='Pulang') pulangFeedback();
+          document.getElementById('scan-status').textContent='✅ Scan berhasil';
+        }} else {{
+          if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();
+          document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';
+        }}
+      }})
+      .catch(()=>{{
+        document.getElementById('scan-status').textContent='Gagal menghubungi server';
+      }})
+      .finally(()=>setTimeout(()=>{{
+        processing=false;
+        try{{scanner.resume();}}catch(_ ){{}}
+        document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';
+      }},3000));
+  }},()=>{{}}).catch(err=>{{
+    document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';
+  }});
 }}
 startScanner();
 </script>"""
