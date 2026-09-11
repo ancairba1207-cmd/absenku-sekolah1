@@ -1263,6 +1263,92 @@ padding:12px;
 border-radius:10px
 }}
 
+
+/* POPUP SUKSES SCAN SISWA */
+.scan-success-overlay{{
+position:fixed;
+inset:0;
+z-index:9999;
+display:flex;
+align-items:center;
+justify-content:center;
+background:rgba(15,23,42,.42);
+backdrop-filter:blur(3px);
+opacity:0;
+visibility:hidden;
+pointer-events:none;
+}}
+
+.scan-success-overlay.show{{
+opacity:1;
+visibility:visible;
+}}
+
+.scan-success-popup{{
+width:min(86vw,360px);
+padding:30px 24px 26px;
+border-radius:28px;
+background:#fff;
+box-shadow:0 20px 60px rgba(15,23,42,.28);
+text-align:center;
+transform:scale(.45);
+opacity:0;
+}}
+
+.scan-success-overlay.show .scan-success-popup{{
+animation:scanSuccessExpand .45s cubic-bezier(.2,.9,.3,1.2) forwards;
+}}
+
+.scan-success-icon{{
+width:78px;
+height:78px;
+margin:0 auto 14px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#22c55e;
+color:#fff;
+font-size:48px;
+font-weight:900;
+box-shadow:0 8px 24px rgba(34,197,94,.35);
+}}
+
+.scan-success-popup h2{{
+margin:0;
+font-size:24px;
+font-weight:900;
+color:#16a34a;
+}}
+
+.scan-success-popup p{{
+margin:7px 0 0;
+font-size:16px;
+font-weight:700;
+color:#334155;
+}}
+
+.scan-success-popup p + p{{
+font-size:14px;
+font-weight:600;
+color:#64748b;
+}}
+
+@keyframes scanSuccessExpand{{
+0%{{
+transform:scale(.45);
+opacity:0;
+}}
+65%{{
+transform:scale(1.06);
+opacity:1;
+}}
+100%{{
+transform:scale(1);
+opacity:1;
+}}
+}}
+
 /* DESAIN SCAN ABSENKU */
 .scan-card{{
 background:#fff;
@@ -9908,6 +9994,14 @@ def scan():
 </div>
 
 
+<div id="scanSuccessOverlay" class="scan-success-overlay">
+<div class="scan-success-popup">
+<div class="scan-success-icon">✓</div>
+<h2>ABSEN BERHASIL</h2>
+<p id="scanSuccessName"></p>
+<p id="scanSuccessTime"></p>
+</div>
+</div>
 <div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div>
 
 </div>
@@ -9917,6 +10011,16 @@ let scanner=null, processing=false;
 
 function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
 function doubleScanFeedback(){{try{{AndroidPrint.doubleScanFeedback();}}catch(e){{try{{navigator.vibrate([0,180,100,180]);}}catch(_){{}}}}}}
+function showSuccessPopup(name,time){{
+  const ov=document.getElementById('scanSuccessOverlay');
+  if(!ov)return;
+  document.getElementById('scanSuccessName').textContent=name||'';
+  document.getElementById('scanSuccessTime').textContent=time?('🕐 '+time):'';
+  ov.classList.remove('show');
+  void ov.offsetWidth;
+  ov.classList.add('show');
+  setTimeout(()=>ov.classList.remove('show'),2300);
+}}
 function pulangFeedback(){{
   try{{
     const audio=new Audio('/static/sound_pulang.mp3');
@@ -9931,7 +10035,7 @@ function startScanner(){{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
-      .then(r=>r.json()).then(d=>{{if(d.ok) {{ successFeedback(); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
+      .then(r=>r.json()).then(d=>{{if(d.ok) {{ successFeedback(); showSuccessPopup(d.nama,d.jam); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
       .catch(()=>{{document.getElementById('scan-status').textContent='Gagal menghubungi server';}})
       .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
   }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
