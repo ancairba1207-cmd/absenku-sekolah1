@@ -7062,6 +7062,16 @@ def obrolan_orangtua():
             margin-top:12px;
         }}
 
+        /* Jarak aman tombol bawah Obrolan Orang Tua */
+        .chat-card > form[action^="/akhiri_obrolan/"] {{
+            margin-top:8px !important;
+            margin-bottom:max(20px,env(safe-area-inset-bottom)) !important;
+        }}
+        .chat-card > form[action^="/akhiri_obrolan/"] .btn {{
+            width:100%;
+            box-sizing:border-box;
+        }}
+
         /* AVATAR OBROLAN ORANG TUA */
         .chat-avatar {{
             width:36px;
