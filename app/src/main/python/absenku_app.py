@@ -6990,7 +6990,11 @@ def obrolan_orangtua():
             min-height:0;
             overflow-y:auto;
             -webkit-overflow-scrolling:touch;
-            background:#e2e8f0;
+            background-color:#e8f3ff;
+            background-image:url("/static/backgrounobrolan.png");
+            background-repeat:repeat;
+            background-size:520px auto;
+            background-position:center top;
             border-radius:14px;
             padding:14px;
             max-height:none;
