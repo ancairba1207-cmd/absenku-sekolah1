@@ -1483,6 +1483,310 @@ font-size:12px;
 line-height:1.45;
 }}
 
+/* RESPONSIVE SCAN - HP BESAR, Z FOLD & TABLET */
+
+/* HP portrait */
+@media(max-width:650px) and (orientation:portrait){{
+.scan-card{{
+padding:12px;
+margin:8px 0;
+border-radius:18px;
+}}
+
+.scan-head{{
+gap:8px;
+margin-bottom:7px;
+}}
+
+.scan-main-icon{{
+width:60px;
+height:60px;
+}}
+
+.scan-head-content h2{{
+font-size:19px;
+line-height:1.12;
+}}
+
+.scan-head-content p{{
+font-size:11px;
+line-height:1.25;
+}}
+
+.scan-back{{
+padding:9px 12px;
+font-size:12px;
+}}
+
+.scan-warning{{
+margin:6px 0 9px;
+padding:8px 10px;
+font-size:10px;
+}}
+
+.scan-warning-icon{{
+width:24px;
+height:24px;
+font-size:14px;
+}}
+
+.scan-camera{{
+height:clamp(220px,31vh,310px);
+}}
+
+.scan-camera #reader,
+.scan-camera #reader video{{
+height:100%!important;
+}}
+
+.scan-camera #reader video{{
+object-fit:cover!important;
+}}
+
+.scan-frame{{
+width:min(54vw,250px);
+height:min(54vw,250px);
+}}
+
+.scan-frame span{{
+width:34px;
+height:34px;
+border-width:4px!important;
+}}
+
+.scan-line{{
+height:2px;
+}}
+
+.scan-camera-hint{{
+bottom:9px;
+font-size:9px;
+padding:7px 11px;
+}}
+
+.scan-tip{{
+margin-top:9px;
+padding:8px 10px;
+gap:8px;
+}}
+
+.scan-tip-icon{{
+width:26px;
+height:26px;
+font-size:15px;
+}}
+
+.scan-tip b{{
+font-size:12px;
+margin-bottom:1px;
+}}
+
+.scan-tip span{{
+font-size:9px;
+line-height:1.3;
+}}
+
+.scan-status{{
+font-size:10px;
+margin:4px 0;
+}}
+
+}}
+
+/* HP dengan layar tinggi/besar */
+@media(min-width:651px) and (max-width:900px) and (orientation:portrait){{
+.scan-card{{
+padding:16px;
+margin:10px 0;
+}}
+
+.scan-camera{{
+height:clamp(300px,34vh,430px);
+}}
+
+.scan-camera #reader,
+.scan-camera #reader video{{
+height:100%!important;
+}}
+
+.scan-camera #reader video{{
+object-fit:cover!important;
+}}
+
+.scan-frame{{
+width:min(48vw,330px);
+height:min(48vw,330px);
+}}
+}}
+
+/* Z Fold / tablet portrait */
+@media(min-width:651px) and (max-width:1200px) and (orientation:portrait){{
+.scan-card{{
+padding:18px;
+}}
+
+.scan-head-content h2{{
+font-size:23px;
+}}
+
+.scan-main-icon{{
+width:72px;
+height:72px;
+}}
+
+.scan-camera{{
+height:clamp(320px,36vh,480px);
+}}
+
+.scan-camera #reader,
+.scan-camera #reader video{{
+height:100%!important;
+}}
+
+.scan-camera #reader video{{
+object-fit:cover!important;
+}}
+
+.scan-frame{{
+width:min(42vw,360px);
+height:min(42vw,360px);
+}}
+}}
+
+/* Tablet landscape & Z Fold layar dalam landscape */
+@media(min-width:651px) and (orientation:landscape){{
+.scan-card{{
+padding:14px 18px;
+margin:8px 0;
+}}
+
+.scan-head{{
+margin-bottom:6px;
+}}
+
+.scan-main-icon{{
+width:58px;
+height:58px;
+}}
+
+.scan-head-content h2{{
+font-size:21px;
+}}
+
+.scan-head-content p{{
+font-size:11px;
+}}
+
+.scan-back{{
+padding:8px 14px;
+font-size:12px;
+}}
+
+.scan-warning{{
+margin:5px 0 8px;
+padding:7px 10px;
+font-size:10px;
+}}
+
+.scan-camera{{
+height:clamp(220px,43vh,400px);
+max-width:760px;
+}}
+
+.scan-camera #reader,
+.scan-camera #reader video{{
+height:100%!important;
+}}
+
+.scan-camera #reader video{{
+object-fit:cover!important;
+}}
+
+.scan-frame{{
+width:min(32vw,300px);
+height:min(32vw,300px);
+}}
+
+.scan-frame span{{
+width:38px;
+height:38px;
+}}
+
+.scan-camera-hint{{
+bottom:8px;
+font-size:10px;
+padding:7px 12px;
+}}
+
+.scan-tip{{
+margin-top:8px;
+padding:8px 12px;
+}}
+
+.scan-tip-icon{{
+width:27px;
+height:27px;
+}}
+
+.scan-tip b{{
+font-size:12px;
+}}
+
+.scan-tip span{{
+font-size:10px;
+}}
+}}
+
+/* Layar sangat kecil: prioritaskan seluruh interface tetap terlihat */
+@media(max-height:700px) and (orientation:portrait){{
+.scan-card{{
+padding:9px;
+margin:5px 0;
+}}
+
+.scan-main-icon{{
+width:52px;
+height:52px;
+}}
+
+.scan-head-content h2{{
+font-size:17px;
+}}
+
+.scan-head-content p{{
+font-size:10px;
+}}
+
+.scan-back{{
+padding:7px 10px;
+font-size:11px;
+}}
+
+.scan-warning{{
+margin:4px 0 6px;
+padding:6px 8px;
+}}
+
+.scan-camera{{
+height:clamp(190px,28vh,250px);
+}}
+
+.scan-tip{{
+margin-top:6px;
+padding:6px 8px;
+}}
+
+.scan-tip-icon{{
+width:23px;
+height:23px;
+font-size:13px;
+}}
+
+.scan-tip span{{
+font-size:8px;
+}}
+}}
+
 @media(max-width:650px){{
 .scan-card{{
 padding:14px;
