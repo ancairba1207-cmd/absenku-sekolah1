@@ -1263,6 +1263,284 @@ padding:12px;
 border-radius:10px
 }}
 
+/* DESAIN SCAN ABSENKU */
+.scan-card{{
+background:#fff;
+padding:20px;
+border-radius:22px;
+margin:14px 0;
+box-shadow:0 5px 22px rgba(15,23,42,.08);
+overflow:hidden;
+}}
+
+.scan-head{{
+display:flex;
+align-items:center;
+gap:14px;
+margin-bottom:10px;
+}}
+
+.scan-main-icon{{
+width:78px;
+height:78px;
+object-fit:contain;
+flex:none;
+}}
+
+.scan-head-content{{
+flex:1;
+min-width:0;
+}}
+
+.scan-head-content h2{{
+margin:0;
+font-size:25px;
+font-weight:800;
+color:#0f172a;
+}}
+
+.scan-head-content p{{
+margin:4px 0 0;
+font-size:14px;
+color:#64748b;
+}}
+
+.scan-back{{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:6px;
+padding:12px 20px;
+border:1px solid #bfdbfe;
+border-radius:22px;
+background:#eff6ff;
+color:#2563eb;
+text-decoration:none;
+font-size:15px;
+font-weight:700;
+white-space:nowrap;
+}}
+
+.scan-warning{{
+display:flex;
+align-items:center;
+gap:10px;
+padding:11px 14px;
+margin:8px 0 16px;
+border-radius:15px;
+background:#fff1f2;
+border:1px solid #fecdd3;
+color:#e11d48;
+font-size:13px;
+font-weight:600;
+}}
+
+.scan-warning-icon{{
+width:28px;
+height:28px;
+border-radius:50%;
+background:#e11d48;
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:900;
+font-size:17px;
+flex:none;
+}}
+
+.scan-camera{{
+position:relative;
+width:100%;
+max-width:900px;
+margin:0 auto;
+border-radius:20px;
+overflow:hidden;
+background:#111827;
+}}
+
+.scan-camera #reader{{
+width:100%;
+max-width:none;
+margin:0;
+}}
+
+.scan-camera #reader video{{
+width:100%!important;
+height:auto!important;
+display:block;
+border-radius:20px;
+}}
+
+.scan-frame{{
+position:absolute;
+left:50%;
+top:50%;
+width:min(58vw,330px);
+height:min(58vw,330px);
+transform:translate(-50%,-50%);
+pointer-events:none;
+}}
+
+.scan-frame span{{
+position:absolute;
+width:55px;
+height:55px;
+border-color:#38bdf8;
+border-style:solid;
+filter:drop-shadow(0 0 5px rgba(56,189,248,.9));
+}}
+
+.scan-frame .tl{{
+left:0;
+top:0;
+border-width:6px 0 0 6px;
+border-radius:12px 0 0 0;
+}}
+
+.scan-frame .tr{{
+right:0;
+top:0;
+border-width:6px 6px 0 0;
+border-radius:0 12px 0 0;
+}}
+
+.scan-frame .bl{{
+left:0;
+bottom:0;
+border-width:0 0 6px 6px;
+border-radius:0 0 0 12px;
+}}
+
+.scan-frame .br{{
+right:0;
+bottom:0;
+border-width:0 6px 6px 0;
+border-radius:0 0 12px 0;
+}}
+
+.scan-line{{
+position:absolute;
+left:4%;
+right:4%;
+top:50%;
+height:3px;
+background:#38bdf8;
+box-shadow:0 0 8px #38bdf8;
+}}
+
+.scan-camera-hint{{
+position:absolute;
+left:50%;
+bottom:18px;
+transform:translateX(-50%);
+padding:10px 18px;
+border-radius:24px;
+background:rgba(15,23,42,.78);
+color:#fff;
+font-size:13px;
+font-weight:600;
+white-space:nowrap;
+display:flex;
+align-items:center;
+gap:7px;
+}}
+
+.scan-tip{{
+display:flex;
+align-items:flex-start;
+gap:12px;
+margin-top:16px;
+padding:13px 15px;
+border-radius:16px;
+background:#eff6ff;
+border:1px solid #bfdbfe;
+color:#1d4ed8;
+}}
+
+.scan-tip-icon{{
+width:30px;
+height:30px;
+border-radius:50%;
+background:#2563eb;
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+font-weight:900;
+flex:none;
+}}
+
+.scan-tip b{{
+display:block;
+font-size:14px;
+margin-bottom:3px;
+}}
+
+.scan-tip span{{
+font-size:12px;
+line-height:1.45;
+}}
+
+@media(max-width:650px){{
+.scan-card{{
+padding:14px;
+border-radius:20px;
+}}
+
+.scan-head{{
+gap:10px;
+}}
+
+.scan-main-icon{{
+width:72px;
+height:72px;
+}}
+
+.scan-head-content h2{{
+font-size:21px;
+}}
+
+.scan-head-content p{{
+font-size:12px;
+}}
+
+.scan-back{{
+padding:10px 14px;
+font-size:13px;
+}}
+
+.scan-warning{{
+font-size:11px;
+padding:10px 11px;
+}}
+
+.scan-frame{{
+width:62vw;
+height:62vw;
+}}
+
+.scan-frame span{{
+width:42px;
+height:42px;
+}}
+
+.scan-camera-hint{{
+font-size:11px;
+padding:8px 13px;
+bottom:12px;
+}}
+
+.scan-tip{{
+padding:11px 12px;
+}}
+
+.scan-tip span{{
+font-size:11px;
+}}
+}}
+
 #reader{{
 width:100%;
 max-width:520px;
@@ -9290,7 +9568,45 @@ def absensi():
 @login_required
 def scan():
     status=request.args.get("status","Masuk"); status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><a href="/absensi" style="text-decoration:none;font-size:24px;color:#2563eb">←</a><img src="/static/images/{("masuk_siswa.png" if status=="Masuk" else "pulang_siswa.png")}" style="width:48px;height:48px;object-fit:contain"><h2 style="margin:0">Scan Siswa {status}</h2></div><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div><div id="hasil"></div></div>
+    body=f"""<div class="scan-card">
+<div class="scan-head">
+<img class="scan-main-icon" src="/static/images/{("masuk_siswa.png" if status=="Masuk" else "pulang_siswa.png")}" alt="Scan Siswa">
+<div class="scan-head-content">
+<h2>Scan Siswa {status}</h2>
+<p>Arahkan QR Code kartu siswa ke kamera</p>
+</div>
+<a class="scan-back" href="/absensi">←&nbsp; Kembali</a>
+</div>
+
+<div class="scan-warning">
+<span class="scan-warning-icon">!</span>
+<span>Pastikan QR Code berada dalam kotak pemindaian</span>
+</div>
+
+<div class="scan-camera">
+<div id="reader"></div>
+<div class="scan-frame">
+<span class="tl"></span>
+<span class="tr"></span>
+<span class="bl"></span>
+<span class="br"></span>
+<div class="scan-line"></div>
+</div>
+<div class="scan-camera-hint">▦&nbsp; Posisikan QR Code di dalam kotak</div>
+</div>
+
+<div class="scan-tip">
+<div class="scan-tip-icon">i</div>
+<div>
+<b>Tips:</b>
+<span>Tahan kartu dengan stabil dan pastikan pencahayaan cukup agar QR Code terbaca dengan baik.</span>
+</div>
+</div>
+
+<div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div>
+<div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div>
+<div id="hasil"></div>
+</div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
 let scanner=null, processing=false;
@@ -9368,7 +9684,45 @@ def proses_scan():
 @admin_required
 def scan_tenaga():
     status=request.args.get("status","Masuk");status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><a href="/absensi" style="text-decoration:none;font-size:24px;color:#2563eb">←</a><img src="/static/images/{("masuk_guru_tendik.png" if status=="Masuk" else "pulang_guru_tendik.png")}" style="width:48px;height:48px;object-fit:contain"><h2 style="margin:0">Scan Guru/Tendik {status}</h2></div><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div><div id="hasil"></div></div>
+    body=f"""<div class="scan-card">
+<div class="scan-head">
+<img class="scan-main-icon" src="/static/images/{("masuk_guru_tendik.png" if status=="Masuk" else "pulang_guru_tendik.png")}" alt="Scan Guru/Tendik">
+<div class="scan-head-content">
+<h2>Scan Guru/Tendik {status}</h2>
+<p>Arahkan QR Code kartu guru/tendik ke kamera</p>
+</div>
+<a class="scan-back" href="/absensi">←&nbsp; Kembali</a>
+</div>
+
+<div class="scan-warning">
+<span class="scan-warning-icon">!</span>
+<span>Pastikan QR Code berada dalam kotak pemindaian</span>
+</div>
+
+<div class="scan-camera">
+<div id="reader"></div>
+<div class="scan-frame">
+<span class="tl"></span>
+<span class="tr"></span>
+<span class="bl"></span>
+<span class="br"></span>
+<div class="scan-line"></div>
+</div>
+<div class="scan-camera-hint">▦&nbsp; Posisikan QR Code di dalam kotak</div>
+</div>
+
+<div class="scan-tip">
+<div class="scan-tip-icon">i</div>
+<div>
+<b>Tips:</b>
+<span>Tahan kartu dengan stabil dan pastikan pencahayaan cukup agar QR Code terbaca dengan baik.</span>
+</div>
+</div>
+
+<div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div>
+<div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div>
+<div id="hasil"></div>
+</div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
 let scanner=null,processing=false;
