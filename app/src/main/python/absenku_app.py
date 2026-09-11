@@ -1281,6 +1281,146 @@ font-size:13px;
 color:#64748b
 }}
 
+.admin-chat-list-card{{
+background:#fff;
+border-radius:16px;
+margin:10px 0;
+box-shadow:0 4px 18px rgba(0,0,0,.07);
+overflow:hidden;
+display:flex;
+flex-direction:column;
+min-height:0;
+}}
+
+.admin-chat-list-heading{{
+padding:15px 16px;
+border-bottom:1px solid #e2e8f0;
+flex:0 0 auto;
+}}
+
+.admin-chat-list-heading h2{{
+margin:0 0 4px;
+display:flex;
+align-items:center;
+gap:8px;
+font-size:20px;
+}}
+
+.admin-chat-list{{
+display:flex;
+flex-direction:column;
+min-height:0;
+}}
+
+.admin-chat-item{{
+display:flex;
+align-items:center;
+gap:12px;
+padding:13px 14px;
+text-decoration:none;
+color:#0f172a;
+background:#fff;
+border-bottom:1px solid #eef2f7;
+}}
+
+.admin-chat-item:last-child{{
+border-bottom:0;
+}}
+
+.admin-chat-item:active{{
+background:#f1f5f9;
+}}
+
+.admin-chat-avatar{{
+width:52px;
+height:52px;
+min-width:52px;
+border-radius:50%;
+overflow:hidden;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#dbeafe;
+}}
+
+.admin-chat-avatar-img{{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}}
+
+.admin-chat-avatar-default{{
+font-size:24px;
+}}
+
+.admin-chat-content{{
+min-width:0;
+flex:1;
+}}
+
+.admin-chat-top{{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px;
+}}
+
+.admin-chat-top strong{{
+font-size:15px;
+font-weight:700;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}}
+
+.admin-chat-time{{
+font-size:10px;
+color:#94a3b8;
+white-space:nowrap;
+}}
+
+.admin-chat-class{{
+font-size:11px;
+color:#64748b;
+margin-top:2px;
+}}
+
+.admin-chat-preview{{
+font-size:12px;
+color:#64748b;
+margin-top:5px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}}
+
+.admin-chat-status{{
+display:inline-block;
+font-size:10px;
+margin-top:5px;
+padding:3px 8px;
+border-radius:999px;
+background:#eff6ff;
+color:#2563eb;
+}}
+
+@media(min-width:701px){{
+.admin-chat-list-card{{
+max-width:850px;
+margin-left:auto;
+margin-right:auto;
+}}
+.admin-chat-item{{
+padding:14px 18px;
+}}
+.admin-chat-avatar{{
+width:56px;
+height:56px;
+min-width:56px;
+}}
+}}
+
 .ok{{
 background:#dcfce7;
 color:#166534;
