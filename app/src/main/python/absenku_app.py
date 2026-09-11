@@ -10102,7 +10102,7 @@ function startScanner(){{
       .then(d=>{{
         if(d.ok) {{
           successFeedback();
-          AndroidPrint.showSuccessPopup(d.nama,d.kelas,d.jam,{status!r});
+          showSuccessPopup(d.nama,d.jam);
           if({status!r}==='Pulang') pulangFeedback();
           document.getElementById('scan-status').textContent='✅ Scan berhasil';
         }} else {{
