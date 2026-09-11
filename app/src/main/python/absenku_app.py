@@ -5808,6 +5808,18 @@ def obrolan_guru_detail(nis):
             line-height:1.3;
         }}
 
+        /* Jarak aman tombol Akhiri Chat Guru */
+        #tombol-akhiri-chat-guru {{
+            margin-bottom:max(20px,env(safe-area-inset-bottom)) !important;
+        }}
+        #tombol-akhiri-chat-guru form {{
+            margin-bottom:0 !important;
+        }}
+        #tombol-akhiri-chat-guru .btn {{
+            width:100%;
+            box-sizing:border-box;
+        }}
+
         @media (max-width:600px) {{
             .guru-student-info {{
                 gap:8px;
