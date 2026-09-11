@@ -134,7 +134,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(android.graphics.Color.rgb(37, 99, 235));
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(0);
 
         if (getIntent() != null && getIntent().hasExtra("notification_route")) {
@@ -179,7 +179,7 @@ public class MainActivity extends Activity {
                 bottomInset = insets.getSystemWindowInsetBottom();
             }
 
-            v.setPadding(0, topInset, 0, bottomInset);
+            v.setPadding(0, 0, 0, bottomInset);
             return insets;
         });
 
