@@ -10012,15 +10012,75 @@ let scanner=null, processing=false;
 function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
 function doubleScanFeedback(){{try{{AndroidPrint.doubleScanFeedback();}}catch(e){{try{{navigator.vibrate([0,180,100,180]);}}catch(_){{}}}}}}
 function showSuccessPopup(name,time){{
-  const ov=document.getElementById('scanSuccessOverlay');
-  if(!ov)return;
+  let ov=document.getElementById('scanSuccessOverlay');
+
+  if(!ov){{
+    ov=document.createElement('div');
+    ov.id='scanSuccessOverlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);pointer-events:auto;';
+
+    const popup=document.createElement('div');
+    popup.style.cssText='width:min(86vw,360px);padding:30px 24px 26px;border-radius:28px;background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.35);text-align:center;transform:scale(.45);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s ease;';
+
+    const icon=document.createElement('div');
+    icon.textContent='✓';
+    icon.style.cssText='width:78px;height:78px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#22c55e;color:#fff;font-size:48px;font-weight:900;box-shadow:0 8px 24px rgba(34,197,94,.35);';
+
+    const title=document.createElement('h2');
+    title.textContent='ABSEN BERHASIL';
+    title.style.cssText='margin:0;font-size:24px;font-weight:900;color:#16a34a;';
+
+    const nm=document.createElement('p');
+    nm.id='scanSuccessName';
+    nm.style.cssText='margin:7px 0 0;font-size:16px;font-weight:700;color:#334155;';
+
+    const tm=document.createElement('p');
+    tm.id='scanSuccessTime';
+    tm.style.cssText='margin:7px 0 0;font-size:14px;font-weight:600;color:#64748b;';
+
+    popup.appendChild(icon);
+    popup.appendChild(title);
+    popup.appendChild(nm);
+    popup.appendChild(tm);
+    ov.appendChild(popup);
+    document.body.appendChild(ov);
+
+    requestAnimationFrame(()=>{{
+      requestAnimationFrame(()=>{{
+        popup.style.transform='scale(1)';
+        popup.style.opacity='1';
+      }});
+    }});
+  }}else{{
+    document.getElementById('scanSuccessName').textContent=name||'';
+    document.getElementById('scanSuccessTime').textContent=time?('🕐 '+time):'';
+    ov.style.display='flex';
+    const popup=ov.firstElementChild;
+    popup.style.transform='scale(.45)';
+    popup.style.opacity='0';
+    requestAnimationFrame(()=>{{
+      requestAnimationFrame(()=>{{
+        popup.style.transform='scale(1)';
+        popup.style.opacity='1';
+      }});
+    }});
+  }}
+
   document.getElementById('scanSuccessName').textContent=name||'';
   document.getElementById('scanSuccessTime').textContent=time?('🕐 '+time):'';
-  ov.classList.remove('show');
-  void ov.offsetWidth;
-  ov.classList.add('show');
-  setTimeout(()=>ov.classList.remove('show'),2300);
+
+  setTimeout(()=>{{
+    const popup=ov.firstElementChild;
+    if(popup){{
+      popup.style.transform='scale(.45)';
+      popup.style.opacity='0';
+    }}
+    setTimeout(()=>{{
+      if(ov)ov.style.display='none';
+    }},350);
+  }},2300);
 }}
+
 function pulangFeedback(){{
   try{{
     const audio=new Audio('/static/sound_pulang.mp3');
@@ -10035,7 +10095,7 @@ function startScanner(){{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
-      .then(r=>r.json()).then(d=>{{if(d.ok) {{ successFeedback(); showSuccessPopup(d.nama,d.jam); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
+      .then(r=>r.json()).then(d=>{{if(d.ok) {{ showSuccessPopup(d.nama,d.jam); successFeedback(); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
       .catch(()=>{{document.getElementById('scan-status').textContent='Gagal menghubungi server';}})
       .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
   }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
