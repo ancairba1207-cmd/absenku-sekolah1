@@ -830,7 +830,7 @@ main{{
 width:100%;
 max-width:1000px;
 margin:auto;
-padding:12px
+padding:12px 12px calc(76px + env(safe-area-inset-bottom));
 }}
 
 .topbar{{
@@ -918,10 +918,11 @@ z-index:1000;
 display:grid;
 grid-template-columns:repeat(5,1fr);
 align-items:center;
+height:64px;
 background:#f1f5f9;
 border-top:1px solid #e2e8f0;
 box-shadow:0 -4px 16px rgba(15,23,42,.08);
-padding:4px 6px calc(4px + env(safe-area-inset-bottom));
+padding:2px 6px env(safe-area-inset-bottom);
 }}
 
 .dashboard-nav-item{{
@@ -931,7 +932,7 @@ flex-direction:column;
 align-items:center;
 justify-content:center;
 gap:2px;
-min-height:52px;
+min-height:48px;
 color:#64748b;
 text-decoration:none;
 font-size:9px;
@@ -942,8 +943,8 @@ font-family:inherit;
 }}
 
 .dashboard-nav-item img{{
-width:25px;
-height:25px;
+width:28px;
+height:28px;
 object-fit:contain;
 display:block;
 }}
@@ -1957,7 +1958,7 @@ header{{padding:14px 10px;border-radius:0 0 18px 18px}}
 .logo{{width:68px;height:68px}}
 header h1{{font-size:18px}}
 header p{{font-size:12px}}
-main{{padding:8px}}
+main{{padding:8px 8px calc(76px + env(safe-area-inset-bottom))}}
 .card{{padding:12px;border-radius:14px}}
 .grid{{grid-template-columns:1fr 1fr;gap:8px}}
 .stat{{padding:10px;font-size:12px}}
