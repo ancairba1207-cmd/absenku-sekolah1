@@ -10012,60 +10012,48 @@ let scanner=null, processing=false;
 function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
 function doubleScanFeedback(){{try{{AndroidPrint.doubleScanFeedback();}}catch(e){{try{{navigator.vibrate([0,180,100,180]);}}catch(_){{}}}}}}
 function showSuccessPopup(name,kelas,time,status){{
-  let ov=document.getElementById('scanSuccessOverlay');
+  const old=document.getElementById('absenSuccessOverlay');
+  if(old) old.remove();
 
-  if(!ov){{
-    ov=document.createElement('div');
-    ov.id='scanSuccessOverlay';
-    ov.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);';
+  const ov=document.createElement('div');
+  ov.id='absenSuccessOverlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);';
 
-    const popup=document.createElement('div');
-    popup.style.cssText='width:min(84vw,370px);padding:28px 24px;border-radius:28px;background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.4);text-align:center;transform:scale(.7);opacity:0;transition:transform .35s ease,opacity .25s ease;';
+  const popup=document.createElement('div');
+  popup.style.cssText='width:min(84vw,370px);padding:28px 24px;border-radius:28px;background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.4);text-align:center;transform:scale(.65);opacity:0;transition:transform .35s ease,opacity .25s ease;';
 
-    const icon=document.createElement('div');
-    icon.textContent='✓';
-    icon.style.cssText='width:76px;height:76px;margin:0 auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#22c55e;color:#fff;font-size:48px;font-weight:900;';
+  const icon=document.createElement('div');
+  icon.textContent='✓';
+  icon.style.cssText='width:76px;height:76px;margin:0 auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#22c55e;color:#fff;font-size:48px;font-weight:900;';
 
-    const title=document.createElement('div');
-    title.textContent='ABSEN BERHASIL';
-    title.style.cssText='font-size:23px;font-weight:900;color:#16a34a;margin-bottom:12px;';
+  const title=document.createElement('div');
+  title.textContent='ABSEN BERHASIL';
+  title.style.cssText='font-size:23px;font-weight:900;color:#16a34a;margin-bottom:12px;';
 
-    const nm=document.createElement('div');
-    nm.id='scanSuccessName';
-    nm.style.cssText='font-size:20px;font-weight:800;color:#1e293b;margin-top:4px;';
+  const nm=document.createElement('div');
+  nm.textContent=name||'';
+  nm.style.cssText='font-size:20px;font-weight:800;color:#1e293b;margin-top:4px;';
 
-    const cl=document.createElement('div');
-    cl.id='scanSuccessClass';
-    cl.style.cssText='font-size:16px;font-weight:600;color:#475569;margin-top:6px;';
+  const cl=document.createElement('div');
+  cl.textContent='Kelas: '+(kelas||'');
+  cl.style.cssText='font-size:16px;font-weight:600;color:#475569;margin-top:6px;';
 
-    const tm=document.createElement('div');
-    tm.id='scanSuccessTime';
-    tm.style.cssText='font-size:16px;font-weight:600;color:#64748b;margin-top:6px;';
+  const tm=document.createElement('div');
+  tm.textContent='🕐 '+(time||'');
+  tm.style.cssText='font-size:16px;font-weight:600;color:#64748b;margin-top:6px;';
 
-    const st=document.createElement('div');
-    st.id='scanSuccessStatus';
-    st.style.cssText='display:inline-block;margin-top:12px;padding:7px 18px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-size:15px;font-weight:900;';
+  const st=document.createElement('div');
+  st.textContent=(status||'').toUpperCase();
+  st.style.cssText='display:inline-block;margin-top:12px;padding:7px 18px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-size:15px;font-weight:900;';
 
-    popup.appendChild(icon);
-    popup.appendChild(title);
-    popup.appendChild(nm);
-    popup.appendChild(cl);
-    popup.appendChild(tm);
-    popup.appendChild(st);
-    ov.appendChild(popup);
-    document.body.appendChild(ov);
-  }}
-
-  document.getElementById('scanSuccessName').textContent=name||'';
-  document.getElementById('scanSuccessClass').textContent='Kelas: '+(kelas||'');
-  document.getElementById('scanSuccessTime').textContent='🕐 '+(time||'');
-  document.getElementById('scanSuccessStatus').textContent=(status||'').toUpperCase();
-
-  ov.style.display='flex';
-
-  const popup=ov.firstElementChild;
-  popup.style.transform='scale(.7)';
-  popup.style.opacity='0';
+  popup.appendChild(icon);
+  popup.appendChild(title);
+  popup.appendChild(nm);
+  popup.appendChild(cl);
+  popup.appendChild(tm);
+  popup.appendChild(st);
+  ov.appendChild(popup);
+  document.body.appendChild(ov);
 
   requestAnimationFrame(()=>{{
     popup.style.transform='scale(1)';
@@ -10073,12 +10061,9 @@ function showSuccessPopup(name,kelas,time,status){{
   }});
 
   setTimeout(()=>{{
-    popup.style.transform='scale(.7)';
+    popup.style.transform='scale(.65)';
     popup.style.opacity='0';
-
-    setTimeout(()=>{{
-      if(ov && ov.parentNode) ov.parentNode.removeChild(ov);
-    }},300);
+    setTimeout(()=>{{ if(ov.parentNode) ov.remove(); }},300);
   }},2500);
 }}
 
