@@ -798,11 +798,19 @@ def page(title, body):
 <style>
 *{{box-sizing:border-box}}
 
+html{{
+height:100%;
+overflow:hidden;
+}}
+
 body{{
 margin:0;
+height:100%;
+min-height:100dvh;
 background:#f1f5f9;
 color:#0f172a;
 font-family:Arial,sans-serif;
+overflow:hidden;
 }}
 
 header{{
