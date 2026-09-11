@@ -342,7 +342,7 @@ public class MainActivity extends Activity {
                         else vibrator.vibrate(180);
                     }
                 } catch (Exception ignored) {}
-                Toast.makeText(MainActivity.this, "✅ QR berhasil dibaca", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "✅ ABSEN BERHASIL", Toast.LENGTH_LONG).show();
             });
         }
     }
