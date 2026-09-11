@@ -4558,7 +4558,7 @@ def obrolan_admin():
         siswa_rows = c._get(
             "siswa",
             {
-                "select": "nis,nama,kelas",
+                "select": "nis,nama,kelas,foto",
                 "order": "nama.asc",
                 "limit": "1000"
             }
@@ -4600,6 +4600,12 @@ def obrolan_admin():
 
             nama = escape(str(siswa.get("nama") or "-"))
             kelas = escape(str(siswa.get("kelas") or "-"))
+            foto_siswa = str(siswa.get("foto") or "").strip()
+
+            if foto_siswa:
+                avatar_html = f'<img class="admin-chat-avatar-img" src="{escape(foto_siswa)}" alt="Foto {nama}">'
+            else:
+                avatar_html = '<div class="admin-chat-avatar-default">👤</div>'
 
             status = escape(str(row.get("status") or "-"))
             status_sesi = str(row.get("status_sesi") or "aktif").strip()
@@ -4617,62 +4623,56 @@ def obrolan_admin():
             else:
                 status_tampil = status
 
+            waktu = escape(str(row.get("created_at") or "").replace("T", " ")[:16])
+
             trs += f"""
-            <tr>
-                <td>
-                    <strong>{nama}</strong><br>
-                    <small>Kelas {kelas} • NIS: {escape(nis)}</small>
-                </td>
-                <td>{status_tampil}</td>
-                <td>{escape(pesan[:120])}</td>
-                <td>
-                    <a class="btn" href="/obrolan_admin/{escape(nis)}">
-                        <img class="open-chat-icon"
-                             src="/static/images/iconbukaobrolan.png"
-                             alt=""> Buka
-                    </a>
-                </td>
-            </tr>
+            <a class="admin-chat-item" href="/obrolan_admin/{escape(nis)}">
+                <div class="admin-chat-avatar">
+                    {avatar_html}
+                </div>
+
+                <div class="admin-chat-content">
+                    <div class="admin-chat-top">
+                        <strong>{nama}</strong>
+                        <span class="admin-chat-time">{waktu}</span>
+                    </div>
+
+                    <div class="admin-chat-class">
+                        Kelas {kelas} • NIS {escape(nis)}
+                    </div>
+
+                    <div class="admin-chat-preview">
+                        {pesan[:100]}
+                    </div>
+
+                    <div class="admin-chat-status">
+                        {status_tampil}
+                    </div>
+                </div>
+            </a>
             """
 
         if not trs:
             trs = """
-            <tr>
-                <td colspan="4"
-                    style="text-align:center;padding:25px">
-                    Belum ada percakapan dari orang tua.
-                </td>
-            </tr>
+            <div style="text-align:center;padding:35px 20px;color:#64748b">
+                Belum ada percakapan dari orang tua.
+            </div>
             """
 
         body = f"""
-        <div class="card">
-            <h2>
-                <img class="menu-chat-icon"
-                     src="/static/images/iconobrolanchatt.png"
-                     alt="">
-                Obrolan Administrator
-            </h2>
-
-            <div class="small" style="margin-bottom:12px">
-                Kelola percakapan orang tua, alihkan ke Wali Kelas,
-                dan lihat riwayat chat yang sudah selesai.
+        <div class="admin-chat-list-card">
+            <div class="admin-chat-list-heading">
+                <h2>
+                    <img class="menu-chat-icon"
+                         src="/static/images/iconobrolanchatt.png"
+                         alt="">
+                    Obrolan Administrator
+                </h2>
+                <div class="small">Percakapan orang tua</div>
             </div>
 
-            <div style="overflow-x:auto">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Siswa</th>
-                            <th>Status</th>
-                            <th>Pesan Terakhir</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {trs}
-                    </tbody>
-                </table>
+            <div class="admin-chat-list">
+                {trs}
             </div>
         </div>
         """
