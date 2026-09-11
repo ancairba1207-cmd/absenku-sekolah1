@@ -10095,7 +10095,7 @@ function startScanner(){{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
-      .then(r=>r.json()).then(d=>{{if(d.ok) {{ document.getElementById('scan-status').textContent='POPUP DIPANGGIL: '+(d.nama||'NAMA KOSONG'); showSuccessPopup(d.nama,d.jam); successFeedback(); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
+      .then(r=>r.json()).then(d=>{{if(d.ok) {{ successFeedback(); AndroidPrint.showSuccessPopup(d.nama,d.kelas,d.jam,{status!r}); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
       .catch(()=>{{document.getElementById('scan-status').textContent='Gagal menghubungi server';}})
       .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
   }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
@@ -10134,7 +10134,7 @@ def proses_scan():
     )
 
     return jsonify(ok=True,message=f"✅ {s['nama']} berhasil absen {status.lower()} pada {jam}.",
-                    whatsapp=s["whatsapp"] or "",nama=s["nama"],jam=jam,orang_tua=s["orang_tua"] or "")
+                    whatsapp=s["whatsapp"] or "",nama=s["nama"],kelas=s["kelas"],jam=jam,orang_tua=s["orang_tua"] or "")
 
 
 @app.route("/scan_tenaga")

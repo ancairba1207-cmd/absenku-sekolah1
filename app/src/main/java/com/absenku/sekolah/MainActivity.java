@@ -23,6 +23,13 @@ import android.webkit.WebViewClient;
 import android.webkit.ValueCallback;
 import android.widget.Toast;
 import android.widget.FrameLayout;
+import android.widget.PopupWindow;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
+import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -322,6 +329,119 @@ public class MainActivity extends Activity {
                         "⚠️ QR SUDAH DI-SCAN",
                         Toast.LENGTH_LONG
                 ).show();
+            });
+        }
+
+        @JavascriptInterface
+        public void showSuccessPopup(String nama, String kelas, String jam, String status) {
+            runOnUiThread(() -> {
+                try {
+                    LinearLayout box = new LinearLayout(MainActivity.this);
+                    box.setOrientation(LinearLayout.VERTICAL);
+                    box.setGravity(Gravity.CENTER);
+                    box.setPadding(45, 35, 45, 35);
+
+                    GradientDrawable bg = new GradientDrawable();
+                    bg.setColor(Color.WHITE);
+                    bg.setCornerRadius(55);
+                    box.setBackground(bg);
+                    box.setElevation(30);
+
+                    TextView icon = new TextView(MainActivity.this);
+                    icon.setText("✓");
+                    icon.setTextColor(Color.WHITE);
+                    icon.setTextSize(42);
+                    icon.setGravity(Gravity.CENTER);
+
+                    GradientDrawable circle = new GradientDrawable();
+                    circle.setColor(Color.rgb(34, 197, 94));
+                    circle.setShape(GradientDrawable.OVAL);
+                    icon.setBackground(circle);
+
+                    LinearLayout.LayoutParams iconParams =
+                            new LinearLayout.LayoutParams(105, 105);
+                    iconParams.gravity = Gravity.CENTER;
+                    box.addView(icon, iconParams);
+
+                    TextView title = new TextView(MainActivity.this);
+                    title.setText("ABSEN BERHASIL");
+                    title.setTextColor(Color.rgb(22, 163, 74));
+                    title.setTextSize(24);
+                    title.setGravity(Gravity.CENTER);
+                    title.setTypeface(null, android.graphics.Typeface.BOLD);
+                    LinearLayout.LayoutParams titleParams =
+                            new LinearLayout.LayoutParams(-1, -2);
+                    titleParams.topMargin = 18;
+                    box.addView(title, titleParams);
+
+                    TextView nameView = new TextView(MainActivity.this);
+                    nameView.setText(nama == null ? "" : nama);
+                    nameView.setTextColor(Color.rgb(51, 65, 85));
+                    nameView.setTextSize(18);
+                    nameView.setGravity(Gravity.CENTER);
+                    nameView.setTypeface(null, android.graphics.Typeface.BOLD);
+                    box.addView(nameView);
+
+                    TextView classView = new TextView(MainActivity.this);
+                    classView.setText("Kelas: " + (kelas == null ? "" : kelas));
+                    classView.setTextColor(Color.rgb(71, 85, 105));
+                    classView.setTextSize(15);
+                    classView.setGravity(Gravity.CENTER);
+                    box.addView(classView);
+
+                    TextView timeView = new TextView(MainActivity.this);
+                    timeView.setText("🕐 " + (jam == null ? "" : jam));
+                    timeView.setTextColor(Color.rgb(100, 116, 139));
+                    timeView.setTextSize(15);
+                    timeView.setGravity(Gravity.CENTER);
+                    box.addView(timeView);
+
+                    TextView statusView = new TextView(MainActivity.this);
+                    statusView.setText((status == null ? "" : status).toUpperCase());
+                    statusView.setTextColor(Color.rgb(37, 99, 235));
+                    statusView.setTextSize(16);
+                    statusView.setGravity(Gravity.CENTER);
+                    statusView.setTypeface(null, android.graphics.Typeface.BOLD);
+                    box.addView(statusView);
+
+                    PopupWindow popup = new PopupWindow(
+                            box,
+                            (int)(getResources().getDisplayMetrics().widthPixels * 0.82f),
+                            -2,
+                            false
+                    );
+
+                    popup.setBackgroundDrawable(bg);
+                    popup.setOutsideTouchable(false);
+                    popup.setFocusable(false);
+                    popup.setElevation(30);
+
+                    box.setScaleX(0.45f);
+                    box.setScaleY(0.45f);
+                    box.setAlpha(0f);
+
+                    popup.showAtLocation(mainLayout, Gravity.CENTER, 0, 0);
+
+                    box.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .alpha(1f)
+                            .setDuration(450)
+                            .start();
+
+                    box.postDelayed(() -> {
+                        box.animate()
+                                .scaleX(0.45f)
+                                .scaleY(0.45f)
+                                .alpha(0f)
+                                .setDuration(300)
+                                .withEndAction(popup::dismiss)
+                                .start();
+                    }, 2300);
+
+                } catch (Exception e) {
+                    android.util.Log.e("ABSENKU_POPUP", "Gagal menampilkan popup sukses", e);
+                }
             });
         }
 
