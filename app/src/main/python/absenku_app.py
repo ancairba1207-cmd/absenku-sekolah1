@@ -9290,7 +9290,7 @@ def absensi():
 @login_required
 def scan():
     status=request.args.get("status","Masuk"); status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><h2>📷 Scan Siswa {status}</h2><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div><div id="hasil"></div></div>
+    body=f"""<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><a href="/absensi" style="text-decoration:none;font-size:24px;color:#2563eb">←</a><img src="/static/images/{("masuk_siswa.png" if status=="Masuk" else "pulang_siswa.png")}" style="width:48px;height:48px;object-fit:contain"><h2 style="margin:0">Scan Siswa {status}</h2></div><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR siswa</div><div id="hasil"></div></div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
 let scanner=null, processing=false;
@@ -9368,7 +9368,7 @@ def proses_scan():
 @admin_required
 def scan_tenaga():
     status=request.args.get("status","Masuk");status=status if status in ("Masuk","Pulang") else "Masuk"
-    body=f"""<div class="card"><h2>📷 Scan Guru/Tendik {status}</h2><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div><div id="hasil"></div></div>
+    body=f"""<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><a href="/absensi" style="text-decoration:none;font-size:24px;color:#2563eb">←</a><img src="/static/images/{("masuk_guru_tendik.png" if status=="Masuk" else "pulang_guru_tendik.png")}" style="width:48px;height:48px;object-fit:contain"><h2 style="margin:0">Scan Guru/Tendik {status}</h2></div><div id="reader"></div><div id="scanOverlay" class="scan-overlay"><div id="scanPopup" class="scan-popup success"><div id="scanIcon" class="icon">✅</div><h2 id="scanTitle">Berhasil Scan</h2><p id="scanName"></p><p id="scanTime"></p></div></div><div id="scan-status" class="scan-status">Arahkan kamera ke QR guru/tendik</div><div id="hasil"></div></div>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
 let scanner=null,processing=false;
