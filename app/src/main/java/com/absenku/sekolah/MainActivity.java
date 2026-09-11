@@ -460,15 +460,25 @@ public class MainActivity extends Activity {
                         mp.setOnCompletionListener(MediaPlayer::release);
                         mp.start();
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    android.util.Log.e("ABSENKU_SOUND", "Gagal memutar suara sukses", e);
+                }
+
                 try {
                     Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
                     if (vibrator != null && vibrator.hasVibrator()) {
-                        if (Build.VERSION.SDK_INT >= 26) vibrator.vibrate(VibrationEffect.createOneShot(180, VibrationEffect.DEFAULT_AMPLITUDE));
-                        else vibrator.vibrate(180);
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(
+                                    300, VibrationEffect.DEFAULT_AMPLITUDE));
+                        } else {
+                            vibrator.vibrate(300);
+                        }
+                    } else {
+                        android.util.Log.e("ABSENKU_VIBRATE", "Vibrator tidak tersedia");
                     }
-                } catch (Exception ignored) {}
-                Toast.makeText(MainActivity.this, "✅ ABSEN BERHASIL", Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    android.util.Log.e("ABSENKU_VIBRATE", "Gagal melakukan getar", e);
+                }
             });
         }
     }
