@@ -7800,7 +7800,76 @@ def home():
     body = f"""
 <style>
 .dashboard-pro {{
-    padding-bottom:20px;
+    padding-bottom:95px;
+}}
+
+.dashboard-bottom-nav {{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:1000;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    align-items:center;
+    background:#f1f5f9;
+    border-top:1px solid #e2e8f0;
+    box-shadow:0 -4px 16px rgba(15,23,42,.08);
+    padding:7px 6px calc(7px + env(safe-area-inset-bottom));
+}}
+
+.dashboard-nav-item {{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    min-height:58px;
+    color:#64748b;
+    text-decoration:none;
+    font-size:10px;
+    font-weight:600;
+}}
+
+.dashboard-nav-item img {{
+    width:28px;
+    height:28px;
+    object-fit:contain;
+    display:block;
+}}
+
+.dashboard-nav-item.active {{
+    color:#2563eb;
+    font-weight:700;
+}}
+
+.dashboard-nav-badge {{
+    position:absolute;
+    top:1px;
+    margin-left:25px;
+    min-width:17px;
+    height:17px;
+    padding:0 4px;
+    border-radius:99px;
+    background:#ef4444;
+    color:white;
+    font-size:9px;
+    line-height:17px;
+    text-align:center;
+    font-weight:800;
+}}
+
+@media(max-width:520px) {{
+    .dashboard-nav-item {{
+        min-height:56px;
+        font-size:9px;
+    }}
+
+    .dashboard-nav-item img {{
+        width:26px;
+        height:26px;
+    }}
 }}
 
 .welcome-card {{
@@ -8319,6 +8388,29 @@ def home():
     </div>
 
 </div>
+
+<nav class="dashboard-bottom-nav" aria-label="Navigasi utama">
+    <a class="dashboard-nav-item active" href="/">
+        <img src="/static/images/home_active.png" alt="Home">
+        <span>Home</span>
+    </a>
+    <a class="dashboard-nav-item" href="/scan">
+        <img src="/static/images/absensi_inactive.png" alt="Absensi">
+        <span>Absensi</span>
+    </a>
+    <a class="dashboard-nav-item" href="#pemberitahuan">
+        <img src="/static/images/pemberitahuan_inactive.png" alt="Pemberitahuan">
+        <span>Pemberitahuan</span>
+    </a>
+    <a class="dashboard-nav-item" href="/obrolan_admin">
+        <img src="/static/images/obrolan_inactive.png" alt="Obrolan">
+        <span>Obrolan</span>
+    </a>
+    <button type="button" class="dashboard-nav-item" onclick="openMenu()" aria-label="Buka Menu">
+        <img src="/static/images/menu_inactive.png" alt="Menu">
+        <span>Menu</span>
+    </button>
+</nav>
 """
 
     return page("Dashboard", body)
