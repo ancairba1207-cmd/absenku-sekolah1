@@ -726,11 +726,6 @@ def page(title, body):
                 <a href="/siswa">👨‍🎓 <span>Data Siswa</span></a>
                 <a href="/tenaga">👨‍🏫 <span>Data Guru / Tendik</span></a>
                 <a href="/akun_orangtua">👪 <span>Akun Orang Tua</span></a>
-                <a href="/scan?status=Masuk">📷 <span>Masuk Siswa</span></a>
-                <a href="/scan?status=Pulang">📷 <span>Pulang Siswa</span></a>
-                <a href="/scan_tenaga?status=Masuk">📷 <span>Masuk Guru</span></a>
-                <a href="/scan_tenaga?status=Pulang">📷 <span>Pulang Guru</span></a>
-                <a href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">📊 <span>Laporan Absensi</span></a>
             </div>
         </details>
 
@@ -769,7 +764,7 @@ def page(title, body):
         <span>Home</span>
     </a>
 
-    <a class="dashboard-nav-item {absensi_active}" href="/scan">
+    <a class="dashboard-nav-item {absensi_active}" href="/absensi">
         <img src="/static/images/{absensi_icon}" alt="Absensi">
         <span>Absensi</span>
     </a>
@@ -849,6 +844,69 @@ margin-bottom:10px;
 box-shadow:0 3px 12px rgba(0,0,0,.08);
 position:relative;
 z-index:1001;
+}}
+
+.absensi-grid{{
+display:flex;
+flex-direction:column;
+gap:10px;
+margin-top:18px;
+}}
+
+.absensi-option{{
+display:flex;
+align-items:center;
+gap:13px;
+padding:10px 12px;
+background:#fff;
+border:1px solid #e2e8f0;
+border-radius:16px;
+text-decoration:none;
+color:#0f172a;
+box-shadow:0 3px 12px rgba(15,23,42,.06);
+}}
+
+.absensi-option img{{
+width:62px;
+height:62px;
+object-fit:contain;
+flex:none;
+}}
+
+.absensi-option h3{{
+margin:0 0 3px;
+font-size:15px;
+font-weight:800;
+}}
+
+.absensi-option p{{
+margin:0;
+font-size:11px;
+color:#64748b;
+}}
+
+.absensi-arrow{{
+margin-left:auto;
+font-size:28px;
+line-height:1;
+color:#94a3b8;
+}}
+
+@media(max-width:520px){{
+.absensi-option{{
+padding:9px 10px;
+gap:11px;
+}}
+.absensi-option img{{
+width:58px;
+height:58px;
+}}
+.absensi-option h3{{
+font-size:14px;
+}}
+.absensi-option p{{
+font-size:10px;
+}}
 }}
 
 .dashboard-bottom-nav{{
@@ -9167,6 +9225,66 @@ def qr_staff(tid):
     c=db();t=c.execute("SELECT * FROM tenaga WHERE id=?",(tid,)).fetchone();c.close()
     return qr_page(t,True) if t else ("Data tidak ditemukan",404)
 
+
+@app.route("/absensi")
+@admin_required
+def absensi():
+    body = """
+<div class="card absensi-hub">
+    <h2 style="margin-top:0">Absensi</h2>
+    <p style="color:#64748b;margin-top:-6px">Pilih jenis absensi yang ingin dilakukan</p>
+
+    <div class="absensi-grid">
+
+        <a class="absensi-option" href="/scan?status=Masuk">
+            <img src="/static/images/masuk_siswa.png" alt="Masuk Siswa">
+            <div>
+                <h3>Masuk Siswa</h3>
+                <p>Scan kehadiran masuk siswa</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+        <a class="absensi-option" href="/scan?status=Pulang">
+            <img src="/static/images/pulang_siswa.png" alt="Pulang Siswa">
+            <div>
+                <h3>Pulang Siswa</h3>
+                <p>Scan kepulangan siswa</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+        <a class="absensi-option" href="/scan_tenaga?status=Masuk">
+            <img src="/static/images/masuk_guru.png" alt="Masuk Guru">
+            <div>
+                <h3>Masuk Guru</h3>
+                <p>Scan kehadiran guru dan tendik</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+        <a class="absensi-option" href="/scan_tenaga?status=Pulang">
+            <img src="/static/images/pulang_guru.png" alt="Pulang Guru">
+            <div>
+                <h3>Pulang Guru</h3>
+                <p>Scan kepulangan guru dan tendik</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+        <a class="absensi-option" href="https://script.google.com/macros/s/AKfycbx6GLjQS_e8uqHxBeft4jbcZXPJksb0rBG0qZh7MVtGsqQxH4FtSqv8RY5epqYN5NbS/exec">
+            <img src="/static/images/laporan_absensi.png" alt="Laporan Absensi">
+            <div>
+                <h3>Laporan Absensi</h3>
+                <p>Lihat dan kelola laporan absensi</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+    </div>
+</div>
+"""
+    return page("Absensi", body)
 
 @app.route("/scan")
 @login_required
