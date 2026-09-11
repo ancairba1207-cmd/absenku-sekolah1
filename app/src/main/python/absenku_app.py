@@ -10011,74 +10011,75 @@ let scanner=null, processing=false;
 
 function successFeedback(){{try{{AndroidPrint.successFeedback();}}catch(e){{try{{navigator.vibrate([100,60,180]);}}catch(_){{}}}}}}
 function doubleScanFeedback(){{try{{AndroidPrint.doubleScanFeedback();}}catch(e){{try{{navigator.vibrate([0,180,100,180]);}}catch(_){{}}}}}}
-function showSuccessPopup(name,time){{
+function showSuccessPopup(name,kelas,time,status){{
   let ov=document.getElementById('scanSuccessOverlay');
 
   if(!ov){{
     ov=document.createElement('div');
     ov.id='scanSuccessOverlay';
-    ov.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);pointer-events:auto;';
+    ov.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);';
 
     const popup=document.createElement('div');
-    popup.style.cssText='width:min(86vw,360px);padding:30px 24px 26px;border-radius:28px;background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.35);text-align:center;transform:scale(.45);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s ease;';
+    popup.style.cssText='width:min(84vw,370px);padding:28px 24px;border-radius:28px;background:#fff;box-shadow:0 20px 60px rgba(15,23,42,.4);text-align:center;transform:scale(.7);opacity:0;transition:transform .35s ease,opacity .25s ease;';
 
     const icon=document.createElement('div');
     icon.textContent='✓';
-    icon.style.cssText='width:78px;height:78px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#22c55e;color:#fff;font-size:48px;font-weight:900;box-shadow:0 8px 24px rgba(34,197,94,.35);';
+    icon.style.cssText='width:76px;height:76px;margin:0 auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#22c55e;color:#fff;font-size:48px;font-weight:900;';
 
-    const title=document.createElement('h2');
+    const title=document.createElement('div');
     title.textContent='ABSEN BERHASIL';
-    title.style.cssText='margin:0;font-size:24px;font-weight:900;color:#16a34a;';
+    title.style.cssText='font-size:23px;font-weight:900;color:#16a34a;margin-bottom:12px;';
 
-    const nm=document.createElement('p');
+    const nm=document.createElement('div');
     nm.id='scanSuccessName';
-    nm.style.cssText='margin:7px 0 0;font-size:16px;font-weight:700;color:#334155;';
+    nm.style.cssText='font-size:20px;font-weight:800;color:#1e293b;margin-top:4px;';
 
-    const tm=document.createElement('p');
+    const cl=document.createElement('div');
+    cl.id='scanSuccessClass';
+    cl.style.cssText='font-size:16px;font-weight:600;color:#475569;margin-top:6px;';
+
+    const tm=document.createElement('div');
     tm.id='scanSuccessTime';
-    tm.style.cssText='margin:7px 0 0;font-size:14px;font-weight:600;color:#64748b;';
+    tm.style.cssText='font-size:16px;font-weight:600;color:#64748b;margin-top:6px;';
+
+    const st=document.createElement('div');
+    st.id='scanSuccessStatus';
+    st.style.cssText='display:inline-block;margin-top:12px;padding:7px 18px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-size:15px;font-weight:900;';
 
     popup.appendChild(icon);
     popup.appendChild(title);
     popup.appendChild(nm);
+    popup.appendChild(cl);
     popup.appendChild(tm);
+    popup.appendChild(st);
     ov.appendChild(popup);
     document.body.appendChild(ov);
-
-    requestAnimationFrame(()=>{{
-      requestAnimationFrame(()=>{{
-        popup.style.transform='scale(1)';
-        popup.style.opacity='1';
-      }});
-    }});
-  }}else{{
-    document.getElementById('scanSuccessName').textContent=name||'';
-    document.getElementById('scanSuccessTime').textContent=time?('🕐 '+time):'';
-    ov.style.display='flex';
-    const popup=ov.firstElementChild;
-    popup.style.transform='scale(.45)';
-    popup.style.opacity='0';
-    requestAnimationFrame(()=>{{
-      requestAnimationFrame(()=>{{
-        popup.style.transform='scale(1)';
-        popup.style.opacity='1';
-      }});
-    }});
   }}
 
   document.getElementById('scanSuccessName').textContent=name||'';
-  document.getElementById('scanSuccessTime').textContent=time?('🕐 '+time):'';
+  document.getElementById('scanSuccessClass').textContent='Kelas: '+(kelas||'');
+  document.getElementById('scanSuccessTime').textContent='🕐 '+(time||'');
+  document.getElementById('scanSuccessStatus').textContent=(status||'').toUpperCase();
+
+  ov.style.display='flex';
+
+  const popup=ov.firstElementChild;
+  popup.style.transform='scale(.7)';
+  popup.style.opacity='0';
+
+  requestAnimationFrame(()=>{{
+    popup.style.transform='scale(1)';
+    popup.style.opacity='1';
+  }});
 
   setTimeout(()=>{{
-    const popup=ov.firstElementChild;
-    if(popup){{
-      popup.style.transform='scale(.45)';
-      popup.style.opacity='0';
-    }}
+    popup.style.transform='scale(.7)';
+    popup.style.opacity='0';
+
     setTimeout(()=>{{
-      if(ov)ov.style.display='none';
-    }},350);
-  }},2300);
+      if(ov && ov.parentNode) ov.parentNode.removeChild(ov);
+    }},300);
+  }},2500);
 }}
 
 function pulangFeedback(){{
@@ -10100,9 +10101,9 @@ function startScanner(){{
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
       .then(r=>r.json())
       .then(d=>{{
-        alert('RESPONS SERVER: '+JSON.stringify(d)); if(d.ok) {{
+        if(d.ok) {{
           successFeedback();
-          alert('POPUP TEST BERHASIL'); showSuccessPopup(d.nama,d.jam);
+          showSuccessPopup(d.nama,d.kelas,d.jam,{status!r});
           if({status!r}==='Pulang') pulangFeedback();
           document.getElementById('scan-status').textContent='✅ Scan berhasil';
         }} else {{
