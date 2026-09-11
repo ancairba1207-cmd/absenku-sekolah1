@@ -5701,15 +5701,39 @@ def obrolan_guru_detail(nis):
         }}
 
         .chat-card {{
+            width:min(100%,760px);
             max-width:760px;
             margin:0 auto;
-            height:calc(100dvh - 300px);
-            max-height:calc(100dvh - 300px);
+            height:calc(100dvh - 180px - env(safe-area-inset-bottom));
+            max-height:calc(100dvh - 180px - env(safe-area-inset-bottom));
             min-height:0;
             display:flex;
             flex-direction:column;
             box-sizing:border-box;
             overflow:hidden;
+            padding-bottom:max(8px,env(safe-area-inset-bottom));
+        }}
+        @media (max-width:600px) {{
+            .chat-card {{
+                width:calc(100% - 16px);
+                max-width:none;
+                height:calc(100dvh - 155px - env(safe-area-inset-bottom));
+                max-height:calc(100dvh - 155px - env(safe-area-inset-bottom));
+                margin-left:auto;
+                margin-right:auto;
+                padding-bottom:max(8px,env(safe-area-inset-bottom));
+            }}
+            .chat-card #chat-box {{
+                padding:8px;
+                min-width:0;
+            }}
+            .chat-card .chat-row,
+            .chat-card .chat-bubble {{
+                min-width:0;
+            }}
+            .chat-card .chat-bubble {{
+                max-width:calc(100% - 44px);
+            }}
         }}
         .guru-student-info {{
             display:flex;
