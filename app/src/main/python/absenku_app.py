@@ -829,8 +829,22 @@ header p{{margin:0;opacity:.9}}
 main{{
 width:100%;
 max-width:1000px;
-margin:auto;
-padding:12px 12px calc(var(--bottom-nav-height) + 12px + env(safe-area-inset-bottom));
+margin:0 auto;
+padding:12px 12px 0;
+flex:1 1 auto;
+min-height:0;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}}
+
+.page-scroll{{
+flex:1 1 auto;
+min-height:0;
+overflow-y:auto;
+overflow-x:hidden;
+-webkit-overflow-scrolling:touch;
+padding-bottom:12px;
 }}
 
 .topbar{{
@@ -1965,7 +1979,7 @@ header{{padding:14px 10px;border-radius:0 0 18px 18px}}
 .logo{{width:68px;height:68px}}
 header h1{{font-size:18px}}
 header p{{font-size:12px}}
-main{{padding:8px 8px calc(var(--bottom-nav-height) + 8px + env(safe-area-inset-bottom))}}
+main{{padding:8px 8px 0}}
 .card{{padding:12px;border-radius:14px}}
 .grid{{grid-template-columns:1fr 1fr;gap:8px}}
 .stat{{padding:10px;font-size:12px}}
@@ -2038,7 +2052,9 @@ document.addEventListener("DOMContentLoaded", function() {{
 <div style="width:44px"></div>
 </div>
 
+<div class="page-scroll">
 {body}
+</div>
 
 {dashboard_nav}
 
