@@ -10100,7 +10100,7 @@ function startScanner(){{
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
       .then(r=>r.json())
       .then(d=>{{
-        if(d.ok) {{
+        alert('RESPONS SERVER: '+JSON.stringify(d)); if(d.ok) {{
           successFeedback();
           alert('POPUP TEST BERHASIL'); showSuccessPopup(d.nama,d.jam);
           if({status!r}==='Pulang') pulangFeedback();
