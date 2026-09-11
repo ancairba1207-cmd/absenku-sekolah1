@@ -10081,8 +10081,6 @@ function startScanner(){{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
 
-    try{{scanner.pause(true);}}catch(_ ){{}}
-
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
       .then(r=>r.json())
       .then(d=>{{
@@ -10101,9 +10099,8 @@ function startScanner(){{
       }})
       .finally(()=>setTimeout(()=>{{
         processing=false;
-        try{{scanner.resume();}}catch(_ ){{}}
         document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';
-      }},3000));
+      }},500));
   }},()=>{{}}).catch(err=>{{
     document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';
   }});
