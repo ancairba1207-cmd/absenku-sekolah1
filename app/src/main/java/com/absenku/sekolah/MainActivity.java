@@ -134,6 +134,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getWindow().setStatusBarColor(android.graphics.Color.rgb(37, 99, 235));
+        getWindow().getDecorView().setSystemUiVisibility(0);
+
         if (getIntent() != null && getIntent().hasExtra("notification_route")) {
             notificationRoute = getIntent().getStringExtra("notification_route");
             if (notificationRoute == null) {
