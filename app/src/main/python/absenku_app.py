@@ -807,6 +807,8 @@ body{{
 margin:0;
 height:100%;
 min-height:100dvh;
+display:flex;
+flex-direction:column;
 background:#f1f5f9;
 color:#0f172a;
 font-family:Arial,sans-serif;
