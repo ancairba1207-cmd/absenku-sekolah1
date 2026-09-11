@@ -830,7 +830,7 @@ main{{
 width:100%;
 max-width:1000px;
 margin:auto;
-padding:12px 12px calc(76px + env(safe-area-inset-bottom));
+padding:12px 12px calc(var(--bottom-nav-height) + 12px + env(safe-area-inset-bottom));
 }}
 
 .topbar{{
@@ -909,6 +909,22 @@ font-size:10px;
 }}
 }}
 
+ :root{{
+--bottom-nav-height:clamp(60px, 8vh, 68px);
+}}
+
+@media(min-width:521px) and (max-width:900px){{
+:root{{
+--bottom-nav-height:clamp(64px, 8vh, 72px);
+}}
+}}
+
+@media(min-width:901px){{
+:root{{
+--bottom-nav-height:74px;
+}}
+}}
+
 .dashboard-bottom-nav{{
 position:fixed;
 left:0;
@@ -918,7 +934,7 @@ z-index:1000;
 display:grid;
 grid-template-columns:repeat(5,1fr);
 align-items:center;
-height:64px;
+height:var(--bottom-nav-height);
 background:#f1f5f9;
 border-top:1px solid #e2e8f0;
 box-shadow:0 -4px 16px rgba(15,23,42,.08);
@@ -932,7 +948,7 @@ flex-direction:column;
 align-items:center;
 justify-content:center;
 gap:2px;
-min-height:48px;
+min-height:calc(var(--bottom-nav-height) - 8px);
 color:#64748b;
 text-decoration:none;
 font-size:9px;
@@ -943,8 +959,8 @@ font-family:inherit;
 }}
 
 .dashboard-nav-item img{{
-width:28px;
-height:28px;
+width:clamp(27px, 4vw, 40px);
+height:clamp(27px, 4vw, 40px);
 object-fit:contain;
 display:block;
 }}
@@ -982,16 +998,7 @@ text-align:center;
 font-weight:800;
 }}
 
-@media(max-width:520px){{
-.dashboard-nav-item{{
-min-height:48px;
-font-size:8px;
-}}
-.dashboard-nav-item img{{
-width:28px;
-height:28px;
-}}
-}}
+
 
 .menu-button{{
 width:44px;
@@ -1958,7 +1965,7 @@ header{{padding:14px 10px;border-radius:0 0 18px 18px}}
 .logo{{width:68px;height:68px}}
 header h1{{font-size:18px}}
 header p{{font-size:12px}}
-main{{padding:8px 8px calc(76px + env(safe-area-inset-bottom))}}
+main{{padding:8px 8px calc(var(--bottom-nav-height) + 8px + env(safe-area-inset-bottom))}}
 .card{{padding:12px;border-radius:14px}}
 .grid{{grid-template-columns:1fr 1fr;gap:8px}}
 .stat{{padding:10px;font-size:12px}}
@@ -8656,7 +8663,7 @@ def home():
     body = f"""
 <style>
 .dashboard-pro {{
-    padding-bottom:95px;
+    padding-bottom:calc(var(--bottom-nav-height) + 12px);
 }}
 
 .dashboard-nav-badge {{
@@ -8675,17 +8682,7 @@ def home():
     font-weight:800;
 }}
 
-@media(max-width:520px) {{
-    .dashboard-nav-item {{
-        min-height:48px;
-        font-size:9px;
-    }}
 
-    .dashboard-nav-item img {{
-        width:28px;
-        height:28px;
-    }}
-}}
 
 .welcome-card {{
     position:relative;
