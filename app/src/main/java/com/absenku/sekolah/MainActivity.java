@@ -336,6 +336,9 @@ public class MainActivity extends Activity {
         public void showSuccessPopup(String nama, String kelas, String jam, String status) {
             runOnUiThread(() -> {
                 try {
+                    FrameLayout overlay = new FrameLayout(MainActivity.this);
+                    overlay.setBackgroundColor(Color.argb(150, 15, 23, 42));
+
                     LinearLayout box = new LinearLayout(MainActivity.this);
                     box.setOrientation(LinearLayout.VERTICAL);
                     box.setGravity(Gravity.CENTER);
@@ -369,6 +372,7 @@ public class MainActivity extends Activity {
                     title.setTextSize(24);
                     title.setGravity(Gravity.CENTER);
                     title.setTypeface(null, android.graphics.Typeface.BOLD);
+
                     LinearLayout.LayoutParams titleParams =
                             new LinearLayout.LayoutParams(-1, -2);
                     titleParams.topMargin = 18;
@@ -390,7 +394,7 @@ public class MainActivity extends Activity {
                     box.addView(classView);
 
                     TextView timeView = new TextView(MainActivity.this);
-                    timeView.setText("🕐 " + (jam == null ? "" : jam));
+                    timeView.setText("Jam: " + (jam == null ? "" : jam));
                     timeView.setTextColor(Color.rgb(100, 116, 139));
                     timeView.setTextSize(15);
                     timeView.setGravity(Gravity.CENTER);
@@ -402,25 +406,26 @@ public class MainActivity extends Activity {
                     statusView.setTextSize(16);
                     statusView.setGravity(Gravity.CENTER);
                     statusView.setTypeface(null, android.graphics.Typeface.BOLD);
-                    box.addView(statusView);
 
-                    PopupWindow popup = new PopupWindow(
-                            box,
-                            (int)(getResources().getDisplayMetrics().widthPixels * 0.82f),
-                            -2,
-                            false
-                    );
+                    LinearLayout.LayoutParams statusParams =
+                            new LinearLayout.LayoutParams(-1, -2);
+                    statusParams.topMargin = 8;
+                    box.addView(statusView, statusParams);
 
-                    popup.setBackgroundDrawable(bg);
-                    popup.setOutsideTouchable(false);
-                    popup.setFocusable(false);
-                    popup.setElevation(30);
+                    FrameLayout.LayoutParams boxParams =
+                            new FrameLayout.LayoutParams(
+                                    (int)(getResources().getDisplayMetrics().widthPixels * 0.82f),
+                                    -2,
+                                    Gravity.CENTER
+                            );
+
+                    overlay.addView(box, boxParams);
+                    mainLayout.addView(overlay,
+                            new FrameLayout.LayoutParams(-1, -1));
 
                     box.setScaleX(0.45f);
                     box.setScaleY(0.45f);
                     box.setAlpha(0f);
-
-                    popup.showAtLocation(mainLayout, Gravity.CENTER, 0, 0);
 
                     box.animate()
                             .scaleX(1f)
@@ -435,12 +440,13 @@ public class MainActivity extends Activity {
                                 .scaleY(0.45f)
                                 .alpha(0f)
                                 .setDuration(300)
-                                .withEndAction(popup::dismiss)
+                                .withEndAction(() -> mainLayout.removeView(overlay))
                                 .start();
                     }, 2300);
 
                 } catch (Exception e) {
-                    android.util.Log.e("ABSENKU_POPUP", "Gagal menampilkan popup sukses", e);
+                    android.util.Log.e("ABSENKU_POPUP",
+                            "Gagal menampilkan popup sukses", e);
                 }
             });
         }
