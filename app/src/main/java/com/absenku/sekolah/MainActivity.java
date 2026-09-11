@@ -33,9 +33,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
@@ -81,7 +78,6 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private FrameLayout mainLayout;
-    private AdView adView;
     private static final int CAMERA_REQ = 1001;
     private static final int FILE_CHOOSER_REQ = 1002;
     private ValueCallback<android.net.Uri[]> filePathCallback;
@@ -163,16 +159,7 @@ public class MainActivity extends Activity {
         mainLayout = new FrameLayout(this);
         webView = new WebView(this);
         FrameLayout.LayoutParams webParams = new FrameLayout.LayoutParams(-1, -1);
-        webParams.bottomMargin = 60;
         mainLayout.addView(webView, webParams);
-        adView = new AdView(this);
-        adView.setAdSize(com.google.android.gms.ads.AdSize.LARGE_BANNER);
-        adView.setAdUnitId("ca-app-pub-1668241409829273/5900950475");
-        FrameLayout.LayoutParams adParams = new FrameLayout.LayoutParams(-1, -2);
-        adParams.gravity = android.view.Gravity.BOTTOM;
-        mainLayout.addView(adView, adParams);
-        MobileAds.initialize(this, status -> {});
-        adView.loadAd(new AdRequest.Builder().build());
         setContentView(mainLayout);
 
         WebSettings s = webView.getSettings();
