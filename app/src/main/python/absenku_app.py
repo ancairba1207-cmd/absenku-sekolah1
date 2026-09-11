@@ -854,7 +854,7 @@ min-height:0;
 overflow-y:auto;
 overflow-x:hidden;
 -webkit-overflow-scrolling:touch;
-padding-bottom:12px;
+padding-bottom:calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom));
 }}
 
 .topbar{{
