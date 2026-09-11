@@ -4789,7 +4789,11 @@ html, body {
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 12px;
-    background: #fafafa;
+    background-color: #e8f3ff;
+    background-image: url("/static/backgrounobrolan.png");
+    background-repeat: repeat;
+    background-size: 520px auto;
+    background-position: center top;
     box-sizing: border-box;
 }
 
