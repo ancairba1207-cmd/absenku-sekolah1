@@ -863,7 +863,7 @@ align-items:center;
 background:#f1f5f9;
 border-top:1px solid #e2e8f0;
 box-shadow:0 -4px 16px rgba(15,23,42,.08);
-padding:7px 6px calc(7px + env(safe-area-inset-bottom));
+padding:4px 6px calc(4px + env(safe-area-inset-bottom));
 }}
 
 .dashboard-nav-item{{
@@ -872,11 +872,11 @@ display:flex;
 flex-direction:column;
 align-items:center;
 justify-content:center;
-gap:3px;
-min-height:58px;
+gap:2px;
+min-height:52px;
 color:#64748b;
 text-decoration:none;
-font-size:10px;
+font-size:9px;
 font-weight:600;
 border:0;
 background:transparent;
@@ -884,8 +884,8 @@ font-family:inherit;
 }}
 
 .dashboard-nav-item img{{
-width:28px;
-height:28px;
+width:25px;
+height:25px;
 object-fit:contain;
 display:block;
 }}
@@ -893,6 +893,18 @@ display:block;
 .dashboard-nav-item.active{{
 color:#2563eb;
 font-weight:700;
+}}
+
+.dashboard-nav-item.active::after{{
+content:"";
+position:absolute;
+bottom:1px;
+left:50%;
+transform:translateX(-50%);
+width:36px;
+height:3px;
+border-radius:99px;
+background:#2563eb;
 }}
 
 .dashboard-nav-badge{{
@@ -913,12 +925,12 @@ font-weight:800;
 
 @media(max-width:520px){{
 .dashboard-nav-item{{
-min-height:56px;
-font-size:9px;
+min-height:50px;
+font-size:8px;
 }}
 .dashboard-nav-item img{{
-width:26px;
-height:26px;
+width:24px;
+height:24px;
 }}
 }}
 
@@ -7918,47 +7930,6 @@ def home():
 <style>
 .dashboard-pro {{
     padding-bottom:95px;
-}}
-
-.dashboard-bottom-nav {{
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:0;
-    z-index:1000;
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    align-items:center;
-    background:#f1f5f9;
-    border-top:1px solid #e2e8f0;
-    box-shadow:0 -4px 16px rgba(15,23,42,.08);
-    padding:7px 6px calc(7px + env(safe-area-inset-bottom));
-}}
-
-.dashboard-nav-item {{
-    position:relative;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:3px;
-    min-height:58px;
-    color:#64748b;
-    text-decoration:none;
-    font-size:10px;
-    font-weight:600;
-}}
-
-.dashboard-nav-item img {{
-    width:28px;
-    height:28px;
-    object-fit:contain;
-    display:block;
-}}
-
-.dashboard-nav-item.active {{
-    color:#2563eb;
-    font-weight:700;
 }}
 
 .dashboard-nav-badge {{
