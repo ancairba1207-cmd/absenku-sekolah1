@@ -984,12 +984,12 @@ font-weight:800;
 
 @media(max-width:520px){{
 .dashboard-nav-item{{
-min-height:50px;
+min-height:48px;
 font-size:8px;
 }}
 .dashboard-nav-item img{{
-width:24px;
-height:24px;
+width:28px;
+height:28px;
 }}
 }}
 
@@ -8677,13 +8677,13 @@ def home():
 
 @media(max-width:520px) {{
     .dashboard-nav-item {{
-        min-height:56px;
+        min-height:48px;
         font-size:9px;
     }}
 
     .dashboard-nav-item img {{
-        width:26px;
-        height:26px;
+        width:28px;
+        height:28px;
     }}
 }}
 
