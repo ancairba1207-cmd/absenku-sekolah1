@@ -158,6 +158,18 @@ public class MainActivity extends Activity {
 
         mainLayout = new FrameLayout(this);
         webView = new WebView(this);
+
+        mainLayout.setOnApplyWindowInsetsListener((v, insets) -> {
+            int bottomInset;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                bottomInset = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom;
+            } else {
+                bottomInset = insets.getSystemWindowInsetBottom();
+            }
+            v.setPadding(0, 0, 0, bottomInset);
+            return insets;
+        });
+
         FrameLayout.LayoutParams webParams = new FrameLayout.LayoutParams(-1, -1);
         mainLayout.addView(webView, webParams);
         setContentView(mainLayout);
