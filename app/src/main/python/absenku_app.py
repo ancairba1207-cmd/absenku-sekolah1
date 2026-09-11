@@ -10095,7 +10095,7 @@ function startScanner(){{
     if(processing)return; processing=true;
     document.getElementById('scan-status').textContent='QR terbaca, memproses...';
     fetch('/proses_scan?kode='+encodeURIComponent(decodedText)+'&status='+encodeURIComponent({status!r}))
-      .then(r=>r.json()).then(d=>{{if(d.ok) {{ showSuccessPopup(d.nama,d.jam); successFeedback(); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
+      .then(r=>r.json()).then(d=>{{if(d.ok) {{ document.getElementById('scan-status').textContent='POPUP DIPANGGIL: '+(d.nama||'NAMA KOSONG'); showSuccessPopup(d.nama,d.jam); successFeedback(); if({status!r}==='Pulang') pulangFeedback(); }} else if((d.message||'').toLowerCase().includes('sudah tercatat')) doubleScanFeedback();  if(d.ok) document.getElementById('scan-status').textContent='✅ Scan berhasil'; else document.getElementById('scan-status').textContent='⚠️ Silakan coba lagi';}})
       .catch(()=>{{document.getElementById('scan-status').textContent='Gagal menghubungi server';}})
       .finally(()=>setTimeout(()=>{{processing=false;document.getElementById('scan-status').textContent='Arahkan kamera ke QR berikutnya';}},1500));
   }},()=>{{}}).catch(err=>{{document.getElementById('scan-status').textContent='Kamera belakang tidak dapat dibuka. Periksa izin kamera.';}});
