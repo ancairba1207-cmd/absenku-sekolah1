@@ -6157,65 +6157,6 @@ html, body {
     }
 }
 
-</style>
-"""
-
-        body = f"""
-        {css_admin_chat}\n        <div class="card admin-chat-card">
-            <h2 style="display:flex;align-items:center;gap:10px;margin:0 0 16px 0;">
-                <img
-                    class="menu-chat-icon"
-                    src="/static/images/iconobrolanchatt.png"
-                    alt=""
-                    style="width:42px;height:42px;object-fit:contain;flex:0 0 42px;"
-                >
-                <span>Obrolan Administrator</span>
-            </h2>
-
-            <div class="student-chat-info">
-                {(
-                    f'<img class="student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
-                    if foto_siswa
-                    else '<div class="student-photo-fallback">👤</div>'
-                )}
-                <div class="student-info-main">
-                    <div class="student-name">{nama_anak}</div>
-                    <div class="student-meta">
-                        NIS: {escape(nis)}<br>
-                        Kelas: {kelas_anak}
-                    </div>
-                </div>
-
-                <div class="student-chat-status">
-                    <div class="status-badge{' selesai' if not chat_aktif else ''}">
-                        {status_chat}
-                    </div>
-                    <div class="last-seen">
-                        Terakhir: {waktu_terakhir}
-                    </div>
-                </div>
-            </div>
-
-            <div id="chat-box" class="chat-box">
-                {isi_pesan}
-            </div>
-
-            {form_chat}
-
-            <div class="admin-chat-actions">
-                <div class="admin-action-transfer">
-                    {tombol_alih}
-                </div>
-                <div class="admin-action-end">
-                    {tombol_akhiri}
-                </div>
-                <div class="admin-action-back">
-                    <a class="btn" href="/obrolan_admin">
-                        ← Kembali
-                    </a>
-                </div>
-            </div>
-        </div>
 
 /* HEADER ADMIN CHAT MODERN */
 .admin-chat-card > h2 {{
@@ -6301,6 +6242,66 @@ html, body {
         padding-left: 4px;
     }}
 }}
+
+</style>
+"""
+
+        body = f"""
+        {css_admin_chat}\n        <div class="card admin-chat-card">
+            <h2 style="display:flex;align-items:center;gap:10px;margin:0 0 16px 0;">
+                <img
+                    class="menu-chat-icon"
+                    src="/static/images/iconobrolanchatt.png"
+                    alt=""
+                    style="width:42px;height:42px;object-fit:contain;flex:0 0 42px;"
+                >
+                <span>Obrolan Administrator</span>
+            </h2>
+
+            <div class="student-chat-info">
+                {(
+                    f'<img class="student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
+                    if foto_siswa
+                    else '<div class="student-photo-fallback">👤</div>'
+                )}
+                <div class="student-info-main">
+                    <div class="student-name">{nama_anak}</div>
+                    <div class="student-meta">
+                        NIS: {escape(nis)}<br>
+                        Kelas: {kelas_anak}
+                    </div>
+                </div>
+
+                <div class="student-chat-status">
+                    <div class="status-badge{' selesai' if not chat_aktif else ''}">
+                        {status_chat}
+                    </div>
+                    <div class="last-seen">
+                        Terakhir: {waktu_terakhir}
+                    </div>
+                </div>
+            </div>
+
+            <div id="chat-box" class="chat-box">
+                {isi_pesan}
+            </div>
+
+            {form_chat}
+
+            <div class="admin-chat-actions">
+                <div class="admin-action-transfer">
+                    {tombol_alih}
+                </div>
+                <div class="admin-action-end">
+                    {tombol_akhiri}
+                </div>
+                <div class="admin-action-back">
+                    <a class="btn" href="/obrolan_admin">
+                        ← Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
 
         """
 
