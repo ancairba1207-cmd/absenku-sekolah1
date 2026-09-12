@@ -6717,6 +6717,60 @@ html, body {
 
         body += f"""
 <script>
+/* ===== POSISI COMPOSER ADMIN CHAT V7 ===== */
+function posisikanComposerAdminChat() {{
+    const form = document.querySelector(
+        '.admin-chat-card .chat-form'
+    );
+    const nav = document.querySelector(
+        '.dashboard-bottom-nav'
+    );
+
+    if (!form || !nav) return;
+
+    form.style.position = 'fixed';
+    form.style.bottom = 'auto';
+
+    const navRect = nav.getBoundingClientRect();
+    const formRect = form.getBoundingClientRect();
+
+    const selisih = navRect.top - formRect.bottom;
+
+    form.style.transform =
+        'translateY(' + selisih + 'px)';
+}}
+
+window.addEventListener(
+    'load',
+    posisikanComposerAdminChat
+);
+
+window.addEventListener(
+    'resize',
+    posisikanComposerAdminChat
+);
+
+window.addEventListener(
+    'orientationchange',
+    function() {{
+        setTimeout(
+            posisikanComposerAdminChat,
+            150
+        );
+    }}
+);
+
+setTimeout(
+    posisikanComposerAdminChat,
+    100
+);
+
+setTimeout(
+    posisikanComposerAdminChat,
+    500
+);
+
+
 
     window.toggleAdminChatMenu = function() {{
         const menu = document.getElementById("adminChatMenu");
