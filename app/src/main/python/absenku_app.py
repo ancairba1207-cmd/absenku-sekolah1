@@ -6546,7 +6546,7 @@ html, body {
     .admin-chat-card .chat-form {
         left: 12px !important;
         right: 12px !important;
-        bottom: 4px !important;
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 4px) !important;
     }
 
     .admin-chat-card .chat-composer {
