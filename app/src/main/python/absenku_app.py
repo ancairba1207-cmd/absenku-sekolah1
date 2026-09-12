@@ -5777,8 +5777,8 @@ def obrolan_admin_detail(nis):
                 <form method="post" action="/alih_obrolan_wali_kelas_admin/{escape(nis)}"
                       onsubmit="return confirm('Alihkan percakapan ini ke Wali Kelas?');"
                       style="margin-top:12px">
-                    <button class="btn" type="submit">
-                        🔄 Alihkan ke Wali Kelas
+                    <button class="btn admin-chat-action-btn" type="submit">
+                        <img src="/static/images/icon_alihkan.png" alt="" class="admin-action-icon"><span>Alihkan ke Wali Kelas</span>
                     </button>
                 </form>
                 """
@@ -5790,8 +5790,9 @@ def obrolan_admin_detail(nis):
             <form method="post" action="/akhiri_obrolan/{escape(nis)}"
                   onsubmit="return confirm('Akhiri chat ini?');"
                   style="margin-top:12px">
-                <button class="btn" type="submit">
-                    🛑 Akhiri Chat
+                <button class="btn admin-chat-action-btn" type="submit">
+                    <img src="/static/images/icon_akhiri_chat.png" alt="" class="admin-action-icon">
+                    <span>Akhiri Chat</span>
                 </button>
             </form>
             """
@@ -6383,6 +6384,106 @@ html, body {
         height: 38px;
         min-width: 38px;
         font-size: 26px;
+    }
+}
+
+
+/* ===== FIX CHAT ADMIN ===== */
+
+/* Composer tetap sebagai bagian bawah card, tidak ikut scroll */
+.admin-chat-card .chat-form {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    margin: 10px 0 0 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    z-index: 120 !important;
+}
+
+.admin-chat-card .chat-composer {
+    width: 100% !important;
+    min-height: 54px !important;
+    box-sizing: border-box !important;
+}
+
+/* Area chat saja yang melakukan scroll */
+.admin-chat-card #chat-box {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding-bottom: 12px !important;
+}
+
+/* Tombol + dibuat lebih kecil dan icon tidak terpotong */
+.admin-chat-card .chat-attach {
+    flex: 0 0 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+}
+
+.admin-chat-card .chat-attach-icon {
+    display: block !important;
+    width: 23px !important;
+    height: 23px !important;
+    min-width: 23px !important;
+    min-height: 23px !important;
+    max-width: 23px !important;
+    max-height: 23px !important;
+    object-fit: contain !important;
+}
+
+/* Icon PNG untuk Alihkan dan Akhiri */
+.admin-chat-card .admin-menu-action .admin-chat-action-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    padding: 9px 12px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.admin-chat-card .admin-action-icon {
+    display: block !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    max-width: 22px !important;
+    max-height: 22px !important;
+    object-fit: contain !important;
+}
+
+/* Popup menu selalu di atas composer */
+.admin-chat-card .admin-chat-menu {
+    z-index: 200 !important;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .admin-chat-card .chat-form {
+        width: 100% !important;
+        margin-top: 8px !important;
+    }
+
+    .admin-chat-card .chat-attach {
+        flex-basis: 40px !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
     }
 }
 
