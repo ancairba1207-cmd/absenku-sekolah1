@@ -5739,11 +5739,19 @@ def obrolan_admin_detail(nis):
             form_chat = """
             <form method="post" class="chat-form">
                 <div class="chat-composer">
+                    <button type="button"
+                            class="chat-attach"
+                            aria-label="Lampiran"
+                            onclick="toggleAdminChatMenu()">
+                        +
+                    </button>
+
                     <textarea
                         name="pesan"
                         rows="1"
                         placeholder="Tulis pesan di sini..."
                         required></textarea>
+
                     <button class="chat-send" type="submit" aria-label="Kirim pesan">
                         <span class="send-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24">
