@@ -6169,7 +6169,7 @@ html, body {
 
 
 /* HEADER ADMIN CHAT MODERN */
-.admin-chat-card > h2 {{
+.admin-chat-card > h2 {
     background: linear-gradient(135deg,#2563eb,#4f46e5);
     color: #fff;
     margin: -12px -12px 12px -12px !important;
@@ -6177,91 +6177,91 @@ html, body {
     border-radius: 14px 14px 0 0;
     min-height: 48px;
     box-sizing: border-box;
-}}
+}
 
-.admin-chat-card > h2 .menu-chat-icon {{
+.admin-chat-card > h2 .menu-chat-icon {
     width: 34px !important;
     height: 34px !important;
     flex: 0 0 34px !important;
-}}
+}
 
-.admin-chat-card .student-chat-info {{
+.admin-chat-card .student-chat-info {
     background: #fff;
     border-radius: 14px;
     padding: 8px 10px !important;
     margin-bottom: 8px;
     box-shadow: 0 2px 8px rgba(15,23,42,.06);
-}}
+}
 
 .admin-chat-card .student-photo,
-.admin-chat-card .student-photo-fallback {{
+.admin-chat-card .student-photo-fallback {
     width: 48px;
     height: 48px;
     min-width: 48px;
     border-width: 3px;
-}}
+}
 
-.admin-chat-card .student-name {{
+.admin-chat-card .student-name {
     font-size: 16px;
     color: #17233c;
-}}
+}
 
-.admin-chat-card .student-meta {{
+.admin-chat-card .student-meta {
     font-size: 11px;
     color: #64748b;
-}}
+}
 
-.admin-chat-card .student-chat-status {{
+.admin-chat-card .student-chat-status {
     min-width: 125px;
     padding-left: 8px;
-}}
+}
 
-.admin-chat-card .status-badge {{
+.admin-chat-card .status-badge {
     padding: 6px 10px;
     font-size: 11px;
-}}
+}
 
-.admin-chat-card .last-seen {{
+.admin-chat-card .last-seen {
     font-size: 10px;
-}}
+}
 
-@media (max-width: 600px) {{
-    .admin-chat-card > h2 {{
+@media (max-width: 600px) {
+    .admin-chat-card > h2 {
         margin: -12px -12px 8px -12px !important;
         padding: 9px 12px;
         min-height: 46px;
-    }}
+    }
 
-    .admin-chat-card > h2 .menu-chat-icon {{
+    .admin-chat-card > h2 .menu-chat-icon {
         width: 30px !important;
         height: 30px !important;
         flex-basis: 30px !important;
-    }}
+    }
 
-    .admin-chat-card > h2 span {{
+    .admin-chat-card > h2 span {
         font-size: 17px;
-    }}
+    }
 
-    .admin-chat-card .student-chat-info {{
+    .admin-chat-card .student-chat-info {
         padding: 6px 8px !important;
-    }}
+    }
 
-    .admin-chat-card .student-chat-status {{
+    .admin-chat-card .student-chat-status {
         min-width: 0;
         border-left: 0;
         padding-left: 4px;
-    }}
-}}
+    }
+}
 
 
 /* MENU + ADMIN CHAT */
-.admin-chat-topbar {{
+.admin-chat-topbar {
     display: flex;
     align-items: center;
     margin: 0 0 6px 0;
-}}
+}
 
-.admin-chat-back {{
+.admin-chat-back {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
@@ -6269,9 +6269,9 @@ html, body {
     font-size: 13px;
     font-weight: 700;
     padding: 5px 2px;
-}}
+}
 
-.admin-chat-menu {{
+.admin-chat-menu {
     position: absolute;
     left: 12px;
     bottom: 70px;
@@ -6283,19 +6283,19 @@ html, body {
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(15,23,42,.20);
     border: 1px solid #e2e8f0;
-}}
+}
 
-.admin-chat-menu.show {{
+.admin-chat-menu.show {
     display: block;
-}}
+}
 
 .admin-menu-item,
-.admin-menu-action {{
+.admin-menu-action {
     width: 100%;
     box-sizing: border-box;
-}}
+}
 
-.admin-menu-item {{
+.admin-menu-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -6309,18 +6309,18 @@ html, body {
     font-weight: 600;
     text-align: left;
     cursor: pointer;
-}}
+}
 
-.admin-menu-item:active {{
+.admin-menu-item:active {
     background: #f1f5f9;
-}}
+}
 
-.admin-menu-action form {{
+.admin-menu-action form {
     margin: 0 !important;
     width: 100%;
-}}
+}
 
-.admin-menu-action .btn {{
+.admin-menu-action .btn {
     width: 100%;
     border: 0;
     background: transparent;
@@ -6332,17 +6332,17 @@ html, body {
     font-weight: 600;
     text-align: left;
     box-sizing: border-box;
-}}
+}
 
-.admin-menu-end .btn {{
+.admin-menu-end .btn {
     color: #dc2626;
-}}
+}
 
-.admin-menu-transfer .btn {{
+.admin-menu-transfer .btn {
     color: #2563eb;
-}}
+}
 
-.chat-attach {{
+.chat-attach {
     width: 40px;
     height: 40px;
     min-width: 40px;
@@ -6357,26 +6357,26 @@ html, body {
     line-height: 1;
     cursor: pointer;
     padding: 0;
-}}
+}
 
-.chat-attach:active {{
+.chat-attach:active {
     transform: scale(.94);
-}}
+}
 
-@media (max-width: 600px) {{
-    .admin-chat-menu {{
+@media (max-width: 600px) {
+    .admin-chat-menu {
         left: 8px;
         bottom: 64px;
         width: 205px;
-    }}
+    }
 
-    .chat-attach {{
+    .chat-attach {
         width: 38px;
         height: 38px;
         min-width: 38px;
         font-size: 26px;
-    }}
-}}
+    }
+}
 
 </style>
 """
