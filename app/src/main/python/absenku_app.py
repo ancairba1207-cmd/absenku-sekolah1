@@ -6494,7 +6494,7 @@ html, body {
         if (!menu.contains(e.target) && !button.contains(e.target)) {{
             menu.classList.remove("show");
         }}
-    }};
+    }});
 
 (function() {{
     let versiChat = null;
