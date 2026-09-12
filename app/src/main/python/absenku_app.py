@@ -6388,7 +6388,7 @@ html, body {
 }
 
 
-/* ===== FIX CHAT ADMIN V4 ===== */
+/* ===== FIX CHAT ADMIN V8 ===== */
 
 /* Card Admin Chat */
 .card.admin-chat-card {
@@ -6408,6 +6408,7 @@ html, body {
 
     overflow: hidden !important;
     box-sizing: border-box !important;
+    padding-bottom: 8px !important;
 }
 
 /* Hanya area pesan yang scroll */
@@ -6423,31 +6424,25 @@ html, body {
 
     box-sizing: border-box !important;
 
-    padding-bottom: 72px !important;
+    padding-bottom: 12px !important;
 
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
 }
 
-/* Composer terkunci tepat di atas bottom navigation */
+/* Composer berada normal di bawah area pesan */
 .admin-chat-card .chat-form {
-    position: fixed !important;
+    position: static !important;
 
-    left: 12px !important;
-    right: 12px !important;
-    bottom: calc(
-        var(--bottom-nav-height) + env(safe-area-inset-bottom)
-    ) !important;
-
-    width: auto !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
     height: auto !important;
 
-    margin: 0 !important;
+    margin: 8px 0 0 0 !important;
     padding: 0 !important;
 
     box-sizing: border-box !important;
-
-    z-index: 1001 !important;
+    z-index: auto !important;
 }
 
 /* Baris composer */
@@ -6599,13 +6594,9 @@ html, body {
     }
 
     .admin-chat-card .chat-form {
-        left: 8px !important;
-        right: 8px !important;
-        bottom: calc(
-            var(--bottom-nav-height) + env(safe-area-inset-bottom)
-        ) !important;
-
-        margin: 0 !important;
+        position: static !important;
+        width: 100% !important;
+        margin: 8px 0 0 0 !important;
     }
 
     .admin-chat-card .chat-composer {
@@ -6717,62 +6708,7 @@ html, body {
 
         body += f"""
 <script>
-/* ===== POSISI COMPOSER ADMIN CHAT V7 ===== */
-function posisikanComposerAdminChat() {{
-    const form = document.querySelector(
-        '.admin-chat-card .chat-form'
-    );
-    const nav = document.querySelector(
-        '.dashboard-bottom-nav'
-    );
-
-    if (!form || !nav) return;
-
-    form.style.position = 'fixed';
-    form.style.bottom = 'auto';
-
-    const navRect = nav.getBoundingClientRect();
-    const formRect = form.getBoundingClientRect();
-
-    const selisih = navRect.top - formRect.bottom;
-
-    form.style.transform =
-        'translateY(' + selisih + 'px)';
-}}
-
-window.addEventListener(
-    'load',
-    posisikanComposerAdminChat
-);
-
-window.addEventListener(
-    'resize',
-    posisikanComposerAdminChat
-);
-
-window.addEventListener(
-    'orientationchange',
-    function() {{
-        setTimeout(
-            posisikanComposerAdminChat,
-            150
-        );
-    }}
-);
-
-setTimeout(
-    posisikanComposerAdminChat,
-    100
-);
-
-setTimeout(
-    posisikanComposerAdminChat,
-    500
-);
-
-
-
-    window.toggleAdminChatMenu = function() {{
+window.toggleAdminChatMenu = function() {{
         const menu = document.getElementById("adminChatMenu");
         if (!menu) return;
         menu.classList.toggle("show");
