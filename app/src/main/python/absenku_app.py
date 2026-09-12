@@ -6398,6 +6398,185 @@ html, body {
 
 /* ===== FIX CHAT ADMIN V9 - COMPOSER ABOVE BOTTOM NAV ===== */
 
+/* ===== FIX CHAT ADMIN V10 - TRUE FLEX HEIGHT ===== */
+
+/* Parent Admin Chat harus mengambil sisa ruang saja */
+.admin-chat-page-scroll {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+}
+
+/* Kartu mengikuti ruang yang tersedia */
+.admin-chat-page-scroll .admin-chat-card {
+    flex: 1 1 0 !important;
+
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+
+    margin-bottom: 0 !important;
+}
+
+/* Area percakapan mengambil SEMUA ruang tersisa */
+.admin-chat-page-scroll .admin-chat-card #chat-box {
+    flex: 1 1 0 !important;
+
+    min-height: 0 !important;
+    height: 0 !important;
+    max-height: none !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    box-sizing: border-box !important;
+
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+}
+
+/* Composer tidak ikut scroll */
+.admin-chat-page-scroll .admin-chat-card .chat-form {
+    flex: 0 0 auto !important;
+
+    position: static !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    margin: 8px 0 0 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+/* Baris input */
+.admin-chat-page-scroll .admin-chat-card .chat-composer {
+    flex: 0 0 auto !important;
+
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    box-sizing: border-box !important;
+
+    padding: 4px !important;
+    margin: 0 !important;
+}
+
+/* Tombol + */
+.admin-chat-page-scroll .admin-chat-card .chat-attach {
+    flex: 0 0 34px !important;
+
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+/* Icon + */
+.admin-chat-page-scroll .admin-chat-card .chat-attach-icon {
+    width: 19px !important;
+    height: 19px !important;
+
+    min-width: 19px !important;
+    min-height: 19px !important;
+    max-width: 19px !important;
+    max-height: 19px !important;
+
+    object-fit: contain !important;
+}
+
+/* Input */
+.admin-chat-page-scroll .admin-chat-card .chat-form textarea {
+    flex: 1 1 auto !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+
+    margin: 0 !important;
+    padding: 8px 9px !important;
+
+    resize: none !important;
+    overflow-y: auto !important;
+
+    box-sizing: border-box !important;
+}
+
+/* Kirim */
+.admin-chat-page-scroll .admin-chat-card .chat-send {
+    flex: 0 0 36px !important;
+
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* HP: pastikan kartu tidak melewati layar */
+@media (max-width: 600px) {
+    .admin-chat-page-scroll {
+        flex: 1 1 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .admin-chat-page-scroll .admin-chat-card {
+        flex: 1 1 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+
+        margin-bottom: 0 !important;
+    }
+
+    .admin-chat-page-scroll .admin-chat-card #chat-box {
+        flex: 1 1 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+    }
+
+    .admin-chat-page-scroll .admin-chat-card .chat-form {
+        flex: 0 0 auto !important;
+        position: static !important;
+    }
+}
+
+
 /* Rantai tinggi khusus halaman Admin Chat */
 .admin-chat-page-scroll {
     display: flex !important;
