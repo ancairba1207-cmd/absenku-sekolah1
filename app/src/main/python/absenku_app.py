@@ -5743,7 +5743,7 @@ def obrolan_admin_detail(nis):
                             class="chat-attach"
                             aria-label="Lampiran"
                             onclick="toggleAdminChatMenu()">
-                        +
+                        <img src="/static/images/icon_plus.png" alt="" class="chat-attach-icon">
                     </button>
 
                     <textarea
@@ -6295,6 +6295,14 @@ html, body {
     box-sizing: border-box;
 }
 
+.admin-menu-icon {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    object-fit: contain;
+    display: block;
+}
+
 .admin-menu-item {
     display: flex;
     align-items: center;
@@ -6440,19 +6448,22 @@ html, body {
                 <button type="button"
                         class="admin-menu-item"
                         onclick="document.getElementById('adminCameraInput').click(); toggleAdminChatMenu();">
-                    📷 Kamera
+                    <img src="/static/images/icon_kamera.png" alt="" class="admin-menu-icon">
+                    <span>Kamera</span>
                 </button>
 
                 <button type="button"
                         class="admin-menu-item"
                         onclick="document.getElementById('adminPhotoInput').click(); toggleAdminChatMenu();">
-                    🖼️ Foto
+                    <img src="/static/images/icon_foto.png" alt="" class="admin-menu-icon">
+                    <span>Foto</span>
                 </button>
 
                 <button type="button"
                         class="admin-menu-item"
                         onclick="document.getElementById('adminFileInput').click(); toggleAdminChatMenu();">
-                    📎 File
+                    <img src="/static/images/icon_file.png" alt="" class="admin-menu-icon">
+                    <span>File</span>
                 </button>
 
             </div>
