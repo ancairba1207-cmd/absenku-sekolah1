@@ -6400,6 +6400,64 @@ html, body {
 
 /* ===== FIX CHAT ADMIN V10 - TRUE FLEX HEIGHT ===== */
 
+/* ===== FIX CHAT ADMIN V11 - RESERVE BOTTOM NAV SPACE ===== */
+
+.admin-chat-page-scroll {
+    box-sizing: border-box !important;
+
+    /* WAJIB sisakan ruang untuk bottom navigation */
+    padding-bottom: var(--bottom-nav-height) !important;
+
+    overflow: hidden !important;
+}
+
+.admin-chat-page-scroll .admin-chat-card {
+    box-sizing: border-box !important;
+
+    /* kartu hanya mengisi ruang yang tersedia */
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+
+    height: auto !important;
+    max-height: none !important;
+
+    overflow: hidden !important;
+}
+
+.admin-chat-page-scroll .admin-chat-card #chat-box {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.admin-chat-page-scroll .admin-chat-card .chat-form {
+    flex: 0 0 auto !important;
+
+    position: static !important;
+
+    width: 100% !important;
+
+    margin: 8px 0 0 0 !important;
+    padding: 0 !important;
+}
+
+.admin-chat-page-scroll .admin-chat-card .chat-composer {
+    flex: 0 0 auto !important;
+
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+
+    box-sizing: border-box !important;
+}
+
+
 /* Parent Admin Chat harus mengambil sisa ruang saja */
 .admin-chat-page-scroll {
     flex: 1 1 0 !important;
