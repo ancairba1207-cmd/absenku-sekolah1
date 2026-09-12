@@ -6216,6 +6216,92 @@ html, body {
                 </div>
             </div>
         </div>
+
+/* HEADER ADMIN CHAT MODERN */
+.admin-chat-card > h2 {{
+    background: linear-gradient(135deg,#2563eb,#4f46e5);
+    color: #fff;
+    margin: -12px -12px 12px -12px !important;
+    padding: 10px 14px;
+    border-radius: 14px 14px 0 0;
+    min-height: 48px;
+    box-sizing: border-box;
+}}
+
+.admin-chat-card > h2 .menu-chat-icon {{
+    width: 34px !important;
+    height: 34px !important;
+    flex: 0 0 34px !important;
+}}
+
+.admin-chat-card .student-chat-info {{
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px 10px !important;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(15,23,42,.06);
+}}
+
+.admin-chat-card .student-photo,
+.admin-chat-card .student-photo-fallback {{
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-width: 3px;
+}}
+
+.admin-chat-card .student-name {{
+    font-size: 16px;
+    color: #17233c;
+}}
+
+.admin-chat-card .student-meta {{
+    font-size: 11px;
+    color: #64748b;
+}}
+
+.admin-chat-card .student-chat-status {{
+    min-width: 125px;
+    padding-left: 8px;
+}}
+
+.admin-chat-card .status-badge {{
+    padding: 6px 10px;
+    font-size: 11px;
+}}
+
+.admin-chat-card .last-seen {{
+    font-size: 10px;
+}}
+
+@media (max-width: 600px) {{
+    .admin-chat-card > h2 {{
+        margin: -12px -12px 8px -12px !important;
+        padding: 9px 12px;
+        min-height: 46px;
+    }}
+
+    .admin-chat-card > h2 .menu-chat-icon {{
+        width: 30px !important;
+        height: 30px !important;
+        flex-basis: 30px !important;
+    }}
+
+    .admin-chat-card > h2 span {{
+        font-size: 17px;
+    }}
+
+    .admin-chat-card .student-chat-info {{
+        padding: 6px 8px !important;
+    }}
+
+    .admin-chat-card .student-chat-status {{
+        min-width: 0;
+        border-left: 0;
+        padding-left: 4px;
+    }}
+}}
+
         """
 
         body += f"""
