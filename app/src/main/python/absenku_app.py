@@ -2202,7 +2202,7 @@ document.addEventListener("DOMContentLoaded", function() {{
 <div style="width:44px"></div>
 </div>
 
-<div class="page-scroll">
+<div class="page-scroll{' admin-chat-page-scroll' if 'admin-chat-card' in body else ''}">
 {body}
 </div>
 
@@ -6387,6 +6387,12 @@ html, body {
     }
 }
 
+
+/* ===== PAGE SCROLL ADMIN CHAT ===== */
+.admin-chat-page-scroll {
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+}
 
 /* ===== FIX CHAT ADMIN V8 ===== */
 
