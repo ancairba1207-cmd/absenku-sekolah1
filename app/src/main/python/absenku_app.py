@@ -4268,7 +4268,9 @@ def nilai_siswa():
         .nilai-form-grid{{grid-template-columns:1fr}}
         .nilai-full{{grid-column:auto}}
     }}
-    </style>
+
+
+
 
     <div class="nilai-admin-wrap">
 
@@ -6243,6 +6245,131 @@ html, body {
     }}
 }}
 
+
+/* MENU + ADMIN CHAT */
+.admin-chat-topbar {{
+    display: flex;
+    align-items: center;
+    margin: 0 0 6px 0;
+}}
+
+.admin-chat-back {{
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 2px;
+}}
+
+.admin-chat-menu {{
+    position: absolute;
+    left: 12px;
+    bottom: 70px;
+    z-index: 50;
+    display: none;
+    width: 220px;
+    padding: 7px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(15,23,42,.20);
+    border: 1px solid #e2e8f0;
+}}
+
+.admin-chat-menu.show {{
+    display: block;
+}}
+
+.admin-menu-item,
+.admin-menu-action {{
+    width: 100%;
+    box-sizing: border-box;
+}}
+
+.admin-menu-item {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    background: transparent;
+    color: #17233c;
+    padding: 11px 12px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}}
+
+.admin-menu-item:active {{
+    background: #f1f5f9;
+}}
+
+.admin-menu-action form {{
+    margin: 0 !important;
+    width: 100%;
+}}
+
+.admin-menu-action .btn {{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: #17233c;
+    padding: 11px 12px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    box-sizing: border-box;
+}}
+
+.admin-menu-end .btn {{
+    color: #dc2626;
+}}
+
+.admin-menu-transfer .btn {{
+    color: #2563eb;
+}}
+
+.chat-attach {{
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: #eef2ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}}
+
+.chat-attach:active {{
+    transform: scale(.94);
+}}
+
+@media (max-width: 600px) {{
+    .admin-chat-menu {{
+        left: 8px;
+        bottom: 64px;
+        width: 205px;
+    }}
+
+    .chat-attach {{
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        font-size: 26px;
+    }}
+}}
+
 </style>
 """
 
@@ -6258,7 +6385,11 @@ html, body {
                 <span>Obrolan Administrator</span>
             </h2>
 
-            <div class="student-chat-info">
+            <div class="admin-chat-topbar">
+            <a class="admin-chat-back" href="/obrolan_admin" aria-label="Kembali">← Kembali</a>
+        </div>
+
+        <div class="student-chat-info">
                 {(
                     f'<img class="student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
                     if foto_siswa
@@ -6288,25 +6419,75 @@ html, body {
 
             {form_chat}
 
-            <div class="admin-chat-actions">
-                <div class="admin-action-transfer">
+            <div class="admin-chat-menu" id="adminChatMenu">
+
+                <div class="admin-menu-action admin-menu-transfer">
                     {tombol_alih}
                 </div>
-                <div class="admin-action-end">
+
+                <div class="admin-menu-action admin-menu-end">
                     {tombol_akhiri}
                 </div>
-                <div class="admin-action-back">
-                    <a class="btn" href="/obrolan_admin">
-                        ← Kembali
-                    </a>
-                </div>
+
+                <button type="button"
+                        class="admin-menu-item"
+                        onclick="document.getElementById('adminCameraInput').click(); toggleAdminChatMenu();">
+                    📷 Kamera
+                </button>
+
+                <button type="button"
+                        class="admin-menu-item"
+                        onclick="document.getElementById('adminPhotoInput').click(); toggleAdminChatMenu();">
+                    🖼️ Foto
+                </button>
+
+                <button type="button"
+                        class="admin-menu-item"
+                        onclick="document.getElementById('adminFileInput').click(); toggleAdminChatMenu();">
+                    📎 File
+                </button>
+
             </div>
+
+            <input id="adminCameraInput"
+                   type="file"
+                   accept="image/*"
+                   capture="environment"
+                   style="display:none">
+
+            <input id="adminPhotoInput"
+                   type="file"
+                   accept="image/*"
+                   style="display:none">
+
+            <input id="adminFileInput"
+                   type="file"
+                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                   style="display:none">
         </div>
 
         """
 
         body += f"""
 <script>
+
+    window.toggleAdminChatMenu = function() {{
+        const menu = document.getElementById("adminChatMenu");
+        if (!menu) return;
+        menu.classList.toggle("show");
+    }};
+
+    document.addEventListener("click", function(e) {{
+        const menu = document.getElementById("adminChatMenu");
+        const button = document.querySelector(".chat-attach");
+
+        if (!menu || !button) return;
+
+        if (!menu.contains(e.target) && !button.contains(e.target)) {{
+            menu.classList.remove("show");
+        }}
+    }};
+
 (function() {{
     let versiChat = null;
     let sedangCek = false;
