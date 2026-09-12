@@ -6423,28 +6423,31 @@ html, body {
 
     box-sizing: border-box !important;
 
+    padding-bottom: 72px !important;
+
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
 }
 
-/* Composer berada setelah chat-box */
+/* Composer terkunci tepat di atas bottom navigation */
 .admin-chat-card .chat-form {
-    position: relative !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
+    position: fixed !important;
 
-    flex: 0 0 auto !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(
+        var(--bottom-nav-height) + env(safe-area-inset-bottom)
+    ) !important;
 
-    width: 100% !important;
+    width: auto !important;
     height: auto !important;
 
-    margin: 8px 0 0 0 !important;
+    margin: 0 !important;
     padding: 0 !important;
 
     box-sizing: border-box !important;
 
-    z-index: 20 !important;
+    z-index: 1001 !important;
 }
 
 /* Baris composer */
@@ -6596,7 +6599,13 @@ html, body {
     }
 
     .admin-chat-card .chat-form {
-        margin-top: 6px !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: calc(
+            var(--bottom-nav-height) + env(safe-area-inset-bottom)
+        ) !important;
+
+        margin: 0 !important;
     }
 
     .admin-chat-card .chat-composer {
