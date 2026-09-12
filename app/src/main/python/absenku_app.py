@@ -6398,8 +6398,8 @@ html, body {
     margin-left: auto !important;
     margin-right: auto !important;
 
-    height: calc(100dvh - 180px - env(safe-area-inset-bottom)) !important;
-    max-height: calc(100dvh - 180px - env(safe-area-inset-bottom)) !important;
+    height: 100% !important;
+    max-height: 100% !important;
 
     min-height: 0 !important;
 
@@ -6586,8 +6586,8 @@ html, body {
         width: calc(100% - 16px) !important;
         max-width: none !important;
 
-        height: calc(100dvh - 155px - env(safe-area-inset-bottom)) !important;
-        max-height: calc(100dvh - 155px - env(safe-area-inset-bottom)) !important;
+        height: 100% !important;
+        max-height: 100% !important;
 
         min-height: 0 !important;
 
