@@ -6388,206 +6388,223 @@ html, body {
 }
 
 
-/* ===== FIX CHAT ADMIN V2 ===== */
+/* ===== FIX CHAT ADMIN V4 ===== */
 
-/* Area chat tetap menjadi layout utama */
-.admin-chat-card {
+/* Card Admin Chat */
+.card.admin-chat-card {
     position: relative !important;
+    width: min(100%, 760px) !important;
+    max-width: 760px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    height: calc(100dvh - 180px - env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - 180px - env(safe-area-inset-bottom)) !important;
+
+    min-height: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    overflow: hidden !important;
     box-sizing: border-box !important;
 }
 
-/* Hanya daftar pesan yang melakukan scroll */
+/* Hanya area pesan yang scroll */
 .admin-chat-card #chat-box {
     flex: 1 1 auto !important;
     min-height: 0 !important;
+
+    height: auto !important;
+    max-height: none !important;
+
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-bottom: 90px !important;
+
     box-sizing: border-box !important;
+
     -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
 }
 
-/* =========================================================
-   COMPOSER FIXED TEPAT DI ATAS BOTTOM NAVIGATION
-   ========================================================= */
+/* Composer berada setelah chat-box */
 .admin-chat-card .chat-form {
-    position: fixed !important;
-    left: 20px !important;
-    right: 20px !important;
-    bottom: calc(105px + env(safe-area-inset-bottom)) !important;
-    width: auto !important;
-    margin: 0 !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    flex: 0 0 auto !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    margin: 8px 0 0 0 !important;
     padding: 0 !important;
-    z-index: 1000 !important;
+
     box-sizing: border-box !important;
+
+    z-index: 20 !important;
 }
 
 /* Baris composer */
 .admin-chat-card .chat-composer {
     width: 100% !important;
-    min-height: 52px !important;
-    max-height: 60px !important;
-    box-sizing: border-box !important;
+
+    min-height: 50px !important;
+    max-height: 56px !important;
+
     display: flex !important;
     align-items: center !important;
+
     gap: 7px !important;
-    padding: 5px !important;
+    padding: 4px !important;
     margin: 0 !important;
+
+    box-sizing: border-box !important;
+
     background: #fff !important;
     border: 1px solid #dbe3ef !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 16px rgba(15,23,42,.16) !important;
+    border-radius: 15px !important;
+
+    box-shadow: 0 3px 12px rgba(15,23,42,.12) !important;
 }
 
-/* =========================================================
-   TOMBOL PLUS
-   ========================================================= */
+/* Tombol + */
 .admin-chat-card .chat-attach {
-    flex: 0 0 36px !important;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
+    flex: 0 0 34px !important;
+
+    width: 34px !important;
+    height: 34px !important;
+
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+
     padding: 0 !important;
     margin: 0 !important;
+
     border-radius: 50% !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
+
     font-size: 0 !important;
     line-height: 0 !important;
 }
 
-/* Icon plus PNG */
+/* Icon + */
 .admin-chat-card .chat-attach-icon {
     display: block !important;
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
-    max-width: 20px !important;
-    max-height: 20px !important;
+
+    width: 19px !important;
+    height: 19px !important;
+
+    min-width: 19px !important;
+    min-height: 19px !important;
+    max-width: 19px !important;
+    max-height: 19px !important;
+
     object-fit: contain !important;
 }
 
-/* =========================================================
-   INPUT PESAN
-   ========================================================= */
+/* Input pesan */
 .admin-chat-card .chat-form textarea {
     flex: 1 1 auto !important;
+
     width: auto !important;
     min-width: 0 !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+
     margin: 0 !important;
-    padding: 9px 10px !important;
+    padding: 8px 9px !important;
+
     box-sizing: border-box !important;
+
     resize: none !important;
     overflow-y: auto !important;
 }
 
-/* =========================================================
-   TOMBOL KIRIM
-   ========================================================= */
+/* Tombol kirim */
 .admin-chat-card .chat-composer .chat-send {
-    flex: 0 0 38px !important;
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    min-height: 38px !important;
-    max-width: 38px !important;
-    max-height: 38px !important;
+    flex: 0 0 36px !important;
+
+    width: 36px !important;
+    height: 36px !important;
+
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+
     padding: 0 !important;
     margin: 0 !important;
 }
 
-/* =========================================================
-   ICON AKHIRI + ALIHKAN
-   ========================================================= */
+/* Icon Alihkan / Akhiri */
 .admin-chat-card .admin-menu-action .admin-chat-action-btn {
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
+
     width: 100% !important;
     min-height: 44px !important;
+
     padding: 9px 12px !important;
     margin: 0 !important;
+
     box-sizing: border-box !important;
 }
 
 .admin-chat-card .admin-action-icon {
     display: block !important;
+
     flex: 0 0 22px !important;
+
     width: 22px !important;
     height: 22px !important;
+
     min-width: 22px !important;
     min-height: 22px !important;
     max-width: 22px !important;
     max-height: 22px !important;
+
     object-fit: contain !important;
 }
 
-/* Popup menu selalu berada di atas composer */
+/* Popup menu */
 .admin-chat-card .admin-chat-menu {
-    z-index: 1100 !important;
+    z-index: 500 !important;
 }
 
-/* =========================================================
-   HP
-   ========================================================= */
+/* HP */
 @media (max-width: 600px) {
+    .card.admin-chat-card {
+        width: calc(100% - 16px) !important;
+        max-width: none !important;
 
-    .admin-chat-card #chat-box {
-        padding-bottom: 82px !important;
+        height: calc(100dvh - 155px - env(safe-area-inset-bottom)) !important;
+        max-height: calc(100dvh - 155px - env(safe-area-inset-bottom)) !important;
+
+        min-height: 0 !important;
+
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
     .admin-chat-card .chat-form {
-        left: 12px !important;
-        right: 12px !important;
-        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 4px) !important;
+        margin-top: 6px !important;
     }
 
     .admin-chat-card .chat-composer {
         min-height: 50px !important;
         max-height: 56px !important;
-        padding: 4px !important;
-        border-radius: 15px !important;
-    }
-
-    .admin-chat-card .chat-attach {
-        flex-basis: 34px !important;
-        width: 34px !important;
-        height: 34px !important;
-        min-width: 34px !important;
-        min-height: 34px !important;
-        max-width: 34px !important;
-        max-height: 34px !important;
-    }
-
-    .admin-chat-card .chat-attach-icon {
-        width: 19px !important;
-        height: 19px !important;
-    }
-
-    .admin-chat-card .chat-form textarea {
-        height: 38px !important;
-        min-height: 38px !important;
-        max-height: 38px !important;
-        padding: 8px 9px !important;
-    }
-
-    .admin-chat-card .chat-composer .chat-send {
-        flex-basis: 36px !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        max-width: 36px !important;
-        max-height: 36px !important;
     }
 }
+
 </style>
 """
 
