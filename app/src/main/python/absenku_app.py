@@ -5891,6 +5891,7 @@ def obrolan_admin_detail(nis):
 
         if request.method == "POST":
             import json
+            import time
 
             pesan_baru = request.form.get("pesan", "").strip()
             file_lampiran = request.files.get("lampiran")
@@ -5905,10 +5906,36 @@ def obrolan_admin_detail(nis):
                     " | content_length=" + repr(file_lampiran.content_length)
                 )
 
-            ada_lampiran = bool(
-                file_lampiran
-                and str(file_lampiran.filename or "").strip()
-            )
+            # WebView Android kadang mengirim multipart field lampiran
+            # tanpa metadata filename. Selama field file ada, tetap proses
+            # sebagai lampiran dan beri nama sementara berdasarkan MIME.
+            ada_lampiran = bool(file_lampiran)
+
+            if ada_lampiran and not str(file_lampiran.filename or "").strip():
+                try:
+                    posisi_awal = file_lampiran.stream.tell()
+                    isi_probe = file_lampiran.stream.read(1)
+                    file_lampiran.stream.seek(posisi_awal)
+                    if not isi_probe:
+                        ada_lampiran = False
+                except Exception:
+                    pass
+
+            if ada_lampiran and not str(file_lampiran.filename or "").strip():
+                mime_fallback = str(file_lampiran.mimetype or "").lower().strip()
+                ext_fallback = {
+                    "application/pdf": ".pdf",
+                    "application/msword": ".doc",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+                    "application/vnd.ms-excel": ".xls",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+                    "application/vnd.ms-powerpoint": ".ppt",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+                    "image/jpeg": ".jpg",
+                    "image/png": ".png",
+                    "image/webp": ".webp",
+                }.get(mime_fallback, "")
+                file_lampiran.filename = "lampiran_" + str(int(time.time() * 1000)) + ext_fallback
 
             if (pesan_baru or ada_lampiran) and sesi_id_aktif:
                 lampiran_metadata = None
