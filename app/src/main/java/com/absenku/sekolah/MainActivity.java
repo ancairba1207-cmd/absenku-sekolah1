@@ -811,7 +811,8 @@ public class MainActivity extends Activity {
                                         androidx.core.content.FileProvider.getUriForFile(
                                                 MainActivity.this,
                                                 MainActivity.this.getPackageName() + ".fileprovider",
-                                                cacheFile
+                                                cacheFile,
+                                                namaFile
                                         )
                                 };
 
