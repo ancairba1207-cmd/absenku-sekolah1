@@ -6095,6 +6095,25 @@ def obrolan_admin_detail(nis):
                             </svg>
                         </span>
                     </button>
+
+            <input id="adminCameraInput"
+                   type="file"
+                   name="lampiran"
+                   accept="image/*"
+                   capture="environment"
+                   style="display:none">
+
+            <input id="adminPhotoInput"
+                   type="file"
+                   name="lampiran"
+                   accept="image/*"
+                   style="display:none">
+
+            <input id="adminFileInput"
+                   type="file"
+                   name="lampiran"
+                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                   style="display:none">
                 </div>
             </form>
             """
@@ -7843,27 +7862,6 @@ html, body {
 
             </div>
 
-            <input id="adminCameraInput"
-                   type="file"
-                   name="lampiran"
-                   form="adminChatForm"
-                   accept="image/*"
-                   capture="environment"
-                   style="display:none">
-
-            <input id="adminPhotoInput"
-                   type="file"
-                   name="lampiran"
-                   form="adminChatForm"
-                   accept="image/*"
-                   style="display:none">
-
-            <input id="adminFileInput"
-                   type="file"
-                   name="lampiran"
-                   form="adminChatForm"
-                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-                   style="display:none">
         </div>
 
         """
