@@ -4826,8 +4826,6 @@ def nilai_tugas():
 
 
 
-@app.route("/obrolan_admin", methods=["GET"])
-@login_required
 def _render_lampiran_server(row, escape_func):
     """Render attachment saat halaman chat pertama kali dibuka."""
     raw = row.get("lampiran") if isinstance(row, dict) else None
@@ -4904,6 +4902,8 @@ def _render_lampiran_server(row, escape_func):
     except Exception:
         return ""
 
+@app.route("/obrolan_admin", methods=["GET"])
+@login_required
 def obrolan_admin():
     if session.get("role") != "admin":
         return redirect(url_for("home"))
