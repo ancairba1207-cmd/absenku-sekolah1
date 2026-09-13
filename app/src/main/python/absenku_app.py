@@ -5934,7 +5934,7 @@ def obrolan_admin_detail(nis):
             # WebView Android kadang mengirim multipart field lampiran
             # tanpa metadata filename. Selama field file ada, tetap proses
             # sebagai lampiran dan beri nama sementara berdasarkan MIME.
-            ada_lampiran = bool(file_lampiran)
+            ada_lampiran = file_lampiran is not None
 
             if ada_lampiran and not str(file_lampiran.filename or "").strip():
                 try:
