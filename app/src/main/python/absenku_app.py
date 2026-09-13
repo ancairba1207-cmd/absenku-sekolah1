@@ -7070,6 +7070,93 @@ html, body {
     }
 }
 
+
+/* ===== ADMIN CHAT FINAL V13 ===== */
+
+/* Page Admin Chat memenuhi ruang yang tersedia */
+.admin-chat-page-scroll {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+}
+
+/* Card memenuhi page-scroll */
+.admin-chat-page-scroll > .admin-chat-card {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+}
+
+/* Hanya pesan yang scroll */
+.admin-chat-page-scroll > .admin-chat-card #chat-box {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Composer tetap di bawah */
+.admin-chat-page-scroll > .admin-chat-card .chat-form {
+    flex: 0 0 auto !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 8px 0 0 0 !important;
+    padding: 0 !important;
+}
+
+/* Baris input */
+.admin-chat-page-scroll > .admin-chat-card .chat-composer {
+    flex: 0 0 50px !important;
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    box-sizing: border-box !important;
+}
+
+/* Tombol + */
+.admin-chat-page-scroll > .admin-chat-card .chat-attach {
+    flex: 0 0 34px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+}
+
+/* Icon + */
+.admin-chat-page-scroll > .admin-chat-card .chat-attach-icon {
+    width: 19px !important;
+    height: 19px !important;
+}
+
+/* Tombol kirim */
+.admin-chat-page-scroll > .admin-chat-card .chat-send {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+}
+
+@media (max-width: 600px) {
+    .admin-chat-page-scroll > .admin-chat-card {
+        width: calc(100% - 16px) !important;
+        max-width: none !important;
+    }
+}
 </style>
 """
 
