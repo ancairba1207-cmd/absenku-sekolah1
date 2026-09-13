@@ -609,21 +609,138 @@ public class MainActivity extends Activity {
             if (resultCode == RESULT_OK &&
                     data != null) {
 
+                android.net.Uri selectedUri = null;
+
                 android.content.ClipData clipData =
                         data.getClipData();
 
                 if (clipData != null &&
                         clipData.getItemCount() > 0) {
 
-                    results = new android.net.Uri[]{
-                            clipData.getItemAt(0).getUri()
-                    };
+                    selectedUri = clipData.getItemAt(0).getUri();
 
                 } else if (data.getData() != null) {
 
-                    results = new android.net.Uri[]{
-                            data.getData()
-                    };
+                    selectedUri = data.getData();
+                }
+
+                if (selectedUri != null) {
+                    try {
+                        /*
+                         * Beberapa file picker Android mengembalikan
+                         * content:// URI tanpa filename yang dapat dibaca
+                         * WebView. Salin file ke cache aplikasi dengan
+                         * nama asli agar Flask menerima filename yang benar.
+                         */
+                        String namaFile = null;
+
+                        android.database.Cursor cursor =
+                                getContentResolver().query(
+                                        selectedUri,
+                                        new String[]{
+                                                android.provider.OpenableColumns.DISPLAY_NAME
+                                        },
+                                        null,
+                                        null,
+                                        null
+                                );
+
+                        if (cursor != null) {
+                            try {
+                                if (cursor.moveToFirst()) {
+                                    int index = cursor.getColumnIndex(
+                                            android.provider.OpenableColumns.DISPLAY_NAME
+                                    );
+                                    if (index >= 0) {
+                                        namaFile = cursor.getString(index);
+                                    }
+                                }
+                            } finally {
+                                cursor.close();
+                            }
+                        }
+
+                        if (namaFile == null ||
+                                namaFile.trim().isEmpty()) {
+                            namaFile = "lampiran_" +
+                                    System.currentTimeMillis();
+                        }
+
+                        namaFile = namaFile.replaceAll(
+                                "[\\\\/:*?\"<>|]",
+                                "_"
+                        );
+
+                        String mimeType =
+                                getContentResolver().getType(selectedUri);
+
+                        if (mimeType == null ||
+                                mimeType.trim().isEmpty()) {
+                            mimeType = "application/octet-stream";
+                        }
+
+                        File cacheFile = new File(
+                                getCacheDir(),
+                                namaFile
+                        );
+
+                        try (
+                                java.io.InputStream input =
+                                        getContentResolver()
+                                                .openInputStream(selectedUri);
+                                java.io.OutputStream output =
+                                        new java.io.FileOutputStream(cacheFile)
+                        ) {
+                            if (input == null) {
+                                throw new java.io.IOException(
+                                        "Tidak dapat membaca file"
+                                );
+                            }
+
+                            byte[] buffer = new byte[8192];
+                            int length;
+
+                            while ((length = input.read(buffer)) != -1) {
+                                output.write(buffer, 0, length);
+                            }
+                        }
+
+                        android.net.Uri cacheUri =
+                                FileProvider.getUriForFile(
+                                        MainActivity.this,
+                                        getPackageName() + ".fileprovider",
+                                        cacheFile
+                                );
+
+                        getContentResolver().takePersistableUriPermission(
+                                selectedUri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        );
+
+                        results = new android.net.Uri[]{
+                                cacheUri
+                        };
+
+                        android.util.Log.d(
+                                "ABSENKU_FILE",
+                                "File siap dikirim: " +
+                                namaFile +
+                                " | MIME=" + mimeType +
+                                " | cache=" + cacheFile.getAbsolutePath()
+                        );
+
+                    } catch (Exception e) {
+                        android.util.Log.e(
+                                "ABSENKU_FILE",
+                                "Gagal menyiapkan file: " +
+                                e.getClass().getSimpleName() +
+                                " | " + e.getMessage()
+                        );
+
+                        results = new android.net.Uri[]{
+                                selectedUri
+                        };
+                    }
                 }
             }
 
