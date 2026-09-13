@@ -806,24 +806,18 @@ public class MainActivity extends Activity {
                          * cacheFile tetap dibuat sebagai pengecekan bahwa
                          * file benar-benar dapat dibaca dari Android.
                          */
-                        android.net.Uri fileUri =
-                                androidx.core.content.FileProvider.getUriForFile(
-                                        MainActivity.this,
-                                        MainActivity.this.getPackageName() + ".fileprovider",
-                                        cacheFile,
-                                        namaFile
-                                );
-
-                        MainActivity.this.grantUriPermission(
-                                MainActivity.this.getPackageName(),
-                                fileUri,
-                                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        );
-
-                        results =
-                                new android.net.Uri[]{
-                                        fileUri
-                                };
+                        /*
+                         * Kembalikan URI asli dari DocumentsProvider ke WebView.
+                         * Input file HTML sudah berada di dalam form multipart,
+                         * sehingga WebView dapat membaca URI content:// asli
+                         * yang diberikan oleh Android file picker.
+                         *
+                         * cacheFile tetap dibuat di atas sebagai verifikasi bahwa
+                         * file benar-benar dapat dibaca oleh aplikasi Android.
+                         */
+                        results = new android.net.Uri[]{
+                                selectedUri
+                        };
 
                         android.util.Log.d(
                                 "ABSENKU_FILE",
