@@ -806,15 +806,29 @@ public class MainActivity extends Activity {
                          * cacheFile tetap dibuat sebagai pengecekan bahwa
                          * file benar-benar dapat dibaca dari Android.
                          */
+                        android.net.Uri fileUri =
+                                androidx.core.content.FileProvider.getUriForFile(
+                                        MainActivity.this,
+                                        MainActivity.this.getPackageName() + ".fileprovider",
+                                        cacheFile,
+                                        namaFile
+                                );
+
+                        MainActivity.this.grantUriPermission(
+                                MainActivity.this.getPackageName(),
+                                fileUri,
+                                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        );
+
                         results =
                                 new android.net.Uri[]{
-                                        androidx.core.content.FileProvider.getUriForFile(
-                                                MainActivity.this,
-                                                MainActivity.this.getPackageName() + ".fileprovider",
-                                                cacheFile,
-                                                namaFile
-                                        )
+                                        fileUri
                                 };
+
+                        android.util.Log.d(
+                                "ABSENKU_FILE",
+                                "URI SIAP UNTUK WEBVIEW: " + results[0]
+                        );
 
                         android.util.Log.d(
                                 "ABSENKU_FILE",
