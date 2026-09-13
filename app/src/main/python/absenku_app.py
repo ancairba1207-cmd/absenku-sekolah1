@@ -8145,6 +8145,12 @@ window.toggleAdminChatMenu = function() {{
                 }});
             }}
 
+            console.log(
+                "[CHAT FILE DEBUG] submit | form=" + form.id +
+                " | teksAda=" + teksAda +
+                " | fileAda=" + fileAda
+            );
+
             if (!teksAda && !fileAda) {{
                 e.preventDefault();
                 alert("Tulis pesan atau pilih lampiran terlebih dahulu.");
