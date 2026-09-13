@@ -6402,6 +6402,122 @@ html, body {
 
 /* ===== FIX CHAT ADMIN V11 - RESERVE BOTTOM NAV SPACE ===== */
 
+/* ===== FIX CHAT ADMIN V12 - FORCE AVAILABLE HEIGHT ===== */
+
+/*
+ * Paksa page-scroll menjadi flex item dengan tinggi yang benar.
+ * Ini membuat kartu Admin Chat mengisi seluruh ruang sampai
+ * tepat sebelum bottom navigation.
+ */
+.admin-chat-page-scroll {
+    flex: 1 1 0 !important;
+
+    width: 100% !important;
+
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+
+    padding-bottom: var(--bottom-nav-height) !important;
+}
+
+/* Kartu mengisi seluruh ruang yang diberikan parent */
+.admin-chat-page-scroll > .admin-chat-card {
+    flex: 1 1 0 !important;
+
+    width: min(100%, 760px) !important;
+
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    box-sizing: border-box !important;
+
+    overflow: hidden !important;
+}
+
+/* Chat box mengambil semua ruang kosong */
+.admin-chat-page-scroll > .admin-chat-card #chat-box {
+    flex: 1 1 0 !important;
+
+    width: 100% !important;
+
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    box-sizing: border-box !important;
+
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+}
+
+/* Composer selalu menjadi elemen terakhir */
+.admin-chat-page-scroll > .admin-chat-card .chat-form {
+    flex: 0 0 auto !important;
+
+    position: static !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    margin: 8px 0 0 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+/* Ukuran composer tetap */
+.admin-chat-page-scroll > .admin-chat-card .chat-composer {
+    flex: 0 0 50px !important;
+
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+
+    box-sizing: border-box !important;
+}
+
+/* HP */
+@media (max-width: 600px) {
+    .admin-chat-page-scroll {
+        flex: 1 1 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+
+        padding-bottom: var(--bottom-nav-height) !important;
+
+        overflow: hidden !important;
+    }
+
+    .admin-chat-page-scroll > .admin-chat-card {
+        flex: 1 1 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+    }
+
+    .admin-chat-page-scroll > .admin-chat-card #chat-box {
+        flex: 1 1 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+    }
+}
+
+
 .admin-chat-page-scroll {
     box-sizing: border-box !important;
 
