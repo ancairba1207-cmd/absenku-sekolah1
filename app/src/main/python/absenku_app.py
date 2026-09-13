@@ -176,7 +176,7 @@ class SupabaseDB:
         import time
         import uuid
 
-        if not file_storage:
+        if file_storage is None:
             return None
 
         # Baca isi file terlebih dahulu. Android/WebView tertentu
