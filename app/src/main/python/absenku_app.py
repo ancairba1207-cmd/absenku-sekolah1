@@ -5894,6 +5894,7 @@ def obrolan_admin_detail(nis):
 
             pesan_baru = request.form.get("pesan", "").strip()
             file_lampiran = request.files.get("lampiran")
+            print("[CHAT REQUEST DEBUG] files=" + repr(list(request.files.keys())) + " | form=" + repr(dict(request.form)))
 
             if file_lampiran:
                 print(

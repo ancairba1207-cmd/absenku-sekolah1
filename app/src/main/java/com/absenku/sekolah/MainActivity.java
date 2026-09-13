@@ -808,7 +808,11 @@ public class MainActivity extends Activity {
                          */
                         results =
                                 new android.net.Uri[]{
-                                        selectedUri
+                                        androidx.core.content.FileProvider.getUriForFile(
+                                                MainActivity.this,
+                                                MainActivity.this.getPackageName() + ".fileprovider",
+                                                cacheFile
+                                        )
                                 };
 
                         android.util.Log.d(
