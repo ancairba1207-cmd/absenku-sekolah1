@@ -7545,14 +7545,18 @@ html, body {
         }}
 
         .chat-attachment-image {{
-            display: block;
-            width: min(280px, 100%);
-            max-width: 100%;
-            max-height: 280px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 1px solid #dbe3ef;
-            box-sizing: border-box;
+            display: block !important;
+            width: 180px !important;
+            height: 180px !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            max-width: 180px !important;
+            max-height: 180px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            border-radius: 10px !important;
+            border: 1px solid #dbe3ef !important;
+            box-sizing: border-box !important;
         }}
 
         .chat-attachment-name {{
@@ -7575,19 +7579,25 @@ html, body {
         .chat-file {{
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 9px 10px;
+            gap: 8px;
+            width: min(280px, 100%);
+            max-width: 100%;
+            padding: 8px 9px;
+            margin-top: 7px;
             border: 1px solid #dbe3ef;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #f8fafc;
             box-sizing: border-box;
-            max-width: 100%;
+            overflow: hidden;
         }}
 
         .chat-file-icon {{
-            font-size: 28px;
+            flex: 0 0 36px;
+            width: 36px;
+            min-width: 36px;
+            font-size: 25px;
             line-height: 1;
-            flex: 0 0 auto;
+            text-align: center;
         }}
 
         .chat-file-info {{
@@ -7615,13 +7625,19 @@ html, body {
         }}
 
         .chat-attachment-preview-image {{
-            width: 56px;
-            height: 56px;
-            min-width: 56px;
-            min-height: 56px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #dbe3ef;
+            display: block !important;
+            width: 56px !important;
+            height: 56px !important;
+            min-width: 56px !important;
+            min-height: 56px !important;
+            max-width: 56px !important;
+            max-height: 56px !important;
+            flex: 0 0 56px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            border-radius: 8px !important;
+            border: 1px solid #dbe3ef !important;
+            box-sizing: border-box !important;
         }}
 
         .chat-attachment-preview-icon {{
@@ -7705,8 +7721,10 @@ html, body {
 
         @media (max-width: 600px) {{
             .chat-attachment-image {{
-                width: min(240px, 100%);
-                max-height: 240px;
+                width: min(180px, 100%) !important;
+                height: 180px !important;
+                max-width: 180px !important;
+                max-height: 180px !important;
             }}
 
             .chat-file {{
@@ -8023,11 +8041,14 @@ window.toggleAdminChatMenu = function() {{
 
             const composer = form.querySelector(".chat-composer");
 
-            if (composer && composer.parentNode) {{
-                composer.parentNode.insertBefore(
-                    preview,
-                    composer.nextSibling
-                );
+            if (composer) {{
+                const sendButton = composer.querySelector(".chat-send");
+
+                if (sendButton) {{
+                    composer.insertBefore(preview, sendButton);
+                }} else {{
+                    composer.appendChild(preview);
+                }}
             }} else {{
                 form.appendChild(preview);
             }}
@@ -9219,14 +9240,18 @@ def obrolan_guru_detail(nis):
         }}
 
         .chat-attachment-image {{
-            display: block;
-            width: min(280px, 100%);
-            max-width: 100%;
-            max-height: 280px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 1px solid #dbe3ef;
-            box-sizing: border-box;
+            display: block !important;
+            width: 180px !important;
+            height: 180px !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            max-width: 180px !important;
+            max-height: 180px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            border-radius: 10px !important;
+            border: 1px solid #dbe3ef !important;
+            box-sizing: border-box !important;
         }}
 
         .chat-attachment-name {{
@@ -9249,19 +9274,25 @@ def obrolan_guru_detail(nis):
         .chat-file {{
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 9px 10px;
+            gap: 8px;
+            width: min(280px, 100%);
+            max-width: 100%;
+            padding: 8px 9px;
+            margin-top: 7px;
             border: 1px solid #dbe3ef;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #f8fafc;
             box-sizing: border-box;
-            max-width: 100%;
+            overflow: hidden;
         }}
 
         .chat-file-icon {{
-            font-size: 28px;
+            flex: 0 0 36px;
+            width: 36px;
+            min-width: 36px;
+            font-size: 25px;
             line-height: 1;
-            flex: 0 0 auto;
+            text-align: center;
         }}
 
         .chat-file-info {{
@@ -9289,13 +9320,19 @@ def obrolan_guru_detail(nis):
         }}
 
         .chat-attachment-preview-image {{
-            width: 56px;
-            height: 56px;
-            min-width: 56px;
-            min-height: 56px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #dbe3ef;
+            display: block !important;
+            width: 56px !important;
+            height: 56px !important;
+            min-width: 56px !important;
+            min-height: 56px !important;
+            max-width: 56px !important;
+            max-height: 56px !important;
+            flex: 0 0 56px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            border-radius: 8px !important;
+            border: 1px solid #dbe3ef !important;
+            box-sizing: border-box !important;
         }}
 
         .chat-attachment-preview-icon {{
@@ -9379,8 +9416,10 @@ def obrolan_guru_detail(nis):
 
         @media (max-width: 600px) {{
             .chat-attachment-image {{
-                width: min(240px, 100%);
-                max-height: 240px;
+                width: min(180px, 100%) !important;
+                height: 180px !important;
+                max-width: 180px !important;
+                max-height: 180px !important;
             }}
 
             .chat-file {{
@@ -9574,11 +9613,14 @@ def obrolan_guru_detail(nis):
 
             const composer = form.querySelector(".chat-composer");
 
-            if (composer && composer.parentNode) {{
-                composer.parentNode.insertBefore(
-                    preview,
-                    composer.nextSibling
-                );
+            if (composer) {{
+                const sendButton = composer.querySelector(".chat-send");
+
+                if (sendButton) {{
+                    composer.insertBefore(preview, sendButton);
+                }} else {{
+                    composer.appendChild(preview);
+                }}
             }} else {{
                 form.appendChild(preview);
             }}
@@ -10874,14 +10916,18 @@ def obrolan_orangtua():
         }}
 
         .chat-attachment-image {{
-            display: block;
-            width: min(280px, 100%);
-            max-width: 100%;
-            max-height: 280px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 1px solid #dbe3ef;
-            box-sizing: border-box;
+            display: block !important;
+            width: 180px !important;
+            height: 180px !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            max-width: 180px !important;
+            max-height: 180px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            border-radius: 10px !important;
+            border: 1px solid #dbe3ef !important;
+            box-sizing: border-box !important;
         }}
 
         .chat-attachment-name {{
@@ -10904,19 +10950,25 @@ def obrolan_orangtua():
         .chat-file {{
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 9px 10px;
+            gap: 8px;
+            width: min(280px, 100%);
+            max-width: 100%;
+            padding: 8px 9px;
+            margin-top: 7px;
             border: 1px solid #dbe3ef;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #f8fafc;
             box-sizing: border-box;
-            max-width: 100%;
+            overflow: hidden;
         }}
 
         .chat-file-icon {{
-            font-size: 28px;
+            flex: 0 0 36px;
+            width: 36px;
+            min-width: 36px;
+            font-size: 25px;
             line-height: 1;
-            flex: 0 0 auto;
+            text-align: center;
         }}
 
         .chat-file-info {{
@@ -10944,13 +10996,19 @@ def obrolan_orangtua():
         }}
 
         .chat-attachment-preview-image {{
-            width: 56px;
-            height: 56px;
-            min-width: 56px;
-            min-height: 56px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #dbe3ef;
+            display: block !important;
+            width: 56px !important;
+            height: 56px !important;
+            min-width: 56px !important;
+            min-height: 56px !important;
+            max-width: 56px !important;
+            max-height: 56px !important;
+            flex: 0 0 56px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            border-radius: 8px !important;
+            border: 1px solid #dbe3ef !important;
+            box-sizing: border-box !important;
         }}
 
         .chat-attachment-preview-icon {{
@@ -11034,8 +11092,10 @@ def obrolan_orangtua():
 
         @media (max-width: 600px) {{
             .chat-attachment-image {{
-                width: min(240px, 100%);
-                max-height: 240px;
+                width: min(180px, 100%) !important;
+                height: 180px !important;
+                max-width: 180px !important;
+                max-height: 180px !important;
             }}
 
             .chat-file {{
@@ -11229,11 +11289,14 @@ def obrolan_orangtua():
 
             const composer = form.querySelector(".chat-composer");
 
-            if (composer && composer.parentNode) {{
-                composer.parentNode.insertBefore(
-                    preview,
-                    composer.nextSibling
-                );
+            if (composer) {{
+                const sendButton = composer.querySelector(".chat-send");
+
+                if (sendButton) {{
+                    composer.insertBefore(preview, sendButton);
+                }} else {{
+                    composer.appendChild(preview);
+                }}
             }} else {{
                 form.appendChild(preview);
             }}
