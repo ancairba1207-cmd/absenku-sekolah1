@@ -606,8 +606,7 @@ public class MainActivity extends Activity {
 
             android.net.Uri[] results = null;
 
-            if (resultCode == RESULT_OK &&
-                    data != null) {
+            if (resultCode == RESULT_OK && data != null) {
 
                 android.net.Uri selectedUri = null;
 
@@ -625,13 +624,8 @@ public class MainActivity extends Activity {
                 }
 
                 if (selectedUri != null) {
+
                     try {
-                        /*
-                         * Beberapa file picker Android mengembalikan
-                         * content:// URI tanpa filename yang dapat dibaca
-                         * WebView. Salin file ke cache aplikasi dengan
-                         * nama asli agar Flask menerima filename yang benar.
-                         */
                         String namaFile = null;
 
                         android.database.Cursor cursor =
@@ -648,11 +642,14 @@ public class MainActivity extends Activity {
                         if (cursor != null) {
                             try {
                                 if (cursor.moveToFirst()) {
-                                    int index = cursor.getColumnIndex(
-                                            android.provider.OpenableColumns.DISPLAY_NAME
-                                    );
+                                    int index =
+                                            cursor.getColumnIndex(
+                                                    android.provider.OpenableColumns.DISPLAY_NAME
+                                            );
+
                                     if (index >= 0) {
-                                        namaFile = cursor.getString(index);
+                                        namaFile =
+                                                cursor.getString(index);
                                     }
                                 }
                             } finally {
@@ -662,7 +659,9 @@ public class MainActivity extends Activity {
 
                         if (namaFile == null ||
                                 namaFile.trim().isEmpty()) {
-                            namaFile = "lampiran_" +
+
+                            namaFile =
+                                    "lampiran_" +
                                     System.currentTimeMillis();
                         }
 
@@ -672,74 +671,171 @@ public class MainActivity extends Activity {
                         );
 
                         String mimeType =
-                                getContentResolver().getType(selectedUri);
+                                getContentResolver()
+                                        .getType(selectedUri);
 
                         if (mimeType == null ||
                                 mimeType.trim().isEmpty()) {
-                            mimeType = "application/octet-stream";
+
+                            mimeType =
+                                    "application/octet-stream";
                         }
 
-                        File cacheFile = new File(
-                                getCacheDir(),
-                                namaFile
-                        );
+                        /*
+                         * Pastikan nama file memiliki ekstensi.
+                         * Ini penting agar Flask/WebView dapat
+                         * mengenali PDF, Word, Excel, dll.
+                         */
+                        if (!namaFile.contains(".")) {
+
+                            String ext = "";
+
+                            if (mimeType.equals("application/pdf")) {
+                                ext = ".pdf";
+
+                            } else if (
+                                    mimeType.equals("application/msword")
+                            ) {
+                                ext = ".doc";
+
+                            } else if (
+                                    mimeType.equals(
+                                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    )
+                            ) {
+                                ext = ".docx";
+
+                            } else if (
+                                    mimeType.equals("application/vnd.ms-excel")
+                            ) {
+                                ext = ".xls";
+
+                            } else if (
+                                    mimeType.equals(
+                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    )
+                            ) {
+                                ext = ".xlsx";
+
+                            } else if (
+                                    mimeType.equals("application/vnd.ms-powerpoint")
+                            ) {
+                                ext = ".ppt";
+
+                            } else if (
+                                    mimeType.equals(
+                                        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                                    )
+                            ) {
+                                ext = ".pptx";
+
+                            } else if (
+                                    mimeType.startsWith("image/")
+                            ) {
+                                ext = ".jpg";
+                            }
+
+                            if (!ext.isEmpty()) {
+                                namaFile += ext;
+                            }
+                        }
+
+                        File folder =
+                                new File(
+                                        getCacheDir(),
+                                        "chat_files"
+                                );
+
+                        if (!folder.exists() &&
+                                !folder.mkdirs()) {
+
+                            throw new java.io.IOException(
+                                    "Folder cache chat tidak dapat dibuat"
+                            );
+                        }
+
+                        File cacheFile =
+                                new File(
+                                        folder,
+                                        namaFile
+                                );
 
                         try (
                                 java.io.InputStream input =
                                         getContentResolver()
-                                                .openInputStream(selectedUri);
+                                                .openInputStream(
+                                                        selectedUri
+                                                );
+
                                 java.io.OutputStream output =
-                                        new java.io.FileOutputStream(cacheFile)
+                                        new java.io.FileOutputStream(
+                                                cacheFile
+                                        )
                         ) {
+
                             if (input == null) {
                                 throw new java.io.IOException(
                                         "Tidak dapat membaca file"
                                 );
                             }
 
-                            byte[] buffer = new byte[8192];
+                            byte[] buffer =
+                                    new byte[8192];
+
                             int length;
 
-                            while ((length = input.read(buffer)) != -1) {
-                                output.write(buffer, 0, length);
+                            while (
+                                    (length =
+                                        input.read(buffer)) != -1
+                            ) {
+                                output.write(
+                                        buffer,
+                                        0,
+                                        length
+                                );
                             }
                         }
 
                         android.net.Uri cacheUri =
                                 FileProvider.getUriForFile(
                                         MainActivity.this,
-                                        getPackageName() + ".fileprovider",
+                                        getPackageName() +
+                                                ".fileprovider",
                                         cacheFile
                                 );
 
-                        getContentResolver().takePersistableUriPermission(
-                                selectedUri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        );
-
-                        results = new android.net.Uri[]{
-                                cacheUri
-                        };
+                        results =
+                                new android.net.Uri[]{
+                                        cacheUri
+                                };
 
                         android.util.Log.d(
                                 "ABSENKU_FILE",
-                                "File siap dikirim: " +
+                                "FILE SIAP: " +
                                 namaFile +
-                                " | MIME=" + mimeType +
-                                " | cache=" + cacheFile.getAbsolutePath()
+                                " | MIME=" +
+                                mimeType +
+                                " | SIZE=" +
+                                cacheFile.length()
                         );
 
                     } catch (Exception e) {
+
                         android.util.Log.e(
                                 "ABSENKU_FILE",
-                                "Gagal menyiapkan file: " +
-                                e.getClass().getSimpleName() +
-                                " | " + e.getMessage()
+                                "GAGAL FILE: " +
+                                e.getClass()
+                                        .getSimpleName() +
+                                " | " +
+                                e.getMessage()
                         );
 
-                        results = new android.net.Uri[]{
-                                selectedUri
-                        };
+                        /*
+                         * Jangan mengembalikan content:// URI
+                         * yang bermasalah. Batalkan saja agar
+                         * WebView tidak mengirim file kosong.
+                         */
+                        results = null;
                     }
                 }
             }
