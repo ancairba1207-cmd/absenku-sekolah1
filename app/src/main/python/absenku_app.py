@@ -119,6 +119,144 @@ class SupabaseDB:
 
         raise RuntimeError(f"Gagal upload foto setelah 3 percobaan: {last_error}")
 
+    def _delete_storage_objects(self, bucket, paths):
+        """Hapus beberapa object Storage sekaligus. Gagal cleanup tidak menghentikan chat."""
+        if not paths:
+            return True
+
+        paths_bersih = []
+        for path in paths:
+            path = str(path or "").strip().lstrip("/")
+            if path and path not in paths_bersih:
+                paths_bersih.append(path)
+
+        if not paths_bersih:
+            return True
+
+        url = (
+            SUPABASE_URL.rstrip("/")
+            + f"/storage/v1/object/{bucket}"
+        )
+        h = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": "Bearer " + SUPABASE_KEY,
+            "Content-Type": "application/json",
+        }
+
+        try:
+            r = self.requests.delete(
+                url,
+                headers=h,
+                json={
+                    "prefixes": paths_bersih,
+                },
+                timeout=20,
+            )
+
+            if not r.ok:
+                print(
+                    f"[ABSENKU] Gagal menghapus attachment Storage "
+                    f"{r.status_code}: {r.text[:300]}"
+                )
+                return False
+
+            return True
+
+        except Exception as e:
+            print(
+                f"[ABSENKU] Exception cleanup attachment: "
+                f"{type(e).__name__}: {e}"
+            )
+            return False
+
+    def upload_chat_attachment(self, file_storage, nis, sesi_id):
+        """Upload satu attachment chat ke Supabase Storage."""
+        import mimetypes
+        import os
+        import time
+        import uuid
+
+        if not file_storage:
+            return None
+
+        nama_asli = str(file_storage.filename or "").strip()
+        if not nama_asli:
+            return None
+
+        nama_bersih = os.path.basename(nama_asli)
+        ext = os.path.splitext(nama_bersih)[1].lower()
+        tipe = str(file_storage.mimetype or "").lower().strip()
+
+        tipe_diizinkan = {
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        }
+
+        ekstensi_diizinkan = {
+            ".jpg", ".jpeg", ".png", ".webp",
+            ".pdf",
+            ".doc", ".docx",
+            ".xls", ".xlsx",
+            ".ppt", ".pptx",
+        }
+
+        if tipe not in tipe_diizinkan:
+            tipe_tebakan = mimetypes.guess_type(nama_bersih)[0]
+            if tipe_tebakan in tipe_diizinkan:
+                tipe = tipe_tebakan
+
+        if tipe not in tipe_diizinkan or ext not in ekstensi_diizinkan:
+            raise ValueError("Jenis file tidak didukung.")
+
+        data = file_storage.read()
+
+        if not data:
+            raise ValueError("File kosong.")
+
+        max_size = 10 * 1024 * 1024
+        if len(data) > max_size:
+            raise ValueError("Ukuran file maksimal 10 MB.")
+
+        nis_safe = "".join(
+            ch for ch in str(nis or "").strip()
+            if ch.isalnum() or ch in ("-", "_")
+        ) or "unknown"
+
+        sesi_safe = "".join(
+            ch for ch in str(sesi_id or "").strip()
+            if ch.isalnum() or ch in ("-", "_")
+        ) or "session"
+
+        nama_file = f"{uuid.uuid4().hex}{ext}"
+        storage_path = f"chat/{nis_safe}/{sesi_safe}/{nama_file}"
+
+        url = self._upload_storage(
+            "chat-attachments",
+            storage_path,
+            data,
+            tipe
+        )
+
+        sekarang = time.time()
+
+        return {
+            "path": storage_path,
+            "nama": nama_bersih,
+            "tipe": tipe,
+            "ukuran": len(data),
+            "url": url,
+            "uploaded_at": sekarang,
+            "expires_at": sekarang + 3600
+        }
+
     def _delete(self, table, filters):
         r=self.requests.delete(self._url(table), headers=self.headers, params=filters, timeout=20)
         if not r.ok:
@@ -2420,7 +2558,7 @@ def realtime_obrolan(nis):
             rows = c._get(
                 "obrolan",
                 {
-                    "select": "id,nis,sesi_id,pengirim,penerima,peran_pengirim,peran_penerima,jenis,pesan,status,diteruskan,diteruskan_ke,created_at,status_sesi,selesai_at",
+                    "select": "id,nis,sesi_id,pengirim,penerima,peran_pengirim,peran_penerima,jenis,pesan,lampiran,status,diteruskan,diteruskan_ke,created_at,status_sesi,selesai_at",
                     "nis": f"eq.{nis}",
                     "status_sesi": "eq.aktif",
                     "order": "created_at.asc,id.asc",
@@ -2431,7 +2569,7 @@ def realtime_obrolan(nis):
             rows = c._get(
                 "obrolan",
                 {
-                    "select": "id,nis,sesi_id,pengirim,penerima,peran_pengirim,peran_penerima,jenis,pesan,status,diteruskan,diteruskan_ke,created_at,status_sesi,selesai_at",
+                    "select": "id,nis,sesi_id,pengirim,penerima,peran_pengirim,peran_penerima,jenis,pesan,lampiran,status,diteruskan,diteruskan_ke,created_at,status_sesi,selesai_at",
                     "nis": f"eq.{nis}",
                     "order": "created_at.asc,id.asc",
                     "limit": "500"
@@ -2891,7 +3029,7 @@ def akun_orangtua():
     """
 
     return page("Akun Orang Tua", body)
-    
+
 @app.route("/profil", methods=["GET","POST"])
 @login_required
 def profil():
@@ -4690,6 +4828,82 @@ def nilai_tugas():
 
 @app.route("/obrolan_admin", methods=["GET"])
 @login_required
+def _render_lampiran_server(row, escape_func):
+    """Render attachment saat halaman chat pertama kali dibuka."""
+    raw = row.get("lampiran") if isinstance(row, dict) else None
+    if not raw:
+        return ""
+
+    try:
+        import json as _json_attachment
+        metadata = (
+            _json_attachment.loads(raw)
+            if isinstance(raw, str)
+            else raw
+        )
+
+        if not isinstance(metadata, dict):
+            return ""
+
+        url_asli = str(metadata.get("url") or "").strip()
+        nama_asli = str(metadata.get("nama") or "Lampiran").strip()
+        tipe = str(metadata.get("tipe") or "").lower().strip()
+
+        if not url_asli:
+            return ""
+
+        prefix = (
+            SUPABASE_URL.rstrip("/")
+            + "/storage/v1/object/public/chat-attachments/"
+        )
+
+        if not url_asli.startswith(prefix):
+            return ""
+
+        url = escape_func(url_asli)
+        nama = escape_func(nama_asli)
+
+        if tipe.startswith("image/"):
+            return (
+                '<div class="chat-attachment">'
+                '<a href="' + url + '" target="_blank" rel="noopener">'
+                '<img class="chat-attachment-image" src="' + url +
+                '" alt="' + nama + '">'
+                '</a>'
+                '<div class="chat-attachment-name">📷 ' + nama + '</div>'
+                '<a class="chat-attachment-download" href="' + url +
+                '" target="_blank" rel="noopener" download>'
+                '⬇️ Simpan'
+                '</a>'
+                '</div>'
+            )
+
+        icon = "📎"
+        if tipe == "application/pdf":
+            icon = "📕"
+        elif "word" in tipe:
+            icon = "📘"
+        elif "excel" in tipe or "spreadsheet" in tipe:
+            icon = "📗"
+        elif "powerpoint" in tipe or "presentation" in tipe:
+            icon = "📙"
+
+        return (
+            '<div class="chat-attachment chat-file">'
+            '<div class="chat-file-icon">' + icon + '</div>'
+            '<div class="chat-file-info">'
+            '<div class="chat-attachment-name">' + nama + '</div>'
+            '<a class="chat-attachment-download" href="' + url +
+            '" target="_blank" rel="noopener" download>'
+            '⬇️ Simpan / Buka'
+            '</a>'
+            '</div>'
+            '</div>'
+        )
+
+    except Exception:
+        return ""
+
 def obrolan_admin():
     if session.get("role") != "admin":
         return redirect(url_for("home"))
@@ -5138,7 +5352,7 @@ def akhiri_obrolan(nis):
         sesi_rows = c._get(
             "obrolan",
             {
-                "select": "id,nis,pengirim,penerima,peran_pengirim,peran_penerima,jenis,pesan,status,diteruskan,diteruskan_ke,sesi_id,status_sesi,created_at",
+                "select": "id,nis,pengirim,penerima,peran_pengirim,peran_penerima,jenis,pesan,lampiran,status,diteruskan,diteruskan_ke,sesi_id,status_sesi,created_at",
                 "nis": f"eq.{nis}",
                 "status_sesi": "eq.aktif",
                 "order": "created_at.asc,id.asc",
@@ -5206,6 +5420,76 @@ def akhiri_obrolan(nis):
                 username_guru = str(
                     guru_rows[0].get("username") or ""
                 ).strip()
+
+        # Hapus seluruh lampiran file dari sesi yang sedang diakhiri.
+        # File yang sudah didownload penerima tetap aman di HP mereka.
+        lampiran_paths = []
+
+        import json as _json_cleanup
+
+        for row in sesi_rows:
+            raw_lampiran = row.get("lampiran")
+
+            if not raw_lampiran:
+                continue
+
+            try:
+                metadata = (
+                    _json_cleanup.loads(raw_lampiran)
+                    if isinstance(raw_lampiran, str)
+                    else raw_lampiran
+                )
+
+                if not isinstance(metadata, dict):
+                    continue
+
+                path_lampiran = str(
+                    metadata.get("path") or ""
+                ).strip().lstrip("/")
+
+                # Pastikan hanya object di bucket chat-attachments
+                # dan hanya path yang dibuat oleh upload_chat_attachment.
+                if (
+                    path_lampiran
+                    and path_lampiran.startswith("chat/")
+                    and not path_lampiran.startswith("/")
+                    and ".." not in path_lampiran.split("/")
+                ):
+                    lampiran_paths.append(path_lampiran)
+
+            except Exception as e:
+                print(
+                    f"[ABSENKU] Metadata attachment tidak valid "
+                    f"sesi {sesi_id}: {e}"
+                )
+
+        if lampiran_paths:
+            hasil_hapus_lampiran = c._delete_storage_objects(
+                "chat-attachments",
+                lampiran_paths
+            )
+
+            if not hasil_hapus_lampiran:
+                print(
+                    f"[ABSENKU] Peringatan: penghapusan lampiran sesi "
+                    f"{sesi_id} tidak berhasil sepenuhnya."
+                )
+
+        # Setelah sesi berakhir, metadata lampiran juga dibersihkan
+        # agar chat lama tidak menyimpan URL attachment yang sudah dihapus.
+        if sesi_rows:
+            ids_lampiran = [
+                row.get("id")
+                for row in sesi_rows
+                if row.get("id") is not None and row.get("lampiran")
+            ]
+
+            if ids_lampiran:
+                c._patch(
+                    "obrolan",
+                    {"id": "in.(" + ",".join(str(x) for x in ids_lampiran) + ")"},
+                    {"lampiran": None}
+                )
 
         selesai_at = datetime.now(timezone.utc).isoformat()
 
@@ -5587,9 +5871,26 @@ def obrolan_admin_detail(nis):
             sesi_id_aktif = sesi_aktif_rows[0].get("sesi_id")
 
         if request.method == "POST":
-            pesan_baru = request.form.get("pesan", "").strip()
+            import json
 
-            if pesan_baru and sesi_id_aktif:
+            pesan_baru = request.form.get("pesan", "").strip()
+            file_lampiran = request.files.get("lampiran")
+
+            ada_lampiran = bool(
+                file_lampiran
+                and str(file_lampiran.filename or "").strip()
+            )
+
+            if (pesan_baru or ada_lampiran) and sesi_id_aktif:
+                lampiran_metadata = None
+
+                if ada_lampiran:
+                    lampiran_metadata = c.upload_chat_attachment(
+                        file_lampiran,
+                        nis,
+                        sesi_id_aktif
+                    )
+
                 c._post(
                     "obrolan",
                     {
@@ -5602,6 +5903,14 @@ def obrolan_admin_detail(nis):
                         "peran_penerima": "orangtua",
                         "jenis": "Obrolan",
                         "pesan": pesan_baru,
+                        "lampiran": (
+                            json.dumps(
+                                lampiran_metadata,
+                                ensure_ascii=False
+                            )
+                            if lampiran_metadata
+                            else None
+                        ),
                         "status": "Ditangani Administrator",
                         "diteruskan": False,
                         "diteruskan_ke": None
@@ -5706,6 +6015,7 @@ def obrolan_admin_detail(nis):
         for row in rows:
             peran = str(row.get("peran_pengirim") or "")
             pesan = escape(str(row.get("pesan") or "")).replace("\n", "<br>")
+            render_lampiran_awal = _render_lampiran_server(row, escape)
 
             if peran == "orangtua":
                 bubble_class = "chat-left"
@@ -5725,7 +6035,7 @@ def obrolan_admin_detail(nis):
                 <img class="chat-avatar" src="{avatar_pesan}" alt="">
                 <div class="chat-bubble">
                     <div class="chat-sender">{escape(nama_pengirim)}</div>
-                    <div class="chat-text">{pesan}</div>
+                    <div class="chat-text">{pesan}</div>{render_lampiran_awal}
                 </div>
             </div>
             """
@@ -5737,7 +6047,7 @@ def obrolan_admin_detail(nis):
 
         if sesi_id_aktif:
             form_chat = """
-            <form method="post" class="chat-form">
+            <form method="post" enctype="multipart/form-data" class="chat-form" id="adminChatForm">
                 <div class="chat-composer">
                     <button type="button"
                             class="chat-attach"
@@ -5749,8 +6059,7 @@ def obrolan_admin_detail(nis):
                     <textarea
                         name="pesan"
                         rows="1"
-                        placeholder="Tulis pesan di sini..."
-                        required></textarea>
+                        placeholder="Tulis pesan di sini..."></textarea>
 
                     <button class="chat-send" type="submit" aria-label="Kirim pesan">
                         <span class="send-icon" aria-hidden="true">
@@ -7225,6 +7534,190 @@ html, body {
     padding-bottom: 100px !important;
     scroll-padding-bottom: 100px !important;
 }
+
+        /* ============================================================
+           CHAT ATTACHMENT
+           ============================================================ */
+        .chat-attachment {{
+            margin-top: 8px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-image {{
+            display: block;
+            width: min(280px, 100%);
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #dbe3ef;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-name {{
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }}
+
+        .chat-attachment-download {{
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+        }}
+
+        .chat-file {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            background: #f8fafc;
+            box-sizing: border-box;
+            max-width: 100%;
+        }}
+
+        .chat-file-icon {{
+            font-size: 28px;
+            line-height: 1;
+            flex: 0 0 auto;
+        }}
+
+        .chat-file-info {{
+            min-width: 0;
+            flex: 1 1 auto;
+        }}
+
+        /* Preview sebelum attachment dikirim */
+        .chat-attachment-preview {{
+            margin-top: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-preview-card {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid #dbe3ef;
+            border-radius: 10px;
+            background: #f8fafc;
+            width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-preview-image {{
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            min-height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #dbe3ef;
+        }}
+
+        .chat-attachment-preview-icon {{
+            width: 56px;
+            min-width: 56px;
+            font-size: 30px;
+            line-height: 1;
+            text-align: center;
+        }}
+
+        .chat-attachment-preview-info {{
+            min-width: 0;
+            flex: 1 1 auto;
+        }}
+
+        .chat-attachment-preview-name {{
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }}
+
+        .chat-attachment-preview-size {{
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }}
+
+        .chat-attachment-preview-remove {{
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #ef4444;
+            font-size: 18px;
+            line-height: 32px;
+            text-align: center;
+            cursor: pointer;
+        }}
+
+        /* Menu attachment Guru/Orang Tua */
+        .chat-attach-menu {{
+            display: none;
+            position: absolute;
+            z-index: 1300;
+            min-width: 190px;
+            max-width: calc(100vw - 32px);
+            padding: 6px;
+            background: #ffffff;
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15,23,42,.18);
+            box-sizing: border-box;
+        }}
+
+        .chat-attach-menu.show {{
+            display: block;
+        }}
+
+        .chat-attach-menu button {{
+            display: flex;
+            align-items: center;
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            margin: 0;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+        }}
+
+        .chat-attach-menu button:active {{
+            background: #eff6ff;
+        }}
+
+        @media (max-width: 600px) {{
+            .chat-attachment-image {{
+                width: min(240px, 100%);
+                max-height: 240px;
+            }}
+
+            .chat-file {{
+                width: 100%;
+            }}
+
+            .chat-attachment-preview-card {{
+                min-height: 72px;
+            }}
+        }}
+
 </style>
 """
 
@@ -7309,18 +7802,24 @@ html, body {
 
             <input id="adminCameraInput"
                    type="file"
+                   name="lampiran"
+                   form="adminChatForm"
                    accept="image/*"
                    capture="environment"
                    style="display:none">
 
             <input id="adminPhotoInput"
                    type="file"
+                   name="lampiran"
+                   form="adminChatForm"
                    accept="image/*"
                    style="display:none">
 
             <input id="adminFileInput"
                    type="file"
-                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                   name="lampiran"
+                   form="adminChatForm"
+                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                    style="display:none">
         </div>
 
@@ -7346,6 +7845,255 @@ window.toggleAdminChatMenu = function() {{
     }});
 
 (function() {{
+
+    // ============================================================
+    // ATTACHMENT CHAT
+    // ============================================================
+    window.toggleChatAttachMenu = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const menu = composer.querySelector(".chat-attach-menu");
+        if (!menu) return;
+
+        document.querySelectorAll(".chat-attach-menu.show").forEach(function(other) {{
+            if (other !== menu) other.classList.remove("show");
+        }});
+
+        menu.classList.toggle("show");
+    }};
+
+    window.pilihChatKamera = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-camera-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    window.pilihChatFoto = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-photo-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    window.pilihChatFile = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-file-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    function tampilkanPreviewLampiran(input, preview) {{
+        if (!input || !preview) return;
+
+        preview.innerHTML = "";
+
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {{
+            alert("Ukuran lampiran maksimal 10 MB.");
+            input.value = "";
+            return;
+        }}
+
+        const card = document.createElement("div");
+        card.className = "chat-attachment-preview-card";
+
+        if (file.type && file.type.startsWith("image/")) {{
+            const img = document.createElement("img");
+            img.className = "chat-attachment-preview-image";
+            img.alt = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {{
+                img.src = e.target.result;
+            }};
+            reader.readAsDataURL(file);
+
+            card.appendChild(img);
+        }} else {{
+            const icon = document.createElement("div");
+            icon.className = "chat-attachment-preview-icon";
+
+            const nama = file.name.toLowerCase();
+
+            if (nama.endsWith(".pdf")) {{
+                icon.textContent = "📕";
+            }} else if (nama.endsWith(".doc") || nama.endsWith(".docx")) {{
+                icon.textContent = "📘";
+            }} else if (nama.endsWith(".xls") || nama.endsWith(".xlsx")) {{
+                icon.textContent = "📗";
+            }} else if (nama.endsWith(".ppt") || nama.endsWith(".pptx")) {{
+                icon.textContent = "📙";
+            }} else {{
+                icon.textContent = "📎";
+            }}
+
+            card.appendChild(icon);
+        }}
+
+        const info = document.createElement("div");
+        info.className = "chat-attachment-preview-info";
+
+        const name = document.createElement("div");
+        name.className = "chat-attachment-preview-name";
+        name.textContent = file.name;
+
+        const size = document.createElement("div");
+        size.className = "chat-attachment-preview-size";
+
+        if (file.size < 1024 * 1024) {{
+            size.textContent = Math.max(1, Math.round(file.size / 1024)) + " KB";
+        }} else {{
+            size.textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+        }}
+
+        info.appendChild(name);
+        info.appendChild(size);
+        card.appendChild(info);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "chat-attachment-preview-remove";
+        remove.textContent = "✕";
+        remove.title = "Hapus lampiran";
+
+        remove.onclick = function() {{
+            input.value = "";
+            preview.innerHTML = "";
+        }};
+
+        card.appendChild(remove);
+        preview.appendChild(card);
+    }}
+
+    function siapkanInputLampiran(form) {{
+        if (!form) return;
+
+        const preview = form.querySelector(".chat-attachment-preview");
+        if (!preview) return;
+
+        const inputs = form.querySelectorAll(
+            'input[type="file"][name="lampiran"]'
+        );
+
+        inputs.forEach(function(input) {{
+            input.addEventListener("change", function() {{
+                inputs.forEach(function(other) {{
+                    if (other !== input) other.value = "";
+                }});
+
+                tampilkanPreviewLampiran(input, preview);
+            }});
+        }});
+    }}
+
+    // Guru dan Orang Tua
+    document.querySelectorAll(".chat-form").forEach(function(form) {{
+        if (form.id !== "adminChatForm") {{
+            siapkanInputLampiran(form);
+        }}
+    }});
+
+    // Admin
+    (function() {{
+        const form = document.getElementById("adminChatForm");
+        if (!form) return;
+
+        let preview = document.getElementById("adminAttachmentPreview");
+
+        if (!preview) {{
+            preview = document.createElement("div");
+            preview.id = "adminAttachmentPreview";
+            preview.className = "chat-attachment-preview";
+
+            const composer = form.querySelector(".chat-composer");
+
+            if (composer && composer.parentNode) {{
+                composer.parentNode.insertBefore(
+                    preview,
+                    composer.nextSibling
+                );
+            }} else {{
+                form.appendChild(preview);
+            }}
+        }}
+
+        const inputs = [
+            document.getElementById("adminCameraInput"),
+            document.getElementById("adminPhotoInput"),
+            document.getElementById("adminFileInput")
+        ].filter(Boolean);
+
+        inputs.forEach(function(input) {{
+            input.addEventListener("change", function() {{
+                inputs.forEach(function(other) {{
+                    if (other !== input) other.value = "";
+                }});
+
+                tampilkanPreviewLampiran(input, preview);
+            }});
+        }});
+    }})();
+
+    // Tutup menu attachment ketika klik di luar.
+    document.addEventListener("click", function(e) {{
+        if (e.target.closest(".chat-attach") ||
+            e.target.closest(".chat-attach-menu")) {{
+            return;
+        }}
+
+        document.querySelectorAll(".chat-attach-menu.show").forEach(function(menu) {{
+            menu.classList.remove("show");
+        }});
+    }});
+
+    // Pesan teks ATAU attachment harus ada.
+    document.querySelectorAll(".chat-form").forEach(function(form) {{
+        form.addEventListener("submit", function(e) {{
+            const textarea = form.querySelector('textarea[name="pesan"]');
+            const teksAda = textarea && textarea.value.trim().length > 0;
+            let fileAda = false;
+
+            form.querySelectorAll(
+                'input[type="file"][name="lampiran"]'
+            ).forEach(function(input) {{
+                if (input.files && input.files.length > 0) {{
+                    fileAda = true;
+                }}
+            }});
+
+            if (form.id === "adminChatForm") {{
+                document.querySelectorAll(
+                    'input[type="file"][name="lampiran"][form="adminChatForm"]'
+                ).forEach(function(input) {{
+                    if (input.files && input.files.length > 0) {{
+                        fileAda = true;
+                    }}
+                }});
+            }}
+
+            if (!teksAda && !fileAda) {{
+                e.preventDefault();
+                alert("Tulis pesan atau pilih lampiran terlebih dahulu.");
+            }}
+        }});
+    }});
+
     let versiChat = null;
     let sedangCek = false;
 
@@ -7353,6 +8101,75 @@ window.toggleAdminChatMenu = function() {{
         const div = document.createElement("div");
         div.textContent = text == null ? "" : String(text);
         return div.innerHTML;
+    }}
+
+
+    function renderLampiran(row) {{
+        let data = row && row.lampiran;
+
+        if (!data) return "";
+
+        try {{
+            if (typeof data === "string") {{
+                data = JSON.parse(data);
+            }}
+        }} catch (e) {{
+            return "";
+        }}
+
+        if (!data || !data.url) return "";
+
+        const url = escapeHtml(data.url);
+        const nama = escapeHtml(data.nama || "Lampiran");
+        const tipe = String(data.tipe || "").toLowerCase();
+
+        if (tipe.startsWith("image/")) {{
+            return '<div class="chat-attachment">' +
+                '<a href="' + url + '" target="_blank" rel="noopener">' +
+                '<img class="chat-attachment-image" src="' + url +
+                '" alt="' + nama + '">' +
+                '</a>' +
+                '<div class="chat-attachment-name">📷 ' +
+                nama +
+                '</div>' +
+                '<a class="chat-attachment-download" href="' + url +
+                '" target="_blank" rel="noopener" download>' +
+                '⬇️ Simpan' +
+                '</a>' +
+                '</div>';
+        }}
+
+        let icon = "📎";
+
+        if (tipe === "application/pdf") {{
+            icon = "📕";
+        }} else if (tipe.includes("word")) {{
+            icon = "📘";
+        }} else if (
+            tipe.includes("excel") ||
+            tipe.includes("spreadsheet")
+        ) {{
+            icon = "📗";
+        }} else if (
+            tipe.includes("powerpoint") ||
+            tipe.includes("presentation")
+        ) {{
+            icon = "📙";
+        }}
+
+        return '<div class="chat-attachment chat-file">' +
+            '<div class="chat-file-icon">' + icon + '</div>' +
+            '<div class="chat-file-info">' +
+            '<div class="chat-attachment-name">' +
+            nama +
+            '</div>' +
+            '<a class="chat-attachment-download" href="' +
+            url +
+            '" target="_blank" rel="noopener" download>' +
+            '⬇️ Simpan / Buka' +
+            '</a>' +
+            '</div>' +
+            '</div>';
     }}
 
     function renderChat(rows) {{
@@ -7371,6 +8188,7 @@ window.toggleAdminChatMenu = function() {{
                     '<div class="chat-bubble">' +
                     '<div class="chat-sender">Orang Tua</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                     '</div>' +
                     '</div>';
             }} else if (peran === "guru") {{
@@ -7379,6 +8197,7 @@ window.toggleAdminChatMenu = function() {{
                     '<div class="chat-bubble">' +
                     '<div class="chat-sender">Wali Kelas</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                     '</div>' +
                     '</div>';
             }} else {{
@@ -7387,6 +8206,7 @@ window.toggleAdminChatMenu = function() {{
                     '<div class="chat-bubble">' +
                     '<div class="chat-sender">Administrator</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                     '</div>' +
                     '</div>';
             }}
@@ -7572,9 +8392,26 @@ def obrolan_guru_detail(nis):
             sesi_id_aktif = sesi_aktif_rows[0].get("sesi_id")
 
         if request.method == "POST":
-            pesan_baru = request.form.get("pesan", "").strip()
+            import json
 
-            if pesan_baru and sesi_id_aktif:
+            pesan_baru = request.form.get("pesan", "").strip()
+            file_lampiran = request.files.get("lampiran")
+
+            ada_lampiran = bool(
+                file_lampiran
+                and str(file_lampiran.filename or "").strip()
+            )
+
+            if (pesan_baru or ada_lampiran) and sesi_id_aktif:
+                lampiran_metadata = None
+
+                if ada_lampiran:
+                    lampiran_metadata = c.upload_chat_attachment(
+                        file_lampiran,
+                        nis,
+                        sesi_id_aktif
+                    )
+
                 c._post(
                     "obrolan",
                     {
@@ -7587,24 +8424,32 @@ def obrolan_guru_detail(nis):
                         "peran_penerima": "orangtua",
                         "jenis": "Obrolan",
                         "pesan": pesan_baru,
+                        "lampiran": (
+                            json.dumps(
+                                lampiran_metadata,
+                                ensure_ascii=False
+                            )
+                            if lampiran_metadata
+                            else None
+                        ),
                         "status": "Ditangani Wali Kelas",
                         "diteruskan": True,
                         "diteruskan_ke": str(session.get("user") or "")
                     }
                 )
 
-            # Kirim notifikasi kepada semua perangkat orang tua berdasarkan NIS siswa.
-            kirim_notifikasi_fcm(
-                nis,
-                "Pesan dari Wali Kelas",
-                f"Wali Kelas {session.get('user') or ''} mengirim pesan tentang {siswa.get('nama') or nis}.",
-                {
-                    "jenis": "obrolan_guru",
-                    "nis": str(nis),
-                    "guru": str(session.get('user') or ""),
-                    "route": "/obrolan_orangtua"
-                }
-            )
+                # Kirim notifikasi kepada semua perangkat orang tua berdasarkan NIS siswa.
+                kirim_notifikasi_fcm(
+                    nis,
+                    "Pesan dari Wali Kelas",
+                    f"Wali Kelas {session.get('user') or ''} mengirim pesan tentang {siswa.get('nama') or nis}.",
+                    {
+                        "jenis": "obrolan_guru",
+                        "nis": str(nis),
+                        "guru": str(session.get('user') or ""),
+                        "route": "/obrolan_orangtua"
+                    }
+                )
 
             c.close()
             return redirect(url_for("obrolan_guru_detail", nis=nis))
@@ -7672,6 +8517,7 @@ def obrolan_guru_detail(nis):
         for row in rows:
             peran = str(row.get("peran_pengirim") or "")
             pesan = escape(str(row.get("pesan") or "")).replace("\n", "<br>")
+            render_lampiran_awal = _render_lampiran_server(row, escape)
 
             if peran == "orangtua":
                 bubble_class = "chat-right"
@@ -7687,7 +8533,7 @@ def obrolan_guru_detail(nis):
             <div class="chat-row {bubble_class}">
                 <div class="chat-bubble">
                     <div class="chat-sender">{escape(nama_pengirim)}</div>
-                    <div class="chat-text">{pesan}</div>
+                    <div class="chat-text">{pesan}</div>{render_lampiran_awal}
                 </div>
             </div>
             """
@@ -7756,13 +8602,46 @@ def obrolan_guru_detail(nis):
             </div>
 
             <div id="kontrol-chat-guru" style="display:{"" if sesi_id_aktif else "none"}">
-<form method="post" class="chat-form">
+<form method="post" enctype="multipart/form-data" class="chat-form">
                 <div class="chat-composer">
+                    <button type="button"
+                            class="chat-attach"
+                            aria-label="Lampiran"
+                            onclick="toggleChatAttachMenu(this)">
+                        <img src="/static/images/icon_plus.png" alt="" class="chat-attach-icon">
+                    </button>
+
                     <textarea
                         name="pesan"
                         rows="1"
-                        placeholder="Tulis pesan di sini..."
-                        required></textarea>
+                        placeholder="Tulis pesan di sini..."></textarea>
+
+                    <div class="chat-attach-menu">
+                        <button type="button" onclick="pilihChatKamera(this)">📷 Kamera</button>
+                        <button type="button" onclick="pilihChatFoto(this)">🖼️ Foto</button>
+                        <button type="button" onclick="pilihChatFile(this)">📎 File</button>
+                    </div>
+
+                    <input type="file"
+                           name="lampiran"
+                           class="chat-camera-input"
+                           accept="image/*"
+                           capture="environment"
+                           style="display:none">
+
+                    <input type="file"
+                           name="lampiran"
+                           class="chat-photo-input"
+                           accept="image/*"
+                           style="display:none">
+
+                    <input type="file"
+                           name="lampiran"
+                           class="chat-file-input"
+                           accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                           style="display:none">
+
+                    <div class="chat-attachment-preview"></div>
 
                     <button class="chat-send" type="submit" aria-label="Kirim pesan">
                         <span class="send-icon" aria-hidden="true">
@@ -8329,10 +9208,443 @@ def obrolan_guru_detail(nis):
             width:100%;
             height:100%;
         }}
-        </style>
+
+        /* ============================================================
+           CHAT ATTACHMENT
+           ============================================================ */
+        .chat-attachment {{
+            margin-top: 8px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-image {{
+            display: block;
+            width: min(280px, 100%);
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #dbe3ef;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-name {{
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }}
+
+        .chat-attachment-download {{
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+        }}
+
+        .chat-file {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            background: #f8fafc;
+            box-sizing: border-box;
+            max-width: 100%;
+        }}
+
+        .chat-file-icon {{
+            font-size: 28px;
+            line-height: 1;
+            flex: 0 0 auto;
+        }}
+
+        .chat-file-info {{
+            min-width: 0;
+            flex: 1 1 auto;
+        }}
+
+        /* Preview sebelum attachment dikirim */
+        .chat-attachment-preview {{
+            margin-top: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-preview-card {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid #dbe3ef;
+            border-radius: 10px;
+            background: #f8fafc;
+            width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-preview-image {{
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            min-height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #dbe3ef;
+        }}
+
+        .chat-attachment-preview-icon {{
+            width: 56px;
+            min-width: 56px;
+            font-size: 30px;
+            line-height: 1;
+            text-align: center;
+        }}
+
+        .chat-attachment-preview-info {{
+            min-width: 0;
+            flex: 1 1 auto;
+        }}
+
+        .chat-attachment-preview-name {{
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }}
+
+        .chat-attachment-preview-size {{
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }}
+
+        .chat-attachment-preview-remove {{
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #ef4444;
+            font-size: 18px;
+            line-height: 32px;
+            text-align: center;
+            cursor: pointer;
+        }}
+
+        /* Menu attachment Guru/Orang Tua */
+        .chat-attach-menu {{
+            display: none;
+            position: absolute;
+            z-index: 1300;
+            min-width: 190px;
+            max-width: calc(100vw - 32px);
+            padding: 6px;
+            background: #ffffff;
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15,23,42,.18);
+            box-sizing: border-box;
+        }}
+
+        .chat-attach-menu.show {{
+            display: block;
+        }}
+
+        .chat-attach-menu button {{
+            display: flex;
+            align-items: center;
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            margin: 0;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+        }}
+
+        .chat-attach-menu button:active {{
+            background: #eff6ff;
+        }}
+
+        @media (max-width: 600px) {{
+            .chat-attachment-image {{
+                width: min(240px, 100%);
+                max-height: 240px;
+            }}
+
+            .chat-file {{
+                width: 100%;
+            }}
+
+            .chat-attachment-preview-card {{
+                min-height: 72px;
+            }}
+        }}
+
+</style>
 
 <script>
 (function() {{
+
+    // ============================================================
+    // ATTACHMENT CHAT
+    // ============================================================
+    window.toggleChatAttachMenu = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const menu = composer.querySelector(".chat-attach-menu");
+        if (!menu) return;
+
+        document.querySelectorAll(".chat-attach-menu.show").forEach(function(other) {{
+            if (other !== menu) other.classList.remove("show");
+        }});
+
+        menu.classList.toggle("show");
+    }};
+
+    window.pilihChatKamera = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-camera-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    window.pilihChatFoto = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-photo-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    window.pilihChatFile = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-file-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    function tampilkanPreviewLampiran(input, preview) {{
+        if (!input || !preview) return;
+
+        preview.innerHTML = "";
+
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {{
+            alert("Ukuran lampiran maksimal 10 MB.");
+            input.value = "";
+            return;
+        }}
+
+        const card = document.createElement("div");
+        card.className = "chat-attachment-preview-card";
+
+        if (file.type && file.type.startsWith("image/")) {{
+            const img = document.createElement("img");
+            img.className = "chat-attachment-preview-image";
+            img.alt = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {{
+                img.src = e.target.result;
+            }};
+            reader.readAsDataURL(file);
+
+            card.appendChild(img);
+        }} else {{
+            const icon = document.createElement("div");
+            icon.className = "chat-attachment-preview-icon";
+
+            const nama = file.name.toLowerCase();
+
+            if (nama.endsWith(".pdf")) {{
+                icon.textContent = "📕";
+            }} else if (nama.endsWith(".doc") || nama.endsWith(".docx")) {{
+                icon.textContent = "📘";
+            }} else if (nama.endsWith(".xls") || nama.endsWith(".xlsx")) {{
+                icon.textContent = "📗";
+            }} else if (nama.endsWith(".ppt") || nama.endsWith(".pptx")) {{
+                icon.textContent = "📙";
+            }} else {{
+                icon.textContent = "📎";
+            }}
+
+            card.appendChild(icon);
+        }}
+
+        const info = document.createElement("div");
+        info.className = "chat-attachment-preview-info";
+
+        const name = document.createElement("div");
+        name.className = "chat-attachment-preview-name";
+        name.textContent = file.name;
+
+        const size = document.createElement("div");
+        size.className = "chat-attachment-preview-size";
+
+        if (file.size < 1024 * 1024) {{
+            size.textContent = Math.max(1, Math.round(file.size / 1024)) + " KB";
+        }} else {{
+            size.textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+        }}
+
+        info.appendChild(name);
+        info.appendChild(size);
+        card.appendChild(info);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "chat-attachment-preview-remove";
+        remove.textContent = "✕";
+        remove.title = "Hapus lampiran";
+
+        remove.onclick = function() {{
+            input.value = "";
+            preview.innerHTML = "";
+        }};
+
+        card.appendChild(remove);
+        preview.appendChild(card);
+    }}
+
+    function siapkanInputLampiran(form) {{
+        if (!form) return;
+
+        const preview = form.querySelector(".chat-attachment-preview");
+        if (!preview) return;
+
+        const inputs = form.querySelectorAll(
+            'input[type="file"][name="lampiran"]'
+        );
+
+        inputs.forEach(function(input) {{
+            input.addEventListener("change", function() {{
+                inputs.forEach(function(other) {{
+                    if (other !== input) other.value = "";
+                }});
+
+                tampilkanPreviewLampiran(input, preview);
+            }});
+        }});
+    }}
+
+    // Guru dan Orang Tua
+    document.querySelectorAll(".chat-form").forEach(function(form) {{
+        if (form.id !== "adminChatForm") {{
+            siapkanInputLampiran(form);
+        }}
+    }});
+
+    // Admin
+    (function() {{
+        const form = document.getElementById("adminChatForm");
+        if (!form) return;
+
+        let preview = document.getElementById("adminAttachmentPreview");
+
+        if (!preview) {{
+            preview = document.createElement("div");
+            preview.id = "adminAttachmentPreview";
+            preview.className = "chat-attachment-preview";
+
+            const composer = form.querySelector(".chat-composer");
+
+            if (composer && composer.parentNode) {{
+                composer.parentNode.insertBefore(
+                    preview,
+                    composer.nextSibling
+                );
+            }} else {{
+                form.appendChild(preview);
+            }}
+        }}
+
+        const inputs = [
+            document.getElementById("adminCameraInput"),
+            document.getElementById("adminPhotoInput"),
+            document.getElementById("adminFileInput")
+        ].filter(Boolean);
+
+        inputs.forEach(function(input) {{
+            input.addEventListener("change", function() {{
+                inputs.forEach(function(other) {{
+                    if (other !== input) other.value = "";
+                }});
+
+                tampilkanPreviewLampiran(input, preview);
+            }});
+        }});
+    }})();
+
+    // Tutup menu attachment ketika klik di luar.
+    document.addEventListener("click", function(e) {{
+        if (e.target.closest(".chat-attach") ||
+            e.target.closest(".chat-attach-menu")) {{
+            return;
+        }}
+
+        document.querySelectorAll(".chat-attach-menu.show").forEach(function(menu) {{
+            menu.classList.remove("show");
+        }});
+    }});
+
+    // Pesan teks ATAU attachment harus ada.
+    document.querySelectorAll(".chat-form").forEach(function(form) {{
+        form.addEventListener("submit", function(e) {{
+            const textarea = form.querySelector('textarea[name="pesan"]');
+            const teksAda = textarea && textarea.value.trim().length > 0;
+            let fileAda = false;
+
+            form.querySelectorAll(
+                'input[type="file"][name="lampiran"]'
+            ).forEach(function(input) {{
+                if (input.files && input.files.length > 0) {{
+                    fileAda = true;
+                }}
+            }});
+
+            if (form.id === "adminChatForm") {{
+                document.querySelectorAll(
+                    'input[type="file"][name="lampiran"][form="adminChatForm"]'
+                ).forEach(function(input) {{
+                    if (input.files && input.files.length > 0) {{
+                        fileAda = true;
+                    }}
+                }});
+            }}
+
+            if (!teksAda && !fileAda) {{
+                e.preventDefault();
+                alert("Tulis pesan atau pilih lampiran terlebih dahulu.");
+            }}
+        }});
+    }});
+
     let versiChat = null;
     let sedangCek = false;
 
@@ -8340,6 +9652,75 @@ def obrolan_guru_detail(nis):
         const div = document.createElement("div");
         div.textContent = text == null ? "" : String(text);
         return div.innerHTML;
+    }}
+
+
+    function renderLampiran(row) {{
+        let data = row && row.lampiran;
+
+        if (!data) return "";
+
+        try {{
+            if (typeof data === "string") {{
+                data = JSON.parse(data);
+            }}
+        }} catch (e) {{
+            return "";
+        }}
+
+        if (!data || !data.url) return "";
+
+        const url = escapeHtml(data.url);
+        const nama = escapeHtml(data.nama || "Lampiran");
+        const tipe = String(data.tipe || "").toLowerCase();
+
+        if (tipe.startsWith("image/")) {{
+            return '<div class="chat-attachment">' +
+                '<a href="' + url + '" target="_blank" rel="noopener">' +
+                '<img class="chat-attachment-image" src="' + url +
+                '" alt="' + nama + '">' +
+                '</a>' +
+                '<div class="chat-attachment-name">📷 ' +
+                nama +
+                '</div>' +
+                '<a class="chat-attachment-download" href="' + url +
+                '" target="_blank" rel="noopener" download>' +
+                '⬇️ Simpan' +
+                '</a>' +
+                '</div>';
+        }}
+
+        let icon = "📎";
+
+        if (tipe === "application/pdf") {{
+            icon = "📕";
+        }} else if (tipe.includes("word")) {{
+            icon = "📘";
+        }} else if (
+            tipe.includes("excel") ||
+            tipe.includes("spreadsheet")
+        ) {{
+            icon = "📗";
+        }} else if (
+            tipe.includes("powerpoint") ||
+            tipe.includes("presentation")
+        ) {{
+            icon = "📙";
+        }}
+
+        return '<div class="chat-attachment chat-file">' +
+            '<div class="chat-file-icon">' + icon + '</div>' +
+            '<div class="chat-file-info">' +
+            '<div class="chat-attachment-name">' +
+            nama +
+            '</div>' +
+            '<a class="chat-attachment-download" href="' +
+            url +
+            '" target="_blank" rel="noopener" download>' +
+            '⬇️ Simpan / Buka' +
+            '</a>' +
+            '</div>' +
+            '</div>';
     }}
 
     function renderChat(rows) {{
@@ -8369,6 +9750,7 @@ def obrolan_guru_detail(nis):
                     '<div class="chat-bubble">' +
                     '<div class="chat-sender">Orang Tua</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                     '</div>' +
                     '</div>';
             }} else if (peran === "guru") {{
@@ -8377,6 +9759,7 @@ def obrolan_guru_detail(nis):
                     '<div class="chat-bubble">' +
                     '<div class="chat-sender">Wali Kelas</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                     '</div>' +
                     '</div>';
             }} else {{
@@ -8385,6 +9768,7 @@ def obrolan_guru_detail(nis):
                     '<div class="chat-bubble">' +
                     '<div class="chat-sender">Administrator</div>' +
                     '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                     '</div>' +
                     '</div>';
             }}
@@ -8556,9 +9940,17 @@ def obrolan_orangtua():
             )
 
         if request.method == "POST":
-            pesan_baru = request.form.get("pesan", "").strip()
+            import json
 
-            if pesan_baru:
+            pesan_baru = request.form.get("pesan", "").strip()
+            file_lampiran = request.files.get("lampiran")
+
+            ada_lampiran = bool(
+                file_lampiran
+                and str(file_lampiran.filename or "").strip()
+            )
+
+            if pesan_baru or ada_lampiran:
                 # Jika belum ada sesi aktif, buat sesi baru hanya saat
                 # Orang Tua benar-benar mengirim pesan.
                 sesi_baru = False
@@ -8590,6 +9982,15 @@ def obrolan_orangtua():
                     and rows_sebelum[0].get("diteruskan")
                 )
 
+                lampiran_metadata = None
+
+                if ada_lampiran:
+                    lampiran_metadata = c.upload_chat_attachment(
+                        file_lampiran,
+                        nis,
+                        sesi_id_aktif
+                    )
+
                 c._post(
                     "obrolan",
                     {
@@ -8602,6 +10003,14 @@ def obrolan_orangtua():
                         "peran_penerima": "guru" if sudah_dialihkan else "admin",
                         "jenis": "Obrolan",
                         "pesan": pesan_baru,
+                        "lampiran": (
+                            json.dumps(
+                                lampiran_metadata,
+                                ensure_ascii=False
+                            )
+                            if lampiran_metadata
+                            else None
+                        ),
                         "status": "Ditangani Wali Kelas" if sudah_dialihkan else "Baru",
                         "diteruskan": sudah_dialihkan,
                         "diteruskan_ke": (
@@ -8777,13 +10186,46 @@ def obrolan_orangtua():
         form_chat = ""
         if sesi_id_aktif:
             form_chat = """
-            <form method="post" class="chat-form">
+            <form method="post" enctype="multipart/form-data" class="chat-form">
                 <div class="chat-composer">
+                    <button type="button"
+                            class="chat-attach"
+                            aria-label="Lampiran"
+                            onclick="toggleChatAttachMenu(this)">
+                        <img src="/static/images/icon_plus.png" alt="" class="chat-attach-icon">
+                    </button>
+
                     <textarea
                         name="pesan"
                         rows="1"
-                        placeholder="Tulis pesan di sini..."
-                        required></textarea>
+                        placeholder="Tulis pesan di sini..."></textarea>
+
+                    <div class="chat-attach-menu">
+                        <button type="button" onclick="pilihChatKamera(this)">📷 Kamera</button>
+                        <button type="button" onclick="pilihChatFoto(this)">🖼️ Foto</button>
+                        <button type="button" onclick="pilihChatFile(this)">📎 File</button>
+                    </div>
+
+                    <input type="file"
+                           name="lampiran"
+                           class="chat-camera-input"
+                           accept="image/*"
+                           capture="environment"
+                           style="display:none">
+
+                    <input type="file"
+                           name="lampiran"
+                           class="chat-photo-input"
+                           accept="image/*"
+                           style="display:none">
+
+                    <input type="file"
+                           name="lampiran"
+                           class="chat-file-input"
+                           accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                           style="display:none">
+
+                    <div class="chat-attachment-preview"></div>
 
                     <button class="chat-send" type="submit" aria-label="Kirim pesan">
                         <span class="send-icon" aria-hidden="true">
@@ -8837,6 +10279,7 @@ def obrolan_orangtua():
                 continue
 
             pesan = escape(str(row.get("pesan") or "")).replace("\n", "<br>")
+            render_lampiran_awal = _render_lampiran_server(row, escape)
 
             if peran == "orangtua":
                 bubble_class = "chat-right"
@@ -8856,7 +10299,7 @@ def obrolan_orangtua():
                 <img class="chat-avatar" src="{avatar_pesan}" alt="">
                 <div class="chat-bubble">
                     <div class="chat-sender">{escape(nama_pengirim)}</div>
-                    <div class="chat-text">{pesan}</div>
+                    <div class="chat-text">{pesan}</div>{render_lampiran_awal}
                 </div>
             </div>
             """
@@ -8904,7 +10347,7 @@ def obrolan_orangtua():
 
             {form_chat}
 
-            
+
             {tombol_akhiri if sesi_id_aktif else tombol_mulai_baru}
         </div>
 
@@ -9420,10 +10863,443 @@ def obrolan_orangtua():
             font-size:14px;
             margin-bottom:8px;
         }}
-        </style>
+
+        /* ============================================================
+           CHAT ATTACHMENT
+           ============================================================ */
+        .chat-attachment {{
+            margin-top: 8px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-image {{
+            display: block;
+            width: min(280px, 100%);
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #dbe3ef;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-name {{
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }}
+
+        .chat-attachment-download {{
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+        }}
+
+        .chat-file {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            background: #f8fafc;
+            box-sizing: border-box;
+            max-width: 100%;
+        }}
+
+        .chat-file-icon {{
+            font-size: 28px;
+            line-height: 1;
+            flex: 0 0 auto;
+        }}
+
+        .chat-file-info {{
+            min-width: 0;
+            flex: 1 1 auto;
+        }}
+
+        /* Preview sebelum attachment dikirim */
+        .chat-attachment-preview {{
+            margin-top: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-preview-card {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid #dbe3ef;
+            border-radius: 10px;
+            background: #f8fafc;
+            width: 100%;
+            box-sizing: border-box;
+        }}
+
+        .chat-attachment-preview-image {{
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            min-height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #dbe3ef;
+        }}
+
+        .chat-attachment-preview-icon {{
+            width: 56px;
+            min-width: 56px;
+            font-size: 30px;
+            line-height: 1;
+            text-align: center;
+        }}
+
+        .chat-attachment-preview-info {{
+            min-width: 0;
+            flex: 1 1 auto;
+        }}
+
+        .chat-attachment-preview-name {{
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }}
+
+        .chat-attachment-preview-size {{
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }}
+
+        .chat-attachment-preview-remove {{
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #ef4444;
+            font-size: 18px;
+            line-height: 32px;
+            text-align: center;
+            cursor: pointer;
+        }}
+
+        /* Menu attachment Guru/Orang Tua */
+        .chat-attach-menu {{
+            display: none;
+            position: absolute;
+            z-index: 1300;
+            min-width: 190px;
+            max-width: calc(100vw - 32px);
+            padding: 6px;
+            background: #ffffff;
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15,23,42,.18);
+            box-sizing: border-box;
+        }}
+
+        .chat-attach-menu.show {{
+            display: block;
+        }}
+
+        .chat-attach-menu button {{
+            display: flex;
+            align-items: center;
+            width: 100%;
+            min-height: 42px;
+            padding: 9px 11px;
+            margin: 0;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+        }}
+
+        .chat-attach-menu button:active {{
+            background: #eff6ff;
+        }}
+
+        @media (max-width: 600px) {{
+            .chat-attachment-image {{
+                width: min(240px, 100%);
+                max-height: 240px;
+            }}
+
+            .chat-file {{
+                width: 100%;
+            }}
+
+            .chat-attachment-preview-card {{
+                min-height: 72px;
+            }}
+        }}
+
+</style>
 
 <script>
 (function() {{
+
+    // ============================================================
+    // ATTACHMENT CHAT
+    // ============================================================
+    window.toggleChatAttachMenu = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const menu = composer.querySelector(".chat-attach-menu");
+        if (!menu) return;
+
+        document.querySelectorAll(".chat-attach-menu.show").forEach(function(other) {{
+            if (other !== menu) other.classList.remove("show");
+        }});
+
+        menu.classList.toggle("show");
+    }};
+
+    window.pilihChatKamera = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-camera-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    window.pilihChatFoto = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-photo-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    window.pilihChatFile = function(button) {{
+        const composer = button ? button.closest(".chat-composer") : null;
+        if (!composer) return;
+
+        const input = composer.querySelector(".chat-file-input");
+        const menu = button.closest(".chat-attach-menu");
+
+        if (menu) menu.classList.remove("show");
+        if (input) input.click();
+    }};
+
+    function tampilkanPreviewLampiran(input, preview) {{
+        if (!input || !preview) return;
+
+        preview.innerHTML = "";
+
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {{
+            alert("Ukuran lampiran maksimal 10 MB.");
+            input.value = "";
+            return;
+        }}
+
+        const card = document.createElement("div");
+        card.className = "chat-attachment-preview-card";
+
+        if (file.type && file.type.startsWith("image/")) {{
+            const img = document.createElement("img");
+            img.className = "chat-attachment-preview-image";
+            img.alt = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {{
+                img.src = e.target.result;
+            }};
+            reader.readAsDataURL(file);
+
+            card.appendChild(img);
+        }} else {{
+            const icon = document.createElement("div");
+            icon.className = "chat-attachment-preview-icon";
+
+            const nama = file.name.toLowerCase();
+
+            if (nama.endsWith(".pdf")) {{
+                icon.textContent = "📕";
+            }} else if (nama.endsWith(".doc") || nama.endsWith(".docx")) {{
+                icon.textContent = "📘";
+            }} else if (nama.endsWith(".xls") || nama.endsWith(".xlsx")) {{
+                icon.textContent = "📗";
+            }} else if (nama.endsWith(".ppt") || nama.endsWith(".pptx")) {{
+                icon.textContent = "📙";
+            }} else {{
+                icon.textContent = "📎";
+            }}
+
+            card.appendChild(icon);
+        }}
+
+        const info = document.createElement("div");
+        info.className = "chat-attachment-preview-info";
+
+        const name = document.createElement("div");
+        name.className = "chat-attachment-preview-name";
+        name.textContent = file.name;
+
+        const size = document.createElement("div");
+        size.className = "chat-attachment-preview-size";
+
+        if (file.size < 1024 * 1024) {{
+            size.textContent = Math.max(1, Math.round(file.size / 1024)) + " KB";
+        }} else {{
+            size.textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+        }}
+
+        info.appendChild(name);
+        info.appendChild(size);
+        card.appendChild(info);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "chat-attachment-preview-remove";
+        remove.textContent = "✕";
+        remove.title = "Hapus lampiran";
+
+        remove.onclick = function() {{
+            input.value = "";
+            preview.innerHTML = "";
+        }};
+
+        card.appendChild(remove);
+        preview.appendChild(card);
+    }}
+
+    function siapkanInputLampiran(form) {{
+        if (!form) return;
+
+        const preview = form.querySelector(".chat-attachment-preview");
+        if (!preview) return;
+
+        const inputs = form.querySelectorAll(
+            'input[type="file"][name="lampiran"]'
+        );
+
+        inputs.forEach(function(input) {{
+            input.addEventListener("change", function() {{
+                inputs.forEach(function(other) {{
+                    if (other !== input) other.value = "";
+                }});
+
+                tampilkanPreviewLampiran(input, preview);
+            }});
+        }});
+    }}
+
+    // Guru dan Orang Tua
+    document.querySelectorAll(".chat-form").forEach(function(form) {{
+        if (form.id !== "adminChatForm") {{
+            siapkanInputLampiran(form);
+        }}
+    }});
+
+    // Admin
+    (function() {{
+        const form = document.getElementById("adminChatForm");
+        if (!form) return;
+
+        let preview = document.getElementById("adminAttachmentPreview");
+
+        if (!preview) {{
+            preview = document.createElement("div");
+            preview.id = "adminAttachmentPreview";
+            preview.className = "chat-attachment-preview";
+
+            const composer = form.querySelector(".chat-composer");
+
+            if (composer && composer.parentNode) {{
+                composer.parentNode.insertBefore(
+                    preview,
+                    composer.nextSibling
+                );
+            }} else {{
+                form.appendChild(preview);
+            }}
+        }}
+
+        const inputs = [
+            document.getElementById("adminCameraInput"),
+            document.getElementById("adminPhotoInput"),
+            document.getElementById("adminFileInput")
+        ].filter(Boolean);
+
+        inputs.forEach(function(input) {{
+            input.addEventListener("change", function() {{
+                inputs.forEach(function(other) {{
+                    if (other !== input) other.value = "";
+                }});
+
+                tampilkanPreviewLampiran(input, preview);
+            }});
+        }});
+    }})();
+
+    // Tutup menu attachment ketika klik di luar.
+    document.addEventListener("click", function(e) {{
+        if (e.target.closest(".chat-attach") ||
+            e.target.closest(".chat-attach-menu")) {{
+            return;
+        }}
+
+        document.querySelectorAll(".chat-attach-menu.show").forEach(function(menu) {{
+            menu.classList.remove("show");
+        }});
+    }});
+
+    // Pesan teks ATAU attachment harus ada.
+    document.querySelectorAll(".chat-form").forEach(function(form) {{
+        form.addEventListener("submit", function(e) {{
+            const textarea = form.querySelector('textarea[name="pesan"]');
+            const teksAda = textarea && textarea.value.trim().length > 0;
+            let fileAda = false;
+
+            form.querySelectorAll(
+                'input[type="file"][name="lampiran"]'
+            ).forEach(function(input) {{
+                if (input.files && input.files.length > 0) {{
+                    fileAda = true;
+                }}
+            }});
+
+            if (form.id === "adminChatForm") {{
+                document.querySelectorAll(
+                    'input[type="file"][name="lampiran"][form="adminChatForm"]'
+                ).forEach(function(input) {{
+                    if (input.files && input.files.length > 0) {{
+                        fileAda = true;
+                    }}
+                }});
+            }}
+
+            if (!teksAda && !fileAda) {{
+                e.preventDefault();
+                alert("Tulis pesan atau pilih lampiran terlebih dahulu.");
+            }}
+        }});
+    }});
+
     let versiChat = null;
     let sedangCek = false;
 
@@ -9431,6 +11307,75 @@ def obrolan_orangtua():
         const div = document.createElement("div");
         div.textContent = text == null ? "" : String(text);
         return div.innerHTML;
+    }}
+
+
+    function renderLampiran(row) {{
+        let data = row && row.lampiran;
+
+        if (!data) return "";
+
+        try {{
+            if (typeof data === "string") {{
+                data = JSON.parse(data);
+            }}
+        }} catch (e) {{
+            return "";
+        }}
+
+        if (!data || !data.url) return "";
+
+        const url = escapeHtml(data.url);
+        const nama = escapeHtml(data.nama || "Lampiran");
+        const tipe = String(data.tipe || "").toLowerCase();
+
+        if (tipe.startsWith("image/")) {{
+            return '<div class="chat-attachment">' +
+                '<a href="' + url + '" target="_blank" rel="noopener">' +
+                '<img class="chat-attachment-image" src="' + url +
+                '" alt="' + nama + '">' +
+                '</a>' +
+                '<div class="chat-attachment-name">📷 ' +
+                nama +
+                '</div>' +
+                '<a class="chat-attachment-download" href="' + url +
+                '" target="_blank" rel="noopener" download>' +
+                '⬇️ Simpan' +
+                '</a>' +
+                '</div>';
+        }}
+
+        let icon = "📎";
+
+        if (tipe === "application/pdf") {{
+            icon = "📕";
+        }} else if (tipe.includes("word")) {{
+            icon = "📘";
+        }} else if (
+            tipe.includes("excel") ||
+            tipe.includes("spreadsheet")
+        ) {{
+            icon = "📗";
+        }} else if (
+            tipe.includes("powerpoint") ||
+            tipe.includes("presentation")
+        ) {{
+            icon = "📙";
+        }}
+
+        return '<div class="chat-attachment chat-file">' +
+            '<div class="chat-file-icon">' + icon + '</div>' +
+            '<div class="chat-file-info">' +
+            '<div class="chat-attachment-name">' +
+            nama +
+            '</div>' +
+            '<a class="chat-attachment-download" href="' +
+            url +
+            '" target="_blank" rel="noopener" download>' +
+            '⬇️ Simpan / Buka' +
+            '</a>' +
+            '</div>' +
+            '</div>';
     }}
 
     function renderChat(rows) {{
@@ -9460,6 +11405,7 @@ def obrolan_orangtua():
                       '<div class="chat-bubble">' +
                       '<div class="chat-sender">Orang Tua</div>' +
                       '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                       '</div>' +
                       '</div>';
               }} else if (peran === "guru") {{
@@ -9468,6 +11414,7 @@ def obrolan_orangtua():
                       '<div class="chat-bubble me">' +
                       '<div class="chat-sender">Wali Kelas</div>' +
                       '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                       '</div>' +
                       '</div>';
               }} else {{
@@ -9476,6 +11423,7 @@ def obrolan_orangtua():
                       '<div class="chat-bubble">' +
                       '<div class="chat-sender">Administrator</div>' +
                       '<div class="chat-text">' + pesan + '</div>' +
+                    renderLampiran(row) +
                       '</div>' +
                       '</div>';
               }}

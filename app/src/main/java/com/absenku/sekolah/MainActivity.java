@@ -4,6 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.Intent;
+import androidx.core.content.FileProvider;
+import java.util.Locale;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.io.File;
+import android.net.Uri;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.ToneGenerator;
@@ -21,6 +27,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.ValueCallback;
+import android.webkit.URLUtil;
+import android.app.DownloadManager;
 import android.widget.Toast;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
@@ -80,23 +88,103 @@ public class MainActivity extends Activity {
     private FrameLayout mainLayout;
     private static final int CAMERA_REQ = 1001;
     private static final int FILE_CHOOSER_REQ = 1002;
+    private static final int CAMERA_CHAT_PERMISSION_REQ = 1005;
+    private static final int CAMERA_CAPTURE_REQ = 1004;
     private ValueCallback<android.net.Uri[]> filePathCallback;
+    private Uri cameraOutputUri;
     private String notificationRoute = "";
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String[] permissions,
+            int[] grantResults) {
 
-        if (requestCode == CAMERA_REQ &&
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                        != PackageManager.PERMISSION_GRANTED) {
+        super.onRequestPermissionsResult(
+                requestCode,
+                permissions,
+                grantResults
+        );
 
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{Manifest.permission.POST_NOTIFICATIONS},
-                    1003
-            );
+        // =====================================================
+        // IZIN KAMERA SAAT STARTUP APLIKASI
+        // =====================================================
+        // CAMERA_REQ hanya untuk permintaan izin kamera awal.
+        // Jangan langsung membuka kamera chat di sini.
+        if (requestCode == CAMERA_REQ) {
+
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // Setelah izin kamera diberikan, lanjutkan meminta
+                // izin notifikasi Android 13+ jika diperlukan.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.POST_NOTIFICATIONS
+                        ) != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(
+                            this,
+                            new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                            1003
+                    );
+                }
+
+            } else {
+                android.util.Log.w(
+                        "ABSENKU_PERMISSION",
+                        "Izin kamera startup ditolak"
+                );
+            }
+
+            return;
+        }
+
+        // =====================================================
+        // IZIN KAMERA
+        // =====================================================
+        if (requestCode == CAMERA_CHAT_PERMISSION_REQ) {
+
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // Setelah izin kamera chat diberikan, buka kamera.
+                bukaKameraUntukChat();
+
+            } else {
+
+                if (filePathCallback != null) {
+                    filePathCallback.onReceiveValue(null);
+                    filePathCallback = null;
+                }
+
+                Toast.makeText(
+                        this,
+                        "Izin kamera diperlukan untuk mengambil foto.",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+
+            return;
+        }
+
+        // =====================================================
+        // IZIN NOTIFIKASI ANDROID 13+
+        // =====================================================
+        if (requestCode == 1003 &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                android.util.Log.d(
+                        "ABSENKU_FCM",
+                        "Izin notifikasi diberikan"
+                );
+            }
+
+            return;
         }
     }
 
@@ -220,6 +308,76 @@ public class MainActivity extends Activity {
             }
         });
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidPrint");
+        // Download lampiran chat ke folder Download Android.
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
+            try {
+                String fileName = URLUtil.guessFileName(
+                        url,
+                        contentDisposition,
+                        mimeType
+                );
+
+                if (fileName == null || fileName.trim().isEmpty()) {
+                    fileName = "lampiran_" + System.currentTimeMillis();
+                }
+
+                DownloadManager.Request request =
+                        new DownloadManager.Request(Uri.parse(url));
+
+                request.setTitle(fileName);
+                request.setDescription("Mengunduh lampiran Absenku...");
+                request.setMimeType(
+                        mimeType != null && !mimeType.isEmpty()
+                                ? mimeType
+                                : "application/octet-stream"
+                );
+
+                request.setNotificationVisibility(
+                        DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+                );
+
+                request.setAllowedOverMetered(true);
+                request.setAllowedOverRoaming(true);
+
+                request.setDestinationInExternalPublicDir(
+                        android.os.Environment.DIRECTORY_DOWNLOADS,
+                        fileName
+                );
+
+                DownloadManager downloadManager =
+                        (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+
+                if (downloadManager != null) {
+                    downloadManager.enqueue(request);
+
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Lampiran sedang diunduh...",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                } else {
+                    Toast.makeText(
+                            MainActivity.this,
+                            "Download Manager tidak tersedia",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+
+            } catch (Exception e) {
+                android.util.Log.e(
+                        "ABSENKU_DOWNLOAD",
+                        "Gagal mengunduh lampiran",
+                        e
+                );
+
+                Toast.makeText(
+                        MainActivity.this,
+                        "Gagal mengunduh lampiran",
+                        Toast.LENGTH_LONG
+                ).show();
+            }
+        });
+
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
@@ -239,18 +397,33 @@ public class MainActivity extends Activity {
                 MainActivity.this.filePathCallback = filePathCallback;
 
                 try {
+                    // Input dengan capture="environment" = buka kamera
+                    if (fileChooserParams.isCaptureEnabled()) {
+                        bukaKameraUntukChat();
+                        return true;
+                    }
+
+                    // Foto/Galeri/File menggunakan intent asli WebView.
+                    // Jangan dipaksa menjadi image/*.
                     Intent intent = fileChooserParams.createIntent();
-                    intent.setType("image/*");
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
-                    startActivityForResult(intent, FILE_CHOOSER_REQ);
+
+                    startActivityForResult(
+                            intent,
+                            FILE_CHOOSER_REQ
+                    );
+
                     return true;
+
                 } catch (Exception e) {
                     MainActivity.this.filePathCallback = null;
+
                     Toast.makeText(
                             MainActivity.this,
-                            "Tidak dapat membuka galeri",
+                            "Tidak dapat membuka pemilih file",
                             Toast.LENGTH_SHORT
                     ).show();
+
                     return false;
                 }
             }
@@ -271,20 +444,186 @@ public class MainActivity extends Activity {
         }).start();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    private void bukaKameraUntukChat() {
+        try {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED) {
 
-        if (requestCode == FILE_CHOOSER_REQ) {
-            if (filePathCallback == null) return;
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.CAMERA},
+                        CAMERA_CHAT_PERMISSION_REQ
+                );
+                return;
+            }
+
+            File folder = new File(
+                    getCacheDir(),
+                    "chat_camera"
+            );
+
+            if (!folder.exists() && !folder.mkdirs()) {
+                throw new Exception(
+                        "Folder kamera tidak dapat dibuat"
+                );
+            }
+
+            String waktu = new SimpleDateFormat(
+                    "yyyyMMdd_HHmmss",
+                    Locale.US
+            ).format(new Date());
+
+            File foto = new File(
+                    folder,
+                    "IMG_" + waktu + ".jpg"
+            );
+
+            cameraOutputUri = FileProvider.getUriForFile(
+                    this,
+                    getPackageName() + ".fileprovider",
+                    foto
+            );
+
+            Intent cameraIntent = new Intent(
+                    android.provider.MediaStore.ACTION_IMAGE_CAPTURE
+            );
+
+            cameraIntent.putExtra(
+                    android.provider.MediaStore.EXTRA_OUTPUT,
+                    cameraOutputUri
+            );
+
+            cameraIntent.addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            );
+
+            // Berikan izin URI foto secara eksplisit kepada aplikasi kamera.
+            android.content.pm.ResolveInfo cameraInfo =
+                    getPackageManager().resolveActivity(
+                            cameraIntent,
+                            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY
+                    );
+
+            if (cameraInfo != null && cameraInfo.activityInfo != null) {
+                grantUriPermission(
+                        cameraInfo.activityInfo.packageName,
+                        cameraOutputUri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                );
+            }
+
+            if (cameraIntent.resolveActivity(
+                    getPackageManager()
+            ) == null) {
+                throw new Exception(
+                        "Aplikasi kamera tidak ditemukan"
+                );
+            }
+
+            startActivityForResult(
+                    cameraIntent,
+                    CAMERA_CAPTURE_REQ
+            );
+
+        } catch (Exception e) {
+            cameraOutputUri = null;
+
+            if (filePathCallback != null) {
+                filePathCallback.onReceiveValue(null);
+                filePathCallback = null;
+            }
+
+            Toast.makeText(
+                    this,
+                    "Kamera tidak dapat dibuka: " + e.getMessage(),
+                    Toast.LENGTH_LONG
+            ).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(
+            int requestCode,
+            int resultCode,
+            android.content.Intent data) {
+
+        super.onActivityResult(
+                requestCode,
+                resultCode,
+                data
+        );
+
+        // =====================================================
+        // HASIL FOTO DARI KAMERA
+        // =====================================================
+        if (requestCode == CAMERA_CAPTURE_REQ) {
+
+            if (filePathCallback == null) {
+                cameraOutputUri = null;
+                return;
+            }
 
             android.net.Uri[] results = null;
 
-            if (resultCode == RESULT_OK && data != null) {
-                android.net.Uri uri = data.getData();
+            if (resultCode == RESULT_OK &&
+                    cameraOutputUri != null) {
 
-                if (uri != null) {
-                    results = new android.net.Uri[]{uri};
+                results = new android.net.Uri[]{
+                        cameraOutputUri
+                };
+
+            } else if (cameraOutputUri != null) {
+
+                try {
+                    getContentResolver().delete(
+                            cameraOutputUri,
+                            null,
+                            null
+                    );
+                } catch (Exception ignored) {
+                }
+            }
+
+            filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
+            cameraOutputUri = null;
+
+            return;
+        }
+
+        // =====================================================
+        // HASIL GALERI / FILE PICKER
+        // =====================================================
+        if (requestCode == FILE_CHOOSER_REQ) {
+
+            if (filePathCallback == null) {
+                return;
+            }
+
+            android.net.Uri[] results = null;
+
+            if (resultCode == RESULT_OK &&
+                    data != null) {
+
+                android.content.ClipData clipData =
+                        data.getClipData();
+
+                if (clipData != null &&
+                        clipData.getItemCount() > 0) {
+
+                    results = new android.net.Uri[]{
+                            clipData.getItemAt(0).getUri()
+                    };
+
+                } else if (data.getData() != null) {
+
+                    results = new android.net.Uri[]{
+                            data.getData()
+                    };
                 }
             }
 

@@ -43,4 +43,5 @@ chaquopy {
 dependencies {
     implementation 'com.google.firebase:firebase-messaging:25.0.1'
     implementation 'androidx.webkit:webkit:1.12.1'
+    implementation 'androidx.core:core:1.13.1'
 }
