@@ -7164,7 +7164,7 @@ html, body {
 .admin-chat-page-scroll > .admin-chat-card .chat-form {
     position: fixed !important;
     left: 50% !important;
-    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)) !important;
+    bottom: var(--bottom-nav-height) !important;
     transform: translateX(-50%) !important;
 
     width: min(calc(100% - 32px), 760px) !important;
