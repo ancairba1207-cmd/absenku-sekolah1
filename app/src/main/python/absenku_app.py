@@ -7157,6 +7157,41 @@ html, body {
         max-width: none !important;
     }
 }
+
+/* ===== ADMIN CHAT FINAL V14 ===== */
+/* Composer dikunci tepat di atas bottom navigation */
+
+.admin-chat-page-scroll > .admin-chat-card .chat-form {
+    position: fixed !important;
+    left: 50% !important;
+    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%) !important;
+
+    width: min(calc(100% - 32px), 760px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    z-index: 1100 !important;
+}
+
+.admin-chat-page-scroll > .admin-chat-card .chat-composer {
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    box-sizing: border-box !important;
+}
+
+/* Beri ruang di bawah pesan agar pesan terakhir tidak tertutup composer */
+.admin-chat-page-scroll > .admin-chat-card #chat-box {
+    padding-bottom: 70px !important;
+}
+
+@media (max-width: 600px) {
+    .admin-chat-page-scroll > .admin-chat-card .chat-form {
+        width: calc(100% - 32px) !important;
+    }
+}
 </style>
 """
 
