@@ -796,17 +796,17 @@ public class MainActivity extends Activity {
                             }
                         }
 
-                        android.net.Uri cacheUri =
-                                FileProvider.getUriForFile(
-                                        MainActivity.this,
-                                        getPackageName() +
-                                                ".fileprovider",
-                                        cacheFile
-                                );
-
+                        /*
+                         * Kembalikan URI asli dari DocumentsProvider
+                         * ke WebView. WebView membutuhkan content:// URI
+                         * asli agar file masuk sebagai multipart/form-data.
+                         *
+                         * cacheFile tetap dibuat sebagai pengecekan bahwa
+                         * file benar-benar dapat dibaca dari Android.
+                         */
                         results =
                                 new android.net.Uri[]{
-                                        cacheUri
+                                        selectedUri
                                 };
 
                         android.util.Log.d(
