@@ -7607,9 +7607,7 @@ html, body {
 
         /* Preview sebelum attachment dikirim */
         .chat-attachment-preview {{
-            margin-top: 8px;
-            width: 100%;
-            box-sizing: border-box;
+            display: none !important;
         }}
 
         .chat-attachment-preview-card {{
@@ -8015,7 +8013,13 @@ window.toggleAdminChatMenu = function() {{
                     if (other !== input) other.value = "";
                 }});
 
-                tampilkanPreviewLampiran(input, preview);
+                // Attachment dikirim otomatis seperti WhatsApp.
+                // Tidak lagi ditampilkan di composer sebelum dikirim.
+                if (typeof form.requestSubmit === "function") {{
+                    form.requestSubmit();
+                }} else {{
+                    form.submit();
+                }}
             }});
         }});
     }}
@@ -8066,7 +8070,13 @@ window.toggleAdminChatMenu = function() {{
                     if (other !== input) other.value = "";
                 }});
 
-                tampilkanPreviewLampiran(input, preview);
+                // Attachment dikirim otomatis seperti WhatsApp.
+                // Tidak lagi ditampilkan di composer sebelum dikirim.
+                if (typeof form.requestSubmit === "function") {{
+                    form.requestSubmit();
+                }} else {{
+                    form.submit();
+                }}
             }});
         }});
     }})();
@@ -9302,9 +9312,7 @@ def obrolan_guru_detail(nis):
 
         /* Preview sebelum attachment dikirim */
         .chat-attachment-preview {{
-            margin-top: 8px;
-            width: 100%;
-            box-sizing: border-box;
+            display: none !important;
         }}
 
         .chat-attachment-preview-card {{
@@ -9587,7 +9595,13 @@ def obrolan_guru_detail(nis):
                     if (other !== input) other.value = "";
                 }});
 
-                tampilkanPreviewLampiran(input, preview);
+                // Attachment dikirim otomatis seperti WhatsApp.
+                // Tidak lagi ditampilkan di composer sebelum dikirim.
+                if (typeof form.requestSubmit === "function") {{
+                    form.requestSubmit();
+                }} else {{
+                    form.submit();
+                }}
             }});
         }});
     }}
@@ -9638,7 +9652,13 @@ def obrolan_guru_detail(nis):
                     if (other !== input) other.value = "";
                 }});
 
-                tampilkanPreviewLampiran(input, preview);
+                // Attachment dikirim otomatis seperti WhatsApp.
+                // Tidak lagi ditampilkan di composer sebelum dikirim.
+                if (typeof form.requestSubmit === "function") {{
+                    form.requestSubmit();
+                }} else {{
+                    form.submit();
+                }}
             }});
         }});
     }})();
@@ -10978,9 +10998,7 @@ def obrolan_orangtua():
 
         /* Preview sebelum attachment dikirim */
         .chat-attachment-preview {{
-            margin-top: 8px;
-            width: 100%;
-            box-sizing: border-box;
+            display: none !important;
         }}
 
         .chat-attachment-preview-card {{
@@ -11263,7 +11281,13 @@ def obrolan_orangtua():
                     if (other !== input) other.value = "";
                 }});
 
-                tampilkanPreviewLampiran(input, preview);
+                // Attachment dikirim otomatis seperti WhatsApp.
+                // Tidak lagi ditampilkan di composer sebelum dikirim.
+                if (typeof form.requestSubmit === "function") {{
+                    form.requestSubmit();
+                }} else {{
+                    form.submit();
+                }}
             }});
         }});
     }}
@@ -11314,7 +11338,13 @@ def obrolan_orangtua():
                     if (other !== input) other.value = "";
                 }});
 
-                tampilkanPreviewLampiran(input, preview);
+                // Attachment dikirim otomatis seperti WhatsApp.
+                // Tidak lagi ditampilkan di composer sebelum dikirim.
+                if (typeof form.requestSubmit === "function") {{
+                    form.requestSubmit();
+                }} else {{
+                    form.submit();
+                }}
             }});
         }});
     }})();
