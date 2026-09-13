@@ -842,6 +842,14 @@ public class MainActivity extends Activity {
                 }
             }
 
+            android.util.Log.d(
+                    "ABSENKU_FILE",
+                    "CALLBACK FILE: " +
+                            (results == null
+                                    ? "NULL"
+                                    : results[0].toString())
+            );
+
             filePathCallback.onReceiveValue(results);
             filePathCallback = null;
         }
