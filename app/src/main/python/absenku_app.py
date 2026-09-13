@@ -179,13 +179,30 @@ class SupabaseDB:
         if not file_storage:
             return None
 
-        nama_asli = str(file_storage.filename or "").strip()
-        if not nama_asli:
-            return None
+        # Baca isi file terlebih dahulu. Android/WebView tertentu
+        # dapat mengirim multipart file tanpa filename atau MIME.
+        data = file_storage.read()
+        if not data:
+            raise ValueError("File kosong.")
 
-        nama_bersih = os.path.basename(nama_asli)
-        ext = os.path.splitext(nama_bersih)[1].lower()
+        max_size = 10 * 1024 * 1024
+        if len(data) > max_size:
+            raise ValueError("Ukuran file maksimal 10 MB.")
+
+        nama_asli = str(file_storage.filename or "").strip()
+        nama_bersih = os.path.basename(nama_asli) if nama_asli else ""
+
         tipe = str(file_storage.mimetype or "").lower().strip()
+
+        # Deteksi format dari isi file jika metadata WebView kosong/tidak valid.
+        if data.startswith(b"%PDF"):
+            if not nama_bersih:
+                nama_bersih = "lampiran_" + str(int(time.time() * 1000)) + ".pdf"
+            elif not os.path.splitext(nama_bersih)[1]:
+                nama_bersih += ".pdf"
+            tipe = "application/pdf"
+
+        ext = os.path.splitext(nama_bersih)[1].lower()
 
         tipe_diizinkan = {
             "image/jpeg",
@@ -208,14 +225,11 @@ class SupabaseDB:
             ".ppt", ".pptx",
         }
 
-        if tipe not in tipe_diizinkan:
+        if tipe not in tipe_diizinkan and nama_bersih:
             tipe_tebakan = mimetypes.guess_type(nama_bersih)[0]
             if tipe_tebakan in tipe_diizinkan:
                 tipe = tipe_tebakan
 
-        # Beberapa Android/WebView mengirim MIME sebagai
-        # application/octet-stream. Jika ekstensi file valid,
-        # tentukan MIME dari ekstensi agar dokumen tetap diterima.
         if tipe not in tipe_diizinkan and ext in ekstensi_diizinkan:
             tipe_ekstensi = {
                 ".jpg": "image/jpeg",
@@ -232,17 +246,28 @@ class SupabaseDB:
             }
             tipe = tipe_ekstensi.get(ext, tipe)
 
+        if not nama_bersih:
+            nama_bersih = "lampiran_" + str(int(time.time() * 1000))
+
+        if not ext and tipe in tipe_diizinkan:
+            ext_dari_tipe = {
+                "image/jpeg": ".jpg",
+                "image/png": ".png",
+                "image/webp": ".webp",
+                "application/pdf": ".pdf",
+                "application/msword": ".doc",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+                "application/vnd.ms-excel": ".xls",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+                "application/vnd.ms-powerpoint": ".ppt",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+            }
+            ext = ext_dari_tipe.get(tipe, "")
+            if ext and not os.path.splitext(nama_bersih)[1]:
+                nama_bersih += ext
+
         if tipe not in tipe_diizinkan or ext not in ekstensi_diizinkan:
             raise ValueError("Jenis file tidak didukung.")
-
-        data = file_storage.read()
-
-        if not data:
-            raise ValueError("File kosong.")
-
-        max_size = 10 * 1024 * 1024
-        if len(data) > max_size:
-            raise ValueError("Ukuran file maksimal 10 MB.")
 
         nis_safe = "".join(
             ch for ch in str(nis or "").strip()
@@ -8063,9 +8088,9 @@ window.toggleAdminChatMenu = function() {{
 
         inputs.forEach(function(input) {{
             input.addEventListener("change", function() {{
-                inputs.forEach(function(other) {{
-                    if (other !== input) other.value = "";
-                }});
+                // Jangan kosongkan input file lain sebelum submit.
+                // WebView Android harus mempertahankan file yang dipilih
+                // sampai native form multipart benar-benar dikirim.
 
                 // Attachment dikirim otomatis seperti WhatsApp.
                 // Tidak lagi ditampilkan di composer sebelum dikirim.
@@ -8120,9 +8145,9 @@ window.toggleAdminChatMenu = function() {{
 
         inputs.forEach(function(input) {{
             input.addEventListener("change", function() {{
-                inputs.forEach(function(other) {{
-                    if (other !== input) other.value = "";
-                }});
+                // Jangan kosongkan input file lain sebelum submit.
+                // WebView Android harus mempertahankan file yang dipilih
+                // sampai native form multipart benar-benar dikirim.
 
                 // Attachment dikirim otomatis seperti WhatsApp.
                 // Tidak lagi ditampilkan di composer sebelum dikirim.
@@ -9651,9 +9676,9 @@ def obrolan_guru_detail(nis):
 
         inputs.forEach(function(input) {{
             input.addEventListener("change", function() {{
-                inputs.forEach(function(other) {{
-                    if (other !== input) other.value = "";
-                }});
+                // Jangan kosongkan input file lain sebelum submit.
+                // WebView Android harus mempertahankan file yang dipilih
+                // sampai native form multipart benar-benar dikirim.
 
                 // Attachment dikirim otomatis seperti WhatsApp.
                 // Tidak lagi ditampilkan di composer sebelum dikirim.
@@ -9708,9 +9733,9 @@ def obrolan_guru_detail(nis):
 
         inputs.forEach(function(input) {{
             input.addEventListener("change", function() {{
-                inputs.forEach(function(other) {{
-                    if (other !== input) other.value = "";
-                }});
+                // Jangan kosongkan input file lain sebelum submit.
+                // WebView Android harus mempertahankan file yang dipilih
+                // sampai native form multipart benar-benar dikirim.
 
                 // Attachment dikirim otomatis seperti WhatsApp.
                 // Tidak lagi ditampilkan di composer sebelum dikirim.
@@ -11337,9 +11362,9 @@ def obrolan_orangtua():
 
         inputs.forEach(function(input) {{
             input.addEventListener("change", function() {{
-                inputs.forEach(function(other) {{
-                    if (other !== input) other.value = "";
-                }});
+                // Jangan kosongkan input file lain sebelum submit.
+                // WebView Android harus mempertahankan file yang dipilih
+                // sampai native form multipart benar-benar dikirim.
 
                 // Attachment dikirim otomatis seperti WhatsApp.
                 // Tidak lagi ditampilkan di composer sebelum dikirim.
@@ -11394,9 +11419,9 @@ def obrolan_orangtua():
 
         inputs.forEach(function(input) {{
             input.addEventListener("change", function() {{
-                inputs.forEach(function(other) {{
-                    if (other !== input) other.value = "";
-                }});
+                // Jangan kosongkan input file lain sebelum submit.
+                // WebView Android harus mempertahankan file yang dipilih
+                // sampai native form multipart benar-benar dikirim.
 
                 // Attachment dikirim otomatis seperti WhatsApp.
                 // Tidak lagi ditampilkan di composer sebelum dikirim.
