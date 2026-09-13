@@ -7192,6 +7192,39 @@ html, body {
         width: calc(100% - 32px) !important;
     }
 }
+
+/* ===== ADMIN CHAT FINAL V16 ===== */
+/* Rapikan popup + dan cegah pesan terakhir tenggelam */
+
+/* Popup + berada di atas composer */
+.admin-chat-card .admin-chat-menu {
+    position: fixed !important;
+    left: max(16px, calc(50% - 380px)) !important;
+    bottom: calc(var(--bottom-nav-height) + 58px) !important;
+    width: 205px !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100dvh - var(--bottom-nav-height) - 80px) !important;
+    overflow-y: auto !important;
+    z-index: 1200 !important;
+    box-sizing: border-box !important;
+}
+
+/* Pada HP, popup mengikuti sisi kiri composer */
+@media (max-width: 600px) {
+    .admin-chat-card .admin-chat-menu {
+        left: 16px !important;
+        bottom: calc(var(--bottom-nav-height) + 58px) !important;
+        width: 205px !important;
+        max-width: calc(100vw - 32px) !important;
+        max-height: calc(100dvh - var(--bottom-nav-height) - 80px) !important;
+    }
+}
+
+/* Ruang ekstra agar pesan terakhir tidak berada di bawah composer */
+.admin-chat-page-scroll > .admin-chat-card #chat-box {
+    padding-bottom: 100px !important;
+    scroll-padding-bottom: 100px !important;
+}
 </style>
 """
 
