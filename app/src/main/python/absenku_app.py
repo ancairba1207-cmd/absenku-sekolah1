@@ -4930,23 +4930,23 @@ def _render_lampiran_server(row, escape_func):
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">'
                 '</a>'
-                '<div class="chat-attachment-name"><img src="/static/images/ic_file_image.png" class="chat-attachment-type-icon" alt=""> ' + nama + '</div>'
+                '<div class="chat-attachment-name">📷 ' + nama + '</div>'
                 '<a class="chat-attachment-download" href="' + url +
                 '" rel="noopener" download>'
-                '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan'
+                '⬇️ Simpan'
                 '</a>'
                 '</div>'
             )
 
-        icon = '<img src="/static/images/ic_file_generic.png" class="chat-file-type-icon" alt="">'
+        icon = "📎"
         if tipe == "application/pdf":
-            icon = '<img src="/static/images/ic_file_pdf.png" class="chat-file-type-icon" alt="">'
+            icon = "📕"
         elif "word" in tipe:
-            icon = '<img src="/static/images/ic_file_word.png" class="chat-file-type-icon" alt="">'
+            icon = "📘"
         elif "excel" in tipe or "spreadsheet" in tipe:
-            icon = '<img src="/static/images/ic_file_excel.png" class="chat-file-type-icon" alt="">'
+            icon = "📗"
         elif "powerpoint" in tipe or "presentation" in tipe:
-            icon = '<img src="/static/images/ic_file_ppt.png" class="chat-file-type-icon" alt="">'
+            icon = "📙"
 
         return (
             '<div class="chat-attachment chat-file">'
@@ -4955,7 +4955,7 @@ def _render_lampiran_server(row, escape_func):
             '<div class="chat-attachment-name">' + nama + '</div>'
             '<a class="chat-attachment-download" href="' + url +
             '" rel="noopener" download>'
-            '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan / Buka'
+            '⬇️ Simpan / Buka'
             '</a>'
             '</div>'
             '</div>'
@@ -8085,15 +8085,15 @@ window.toggleAdminChatMenu = function() {{
             const nama = file.name.toLowerCase();
 
             if (nama.endsWith(".pdf")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_pdf.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📕";
             }} else if (nama.endsWith(".doc") || nama.endsWith(".docx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_word.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📘";
             }} else if (nama.endsWith(".xls") || nama.endsWith(".xlsx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_excel.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📗";
             }} else if (nama.endsWith(".ppt") || nama.endsWith(".pptx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_ppt.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📙";
             }} else {{
-                icon.innerHTML = '<img src="/static/images/ic_file_generic.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📎";
             }}
 
             card.appendChild(icon);
@@ -8303,32 +8303,32 @@ window.toggleAdminChatMenu = function() {{
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
-                '<div class="chat-attachment-name"><img src="/static/images/ic_file_image.png" class="chat-attachment-type-icon" alt=""> ' +
+                '<div class="chat-attachment-name">📷 ' +
                 nama +
                 '</div>' +
                 '<a class="chat-attachment-download" href="' + url +
                 '" rel="noopener" download>' +
-                '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan' +
+                '⬇️ Simpan' +
                 '</a>' +
                 '</div>';
         }}
 
-        let icon = '<img src="/static/images/ic_file_generic.png" class="chat-file-type-icon" alt="">';
+        let icon = "📎";
 
         if (tipe === "application/pdf") {{
-            icon = '<img src="/static/images/ic_file_pdf.png" class="chat-file-type-icon" alt="">';
+            icon = "📕";
         }} else if (tipe.includes("word")) {{
-            icon = '<img src="/static/images/ic_file_word.png" class="chat-file-type-icon" alt="">';
+            icon = "📘";
         }} else if (
             tipe.includes("excel") ||
             tipe.includes("spreadsheet")
         ) {{
-            icon = '<img src="/static/images/ic_file_excel.png" class="chat-file-type-icon" alt="">';
+            icon = "📗";
         }} else if (
             tipe.includes("powerpoint") ||
             tipe.includes("presentation")
         ) {{
-            icon = '<img src="/static/images/ic_file_ppt.png" class="chat-file-type-icon" alt="">';
+            icon = "📙";
         }}
 
         return '<div class="chat-attachment chat-file">' +
@@ -8340,7 +8340,7 @@ window.toggleAdminChatMenu = function() {{
             '<a class="chat-attachment-download" href="' +
             url +
             '" rel="noopener" download>' +
-            '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan / Buka' +
+            '⬇️ Simpan / Buka' +
             '</a>' +
             '</div>' +
             '</div>';
@@ -9757,15 +9757,15 @@ def obrolan_guru_detail(nis):
             const nama = file.name.toLowerCase();
 
             if (nama.endsWith(".pdf")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_pdf.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📕";
             }} else if (nama.endsWith(".doc") || nama.endsWith(".docx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_word.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📘";
             }} else if (nama.endsWith(".xls") || nama.endsWith(".xlsx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_excel.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📗";
             }} else if (nama.endsWith(".ppt") || nama.endsWith(".pptx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_ppt.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📙";
             }} else {{
-                icon.innerHTML = '<img src="/static/images/ic_file_generic.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📎";
             }}
 
             card.appendChild(icon);
@@ -9969,32 +9969,32 @@ def obrolan_guru_detail(nis):
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
-                '<div class="chat-attachment-name"><img src="/static/images/ic_file_image.png" class="chat-attachment-type-icon" alt=""> ' +
+                '<div class="chat-attachment-name">📷 ' +
                 nama +
                 '</div>' +
                 '<a class="chat-attachment-download" href="' + url +
                 '" rel="noopener" download>' +
-                '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan' +
+                '⬇️ Simpan' +
                 '</a>' +
                 '</div>';
         }}
 
-        let icon = '<img src="/static/images/ic_file_generic.png" class="chat-file-type-icon" alt="">';
+        let icon = "📎";
 
         if (tipe === "application/pdf") {{
-            icon = '<img src="/static/images/ic_file_pdf.png" class="chat-file-type-icon" alt="">';
+            icon = "📕";
         }} else if (tipe.includes("word")) {{
-            icon = '<img src="/static/images/ic_file_word.png" class="chat-file-type-icon" alt="">';
+            icon = "📘";
         }} else if (
             tipe.includes("excel") ||
             tipe.includes("spreadsheet")
         ) {{
-            icon = '<img src="/static/images/ic_file_excel.png" class="chat-file-type-icon" alt="">';
+            icon = "📗";
         }} else if (
             tipe.includes("powerpoint") ||
             tipe.includes("presentation")
         ) {{
-            icon = '<img src="/static/images/ic_file_ppt.png" class="chat-file-type-icon" alt="">';
+            icon = "📙";
         }}
 
         return '<div class="chat-attachment chat-file">' +
@@ -10006,7 +10006,7 @@ def obrolan_guru_detail(nis):
             '<a class="chat-attachment-download" href="' +
             url +
             '" rel="noopener" download>' +
-            '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan / Buka' +
+            '⬇️ Simpan / Buka' +
             '</a>' +
             '</div>' +
             '</div>';
@@ -11483,15 +11483,15 @@ def obrolan_orangtua():
             const nama = file.name.toLowerCase();
 
             if (nama.endsWith(".pdf")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_pdf.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📕";
             }} else if (nama.endsWith(".doc") || nama.endsWith(".docx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_word.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📘";
             }} else if (nama.endsWith(".xls") || nama.endsWith(".xlsx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_excel.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📗";
             }} else if (nama.endsWith(".ppt") || nama.endsWith(".pptx")) {{
-                icon.innerHTML = '<img src="/static/images/ic_file_ppt.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📙";
             }} else {{
-                icon.innerHTML = '<img src="/static/images/ic_file_generic.png" class="chat-file-type-icon" alt="">';
+                icon.textContent = "📎";
             }}
 
             card.appendChild(icon);
@@ -11695,32 +11695,32 @@ def obrolan_orangtua():
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
-                '<div class="chat-attachment-name"><img src="/static/images/ic_file_image.png" class="chat-attachment-type-icon" alt=""> ' +
+                '<div class="chat-attachment-name">📷 ' +
                 nama +
                 '</div>' +
                 '<a class="chat-attachment-download" href="' + url +
                 '" rel="noopener" download>' +
-                '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan' +
+                '⬇️ Simpan' +
                 '</a>' +
                 '</div>';
         }}
 
-        let icon = '<img src="/static/images/ic_file_generic.png" class="chat-file-type-icon" alt="">';
+        let icon = "📎";
 
         if (tipe === "application/pdf") {{
-            icon = '<img src="/static/images/ic_file_pdf.png" class="chat-file-type-icon" alt="">';
+            icon = "📕";
         }} else if (tipe.includes("word")) {{
-            icon = '<img src="/static/images/ic_file_word.png" class="chat-file-type-icon" alt="">';
+            icon = "📘";
         }} else if (
             tipe.includes("excel") ||
             tipe.includes("spreadsheet")
         ) {{
-            icon = '<img src="/static/images/ic_file_excel.png" class="chat-file-type-icon" alt="">';
+            icon = "📗";
         }} else if (
             tipe.includes("powerpoint") ||
             tipe.includes("presentation")
         ) {{
-            icon = '<img src="/static/images/ic_file_ppt.png" class="chat-file-type-icon" alt="">';
+            icon = "📙";
         }}
 
         return '<div class="chat-attachment chat-file">' +
@@ -11732,7 +11732,7 @@ def obrolan_orangtua():
             '<a class="chat-attachment-download" href="' +
             url +
             '" rel="noopener" download>' +
-            '<img src="/static/images/ic_save.png" class="chat-attachment-save-icon" alt=""> Simpan / Buka' +
+            '⬇️ Simpan / Buka' +
             '</a>' +
             '</div>' +
             '</div>';
