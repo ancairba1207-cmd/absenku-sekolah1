@@ -1079,6 +1079,37 @@ public class MainActivity extends Activity {
                 }
             });
         }
+        @JavascriptInterface
+        public void downloadLampiran(String url, String namaFile) {
+            runOnUiThread(() -> {
+                try {
+                    if (url == null || url.trim().isEmpty()) {
+                        Toast.makeText(MainActivity.this, "URL lampiran tidak tersedia", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String fileName = (namaFile == null || namaFile.trim().isEmpty())
+                            ? "lampiran_" + System.currentTimeMillis()
+                            : namaFile.trim();
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    request.setTitle(fileName);
+                    request.setDescription("Mengunduh lampiran Absenku...");
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setAllowedOverMetered(true);
+                    request.setAllowedOverRoaming(true);
+                    request.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, fileName);
+                    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                    if (dm != null) {
+                        dm.enqueue(request);
+                        Toast.makeText(MainActivity.this, "Lampiran sedang diunduh...", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Download Manager tidak tersedia", Toast.LENGTH_LONG).show();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Gagal mengunduh lampiran", Toast.LENGTH_LONG).show();
+                    android.util.Log.e("ABSENKU_DOWNLOAD", "Gagal download lampiran", e);
+                }
+            });
+        }
     }
 
     @Override
