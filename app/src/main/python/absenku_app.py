@@ -7662,6 +7662,18 @@ html, body {
             box-sizing: border-box;
         }}
 
+        #chat-box .chat-attachment .chat-attachment-image {{
+            display: block !important;
+            width: 120px !important;
+            height: 120px !important;
+            max-width: 120px !important;
+            max-height: 120px !important;
+            min-width: 120px !important;
+            min-height: 120px !important;
+            object-fit: contain !important;
+            flex: 0 0 120px !important;
+        }}
+
         .chat-attachment-image {{
             display: block !important;
             width: 120px !important;
@@ -7843,7 +7855,19 @@ html, body {
         }}
 
         @media (max-width: 600px) {{
-            .chat-attachment-image {{
+            #chat-box .chat-attachment .chat-attachment-image {{
+            display: block !important;
+            width: 120px !important;
+            height: 120px !important;
+            max-width: 120px !important;
+            max-height: 120px !important;
+            min-width: 120px !important;
+            min-height: 120px !important;
+            object-fit: contain !important;
+            flex: 0 0 120px !important;
+        }}
+
+        .chat-attachment-image {{
             display: block !important;
             width: 120px !important;
             height: 120px !important;
@@ -9368,6 +9392,18 @@ def obrolan_guru_detail(nis):
             box-sizing: border-box;
         }}
 
+        #chat-box .chat-attachment .chat-attachment-image {{
+            display: block !important;
+            width: 120px !important;
+            height: 120px !important;
+            max-width: 120px !important;
+            max-height: 120px !important;
+            min-width: 120px !important;
+            min-height: 120px !important;
+            object-fit: contain !important;
+            flex: 0 0 120px !important;
+        }}
+
         .chat-attachment-image {{
             display: block !important;
             width: 120px !important;
@@ -9549,7 +9585,19 @@ def obrolan_guru_detail(nis):
         }}
 
         @media (max-width: 600px) {{
-            .chat-attachment-image {{
+            #chat-box .chat-attachment .chat-attachment-image {{
+            display: block !important;
+            width: 120px !important;
+            height: 120px !important;
+            max-width: 120px !important;
+            max-height: 120px !important;
+            min-width: 120px !important;
+            min-height: 120px !important;
+            object-fit: contain !important;
+            flex: 0 0 120px !important;
+        }}
+
+        .chat-attachment-image {{
             display: block !important;
             width: 120px !important;
             height: 120px !important;
@@ -11070,6 +11118,18 @@ def obrolan_orangtua():
             box-sizing: border-box;
         }}
 
+        #chat-box .chat-attachment .chat-attachment-image {{
+            display: block !important;
+            width: 120px !important;
+            height: 120px !important;
+            max-width: 120px !important;
+            max-height: 120px !important;
+            min-width: 120px !important;
+            min-height: 120px !important;
+            object-fit: contain !important;
+            flex: 0 0 120px !important;
+        }}
+
         .chat-attachment-image {{
             display: block !important;
             width: 120px !important;
@@ -11251,7 +11311,19 @@ def obrolan_orangtua():
         }}
 
         @media (max-width: 600px) {{
-            .chat-attachment-image {{
+            #chat-box .chat-attachment .chat-attachment-image {{
+            display: block !important;
+            width: 120px !important;
+            height: 120px !important;
+            max-width: 120px !important;
+            max-height: 120px !important;
+            min-width: 120px !important;
+            min-height: 120px !important;
+            object-fit: contain !important;
+            flex: 0 0 120px !important;
+        }}
+
+        .chat-attachment-image {{
             display: block !important;
             width: 120px !important;
             height: 120px !important;
