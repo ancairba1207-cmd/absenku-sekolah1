@@ -815,8 +815,20 @@ public class MainActivity extends Activity {
                          * cacheFile tetap dibuat di atas sebagai verifikasi bahwa
                          * file benar-benar dapat dibaca oleh aplikasi Android.
                          */
+                        android.net.Uri webViewUri = androidx.core.content.FileProvider.getUriForFile(
+                                MainActivity.this,
+                                getPackageName() + ".fileprovider",
+                                cacheFile
+                        );
+
+                        grantUriPermission(
+                                getPackageName(),
+                                webViewUri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        );
+
                         results = new android.net.Uri[]{
-                                selectedUri
+                                webViewUri
                         };
 
                         android.util.Log.d(
