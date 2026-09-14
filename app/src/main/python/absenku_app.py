@@ -6804,6 +6804,18 @@ html, body {
     transform: scale(.94);
 }
 
+/* Ukuran icon + lampiran chat */
+.chat-attach-icon {
+    width: 19px !important;
+    height: 19px !important;
+    min-width: 19px !important;
+    min-height: 19px !important;
+    max-width: 19px !important;
+    max-height: 19px !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
 @media (max-width: 600px) {
     .admin-chat-menu {
         left: 8px;
