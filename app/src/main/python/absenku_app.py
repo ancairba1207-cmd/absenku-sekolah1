@@ -944,13 +944,25 @@ def page(title, body):
         </details>
         """
 
-    if role == "admin":
+    if role in ("admin", "guru"):
         nav_path = request.path
 
-        home_active = "active" if nav_path == "/" else ""
-        absensi_active = "active" if nav_path.startswith("/scan") else ""
-        pemberitahuan_active = ""
-        obrolan_active = "active" if nav_path.startswith("/obrolan_admin") else ""
+        if role == "guru":
+            home_active = "active" if nav_path.startswith("/dashboard_guru") else ""
+            absensi_active = "active" if nav_path.startswith("/absensi_guru") or nav_path.startswith("/scan") or nav_path.startswith("/laporan_siswa_") else ""
+            pemberitahuan_active = ""
+            obrolan_active = "active" if nav_path.startswith("/obrolan_guru") else ""
+            home_href = "/dashboard_guru"
+            absensi_href = "/absensi_guru"
+            obrolan_href = "/obrolan_guru"
+        else:
+            home_active = "active" if nav_path == "/" else ""
+            absensi_active = "active" if nav_path.startswith("/scan") else ""
+            pemberitahuan_active = ""
+            obrolan_active = "active" if nav_path.startswith("/obrolan_admin") else ""
+            home_href = "/"
+            absensi_href = "/absensi"
+            obrolan_href = "/obrolan_admin"
 
         home_icon = "home_active.png" if home_active else "home_inactive.png"
         absensi_icon = "absensi_active.png" if absensi_active else "absensi_inactive.png"
@@ -959,12 +971,12 @@ def page(title, body):
 
         dashboard_nav = f"""
 <nav class="dashboard-bottom-nav" aria-label="Navigasi utama">
-    <a class="dashboard-nav-item {home_active}" href="/">
+    <a class="dashboard-nav-item {home_active}" href="{home_href}">
         <img src="/static/images/{home_icon}" alt="Home">
         <span>Home</span>
     </a>
 
-    <a class="dashboard-nav-item {absensi_active}" href="/absensi">
+    <a class="dashboard-nav-item {absensi_active}" href="{absensi_href}">
         <img src="/static/images/{absensi_icon}" alt="Absensi">
         <span>Absensi</span>
     </a>
@@ -974,7 +986,7 @@ def page(title, body):
         <span>Pemberitahuan</span>
     </a>
 
-    <a class="dashboard-nav-item {obrolan_active}" href="/obrolan_admin">
+    <a class="dashboard-nav-item {obrolan_active}" href="{obrolan_href}">
         <img src="/static/images/{obrolan_icon}" alt="Obrolan">
         <span>Obrolan</span>
     </a>
@@ -5199,53 +5211,46 @@ def obrolan_guru():
             else:
                 status_tampil = status
 
+            waktu = escape(str(row.get("created_at") or "")[:16].replace("T", " "))
+
             trs += f"""
-            <tr>
-                <td>
-                    <strong>{nama}</strong><br>
-                    <small>NIS: {escape(nis)}</small>
-                </td>
-                <td>{status_tampil}</td>
-                <td>{escape(pesan[:120])}</td>
-                <td>
-                    <a class="btn" href="/obrolan_guru/{escape(nis)}">
-                        <img class="open-chat-icon" src="/static/images/iconbukaobrolan.png" alt=""> Buka
-                    </a>
-                </td>
-            </tr>
+            <a class="admin-chat-item" href="/obrolan_guru/{escape(nis)}">
+                <div class="admin-chat-avatar">
+                    <div class="admin-chat-avatar-default">👤</div>
+                </div>
+                <div class="admin-chat-content">
+                    <div class="admin-chat-top">
+                        <strong>{nama}</strong>
+                        <span class="admin-chat-time">{waktu}</span>
+                    </div>
+                    <div class="admin-chat-class">NIS: {escape(nis)}</div>
+                    <div class="admin-chat-preview">{escape(pesan[:120]) or "Belum ada pesan"}</div>
+                    <span class="admin-chat-status">{status_tampil}</span>
+                </div>
+            </a>
             """
 
         if not trs:
             trs = """
-            <tr>
-                <td colspan="4" style="text-align:center;padding:25px">
-                    Belum ada percakapan untuk kelas ini.
-                </td>
-            </tr>
+            <div style="text-align:center;padding:25px;color:#64748b">
+                Belum ada percakapan untuk kelas ini.
+            </div>
             """
 
         body = f"""
-        <div class="card">
-            <h2>💬 Obrolan Kelas {escape(kelas_guru)}</h2>
-
-            <div class="small" style="margin-bottom:12px">
-                Percakapan orang tua dari siswa kelas {escape(kelas_guru)}.
+        <div class="admin-chat-list-card">
+            <div class="admin-chat-list-heading">
+                <h2>
+                    <img class="menu-chat-icon" src="/static/images/iconobrolanchatt.png" alt="">
+                    Obrolan Kelas {escape(kelas_guru)}
+                </h2>
+                <div class="small">
+                    Percakapan orang tua dari siswa kelas {escape(kelas_guru)}.
+                </div>
             </div>
 
-            <div style="overflow-x:auto">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Siswa</th>
-                            <th>Status</th>
-                            <th>Pesan Terakhir</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {trs}
-                    </tbody>
-                </table>
+            <div class="admin-chat-list">
+                {trs}
             </div>
         </div>
         """
@@ -13550,6 +13555,60 @@ def absensi():
 </div>
 """
     return page("Absensi", body)
+
+@app.route("/absensi_guru")
+@login_required
+def absensi_guru():
+    if session.get("role") != "guru":
+        return redirect(url_for("home"))
+
+    body = """
+<div class="card absensi-hub">
+    <h2 style="margin-top:0">Absensi</h2>
+    <p style="color:#64748b;margin-top:-6px">Pilih jenis absensi yang ingin dilakukan</p>
+
+    <div class="absensi-grid">
+
+        <a class="absensi-option" href="/scan?status=Masuk">
+            <img src="/static/images/masuk_siswa.png" alt="Masuk Siswa">
+            <div>
+                <h3>Masuk Siswa</h3>
+                <p>Scan kehadiran masuk siswa</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+        <a class="absensi-option" href="/scan?status=Pulang">
+            <img src="/static/images/pulang_siswa.png" alt="Pulang Siswa">
+            <div>
+                <h3>Pulang Siswa</h3>
+                <p>Scan kepulangan siswa</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+        <a class="absensi-option" href="/laporan_siswa_harian">
+            <img src="/static/images/laporan_absensi.png" alt="Laporan Harian">
+            <div>
+                <h3>Laporan Harian</h3>
+                <p>Lihat laporan absensi siswa hari ini</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+        <a class="absensi-option" href="/laporan_siswa_bulanan">
+            <img src="/static/images/laporan_absensi.png" alt="Laporan Bulanan">
+            <div>
+                <h3>Laporan Bulanan</h3>
+                <p>Lihat laporan absensi siswa per bulan</p>
+            </div>
+            <span class="absensi-arrow">›</span>
+        </a>
+
+    </div>
+</div>
+"""
+    return page("Absensi Guru", body)
 
 @app.route("/scan")
 @login_required
