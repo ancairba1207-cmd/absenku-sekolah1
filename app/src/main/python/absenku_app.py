@@ -4927,7 +4927,7 @@ def _render_lampiran_server(row, escape_func):
             return (
                 '<div class="chat-attachment">'
                 '<a href="' + url + '" target="_blank" rel="noopener">'
-                '<img class="chat-attachment-image" src="' + url +
+                '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">'
                 '</a>'
                 '<div class="chat-attachment-name">📷 ' + nama + '</div>'
@@ -8300,7 +8300,7 @@ window.toggleAdminChatMenu = function() {{
         if (tipe.startsWith("image/")) {{
             return '<div class="chat-attachment">' +
                 '<a href="' + url + '" target="_blank" rel="noopener">' +
-                '<img class="chat-attachment-image" src="' + url +
+                '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
                 '<div class="chat-attachment-name">📷 ' +
@@ -9922,7 +9922,7 @@ def obrolan_guru_detail(nis):
         if (tipe.startsWith("image/")) {{
             return '<div class="chat-attachment">' +
                 '<a href="' + url + '" target="_blank" rel="noopener">' +
-                '<img class="chat-attachment-image" src="' + url +
+                '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
                 '<div class="chat-attachment-name">📷 ' +
@@ -11648,7 +11648,7 @@ def obrolan_orangtua():
         if (tipe.startsWith("image/")) {{
             return '<div class="chat-attachment">' +
                 '<a href="' + url + '" target="_blank" rel="noopener">' +
-                '<img class="chat-attachment-image" src="' + url +
+                '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
                 '<div class="chat-attachment-name">📷 ' +
