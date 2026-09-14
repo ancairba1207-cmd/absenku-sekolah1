@@ -7722,6 +7722,42 @@ html, body {
             overflow: hidden;
         }}
 
+
+        .chat-file-icon img.chat-file-type-icon {{
+            width: 24px !important;
+            height: 24px !important;
+            max-width: 24px !important;
+            max-height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+            object-fit: contain !important;
+            display: block !important;
+        }}
+
+        .chat-attachment-type-icon {{
+            width: 20px !important;
+            height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            object-fit: contain !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }}
+
+        .chat-attachment-save-icon {{
+            width: 20px !important;
+            height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            object-fit: contain !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }}
+
         .chat-file-icon {{
             flex: 0 0 44px;
             width: 44px;
@@ -9496,6 +9532,42 @@ def obrolan_guru_detail(nis):
             overflow: hidden;
         }}
 
+
+        .chat-file-icon img.chat-file-type-icon {{
+            width: 24px !important;
+            height: 24px !important;
+            max-width: 24px !important;
+            max-height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+            object-fit: contain !important;
+            display: block !important;
+        }}
+
+        .chat-attachment-type-icon {{
+            width: 20px !important;
+            height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            object-fit: contain !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }}
+
+        .chat-attachment-save-icon {{
+            width: 20px !important;
+            height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            object-fit: contain !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }}
+
         .chat-file-icon {{
             flex: 0 0 44px;
             width: 44px;
@@ -11220,6 +11292,42 @@ def obrolan_orangtua():
             background: #ffffff;
             box-sizing: border-box;
             overflow: hidden;
+        }}
+
+
+        .chat-file-icon img.chat-file-type-icon {{
+            width: 24px !important;
+            height: 24px !important;
+            max-width: 24px !important;
+            max-height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+            object-fit: contain !important;
+            display: block !important;
+        }}
+
+        .chat-attachment-type-icon {{
+            width: 20px !important;
+            height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            object-fit: contain !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }}
+
+        .chat-attachment-save-icon {{
+            width: 20px !important;
+            height: 20px !important;
+            max-width: 20px !important;
+            max-height: 20px !important;
+            min-width: 20px !important;
+            min-height: 20px !important;
+            object-fit: contain !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
         }}
 
         .chat-file-icon {{
