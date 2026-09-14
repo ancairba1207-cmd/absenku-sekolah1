@@ -407,7 +407,6 @@ public class MainActivity extends Activity {
                     // Jangan dipaksa menjadi image/*.
                     Intent intent = fileChooserParams.createIntent();
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
 
                     startActivityForResult(
