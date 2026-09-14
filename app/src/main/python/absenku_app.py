@@ -7664,12 +7664,12 @@ html, body {
 
         .chat-attachment-image {{
             display: block !important;
-            width: 160px !important;
-            height: 160px !important;
+            width: 120px !important;
+            height: 120px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: min(160px, 100%) !important;
-            max-height: 160px !important;
+            max-width: min(120px, 100%) !important;
+            max-height: 120px !important;
             object-fit: contain !important;
             object-position: center !important;
             border-radius: 12px !important;
@@ -7845,12 +7845,12 @@ html, body {
         @media (max-width: 600px) {{
             .chat-attachment-image {{
             display: block !important;
-            width: 160px !important;
-            height: 160px !important;
+            width: 120px !important;
+            height: 120px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: min(160px, 100%) !important;
-            max-height: 160px !important;
+            max-width: min(120px, 100%) !important;
+            max-height: 120px !important;
             object-fit: contain !important;
             object-position: center !important;
             border-radius: 12px !important;
@@ -9370,12 +9370,12 @@ def obrolan_guru_detail(nis):
 
         .chat-attachment-image {{
             display: block !important;
-            width: 160px !important;
-            height: 160px !important;
+            width: 120px !important;
+            height: 120px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: min(160px, 100%) !important;
-            max-height: 160px !important;
+            max-width: min(120px, 100%) !important;
+            max-height: 120px !important;
             object-fit: contain !important;
             object-position: center !important;
             border-radius: 12px !important;
@@ -9551,12 +9551,12 @@ def obrolan_guru_detail(nis):
         @media (max-width: 600px) {{
             .chat-attachment-image {{
             display: block !important;
-            width: 160px !important;
-            height: 160px !important;
+            width: 120px !important;
+            height: 120px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: min(160px, 100%) !important;
-            max-height: 160px !important;
+            max-width: min(120px, 100%) !important;
+            max-height: 120px !important;
             object-fit: contain !important;
             object-position: center !important;
             border-radius: 12px !important;
@@ -11072,12 +11072,12 @@ def obrolan_orangtua():
 
         .chat-attachment-image {{
             display: block !important;
-            width: 160px !important;
-            height: 160px !important;
+            width: 120px !important;
+            height: 120px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: min(160px, 100%) !important;
-            max-height: 160px !important;
+            max-width: min(120px, 100%) !important;
+            max-height: 120px !important;
             object-fit: contain !important;
             object-position: center !important;
             border-radius: 12px !important;
@@ -11253,12 +11253,12 @@ def obrolan_orangtua():
         @media (max-width: 600px) {{
             .chat-attachment-image {{
             display: block !important;
-            width: 160px !important;
-            height: 160px !important;
+            width: 120px !important;
+            height: 120px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: min(160px, 100%) !important;
-            max-height: 160px !important;
+            max-width: min(120px, 100%) !important;
+            max-height: 120px !important;
             object-fit: contain !important;
             object-position: center !important;
             border-radius: 12px !important;
