@@ -7664,16 +7664,17 @@ html, body {
 
         .chat-attachment-image {{
             display: block !important;
-            width: 180px !important;
-            height: 180px !important;
+            width: 200px !important;
+            height: 200px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: 180px !important;
-            max-height: 180px !important;
-            object-fit: cover !important;
+            max-width: min(200px, 100%) !important;
+            max-height: 200px !important;
+            object-fit: contain !important;
             object-position: center !important;
-            border-radius: 10px !important;
+            border-radius: 12px !important;
             border: 1px solid #dbe3ef !important;
+            background: #f8fafc !important;
             box-sizing: border-box !important;
         }}
 
@@ -7697,25 +7698,31 @@ html, body {
         .chat-file {{
             display: flex;
             align-items: center;
-            gap: 8px;
-            width: min(280px, 100%);
+            gap: 10px;
+            width: min(320px, 100%);
             max-width: 100%;
-            padding: 8px 9px;
-            margin-top: 7px;
+            padding: 10px;
+            margin-top: 8px;
             border: 1px solid #dbe3ef;
-            border-radius: 10px;
-            background: #f8fafc;
+            border-radius: 12px;
+            background: #ffffff;
             box-sizing: border-box;
             overflow: hidden;
         }}
 
         .chat-file-icon {{
-            flex: 0 0 36px;
-            width: 36px;
-            min-width: 36px;
-            font-size: 25px;
+            flex: 0 0 44px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
             line-height: 1;
             text-align: center;
+            border-radius: 10px;
+            background: #eef4ff;
         }}
 
         .chat-file-info {{
@@ -7837,11 +7844,20 @@ html, body {
 
         @media (max-width: 600px) {{
             .chat-attachment-image {{
-                width: min(180px, 100%) !important;
-                height: 180px !important;
-                max-width: 180px !important;
-                max-height: 180px !important;
-            }}
+            display: block !important;
+            width: 200px !important;
+            height: 200px !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            max-width: min(200px, 100%) !important;
+            max-height: 200px !important;
+            object-fit: contain !important;
+            object-position: center !important;
+            border-radius: 12px !important;
+            border: 1px solid #dbe3ef !important;
+            background: #f8fafc !important;
+            box-sizing: border-box !important;
+        }}
 
             .chat-file {{
                 width: 100%;
@@ -9354,16 +9370,17 @@ def obrolan_guru_detail(nis):
 
         .chat-attachment-image {{
             display: block !important;
-            width: 180px !important;
-            height: 180px !important;
+            width: 200px !important;
+            height: 200px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: 180px !important;
-            max-height: 180px !important;
-            object-fit: cover !important;
+            max-width: min(200px, 100%) !important;
+            max-height: 200px !important;
+            object-fit: contain !important;
             object-position: center !important;
-            border-radius: 10px !important;
+            border-radius: 12px !important;
             border: 1px solid #dbe3ef !important;
+            background: #f8fafc !important;
             box-sizing: border-box !important;
         }}
 
@@ -9387,25 +9404,31 @@ def obrolan_guru_detail(nis):
         .chat-file {{
             display: flex;
             align-items: center;
-            gap: 8px;
-            width: min(280px, 100%);
+            gap: 10px;
+            width: min(320px, 100%);
             max-width: 100%;
-            padding: 8px 9px;
-            margin-top: 7px;
+            padding: 10px;
+            margin-top: 8px;
             border: 1px solid #dbe3ef;
-            border-radius: 10px;
-            background: #f8fafc;
+            border-radius: 12px;
+            background: #ffffff;
             box-sizing: border-box;
             overflow: hidden;
         }}
 
         .chat-file-icon {{
-            flex: 0 0 36px;
-            width: 36px;
-            min-width: 36px;
-            font-size: 25px;
+            flex: 0 0 44px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
             line-height: 1;
             text-align: center;
+            border-radius: 10px;
+            background: #eef4ff;
         }}
 
         .chat-file-info {{
@@ -9527,11 +9550,20 @@ def obrolan_guru_detail(nis):
 
         @media (max-width: 600px) {{
             .chat-attachment-image {{
-                width: min(180px, 100%) !important;
-                height: 180px !important;
-                max-width: 180px !important;
-                max-height: 180px !important;
-            }}
+            display: block !important;
+            width: 200px !important;
+            height: 200px !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            max-width: min(200px, 100%) !important;
+            max-height: 200px !important;
+            object-fit: contain !important;
+            object-position: center !important;
+            border-radius: 12px !important;
+            border: 1px solid #dbe3ef !important;
+            background: #f8fafc !important;
+            box-sizing: border-box !important;
+        }}
 
             .chat-file {{
                 width: 100%;
@@ -11040,16 +11072,17 @@ def obrolan_orangtua():
 
         .chat-attachment-image {{
             display: block !important;
-            width: 180px !important;
-            height: 180px !important;
+            width: 200px !important;
+            height: 200px !important;
             min-width: 0 !important;
             min-height: 0 !important;
-            max-width: 180px !important;
-            max-height: 180px !important;
-            object-fit: cover !important;
+            max-width: min(200px, 100%) !important;
+            max-height: 200px !important;
+            object-fit: contain !important;
             object-position: center !important;
-            border-radius: 10px !important;
+            border-radius: 12px !important;
             border: 1px solid #dbe3ef !important;
+            background: #f8fafc !important;
             box-sizing: border-box !important;
         }}
 
@@ -11073,25 +11106,31 @@ def obrolan_orangtua():
         .chat-file {{
             display: flex;
             align-items: center;
-            gap: 8px;
-            width: min(280px, 100%);
+            gap: 10px;
+            width: min(320px, 100%);
             max-width: 100%;
-            padding: 8px 9px;
-            margin-top: 7px;
+            padding: 10px;
+            margin-top: 8px;
             border: 1px solid #dbe3ef;
-            border-radius: 10px;
-            background: #f8fafc;
+            border-radius: 12px;
+            background: #ffffff;
             box-sizing: border-box;
             overflow: hidden;
         }}
 
         .chat-file-icon {{
-            flex: 0 0 36px;
-            width: 36px;
-            min-width: 36px;
-            font-size: 25px;
+            flex: 0 0 44px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
             line-height: 1;
             text-align: center;
+            border-radius: 10px;
+            background: #eef4ff;
         }}
 
         .chat-file-info {{
@@ -11213,11 +11252,20 @@ def obrolan_orangtua():
 
         @media (max-width: 600px) {{
             .chat-attachment-image {{
-                width: min(180px, 100%) !important;
-                height: 180px !important;
-                max-width: 180px !important;
-                max-height: 180px !important;
-            }}
+            display: block !important;
+            width: 200px !important;
+            height: 200px !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            max-width: min(200px, 100%) !important;
+            max-height: 200px !important;
+            object-fit: contain !important;
+            object-position: center !important;
+            border-radius: 12px !important;
+            border: 1px solid #dbe3ef !important;
+            background: #f8fafc !important;
+            box-sizing: border-box !important;
+        }}
 
             .chat-file {{
                 width: 100%;
