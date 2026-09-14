@@ -8425,6 +8425,22 @@ window.toggleAdminChatMenu = function() {{
         }}
     }});
 
+    document.addEventListener("click", function(e) {{
+        const tombolDownload = e.target.closest("#chat-box .chat-attachment-download");
+        if (tombolDownload !== null) {{
+            e.preventDefault();
+            e.stopPropagation();
+            const url = tombolDownload.getAttribute("href") || "";
+            const namaEl = tombolDownload.parentElement ? tombolDownload.parentElement.querySelector(".chat-attachment-name") : null;
+            const nama = namaEl ? namaEl.textContent.replace(/^📷\s*/, "").trim() : "Lampiran";
+            if (window.AndroidPrint && typeof window.AndroidPrint.downloadLampiran === "function") {{
+                window.AndroidPrint.downloadLampiran(url, nama);
+            }} else {{
+                window.location.href = url;
+            }}
+        }}
+    }});
+
     function perbaruiStatusSesiAdmin(rows) {{
         const aktif = Array.isArray(rows) && rows.some(function(row) {{
             return row && row.status_sesi === "aktif";
