@@ -8397,6 +8397,34 @@ window.toggleAdminChatMenu = function() {{
         }}
     }}
 
+    function bukaPreviewGambarChat(src) {{
+        let overlay = document.getElementById("chat-image-preview-overlay");
+        if (overlay === null) {{
+            overlay = document.createElement("div");
+            overlay.id = "chat-image-preview-overlay";
+            overlay.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;";
+            overlay.innerHTML = '<button type="button" class="chat-image-preview-close" style="position:absolute;top:18px;right:18px;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.95);color:#222;font-size:28px;line-height:44px;text-align:center;z-index:2;">×</button><img alt="Preview gambar" style="display:block;max-width:95vw;max-height:85vh;width:auto;height:auto;object-fit:contain;border-radius:12px;">';
+            document.body.appendChild(overlay);
+            overlay.addEventListener("click", function(e) {{
+                if (e.target === overlay || e.target.closest(".chat-image-preview-close") !== null) {{
+                    overlay.style.display = "none";
+                }}
+            }});
+        }}
+        const preview = overlay.querySelector("img");
+        preview.src = src;
+        overlay.style.display = "flex";
+    }}
+
+    document.addEventListener("click", function(e) {{
+        const gambar = e.target.closest("#chat-box .chat-attachment-image");
+        if (gambar !== null) {{
+            e.preventDefault();
+            e.stopPropagation();
+            bukaPreviewGambarChat(gambar.currentSrc || gambar.src);
+        }}
+    }});
+
     function perbaruiStatusSesiAdmin(rows) {{
         const aktif = Array.isArray(rows) && rows.some(function(row) {{
             return row && row.status_sesi === "aktif";
