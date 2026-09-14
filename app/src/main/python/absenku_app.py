@@ -4926,13 +4926,13 @@ def _render_lampiran_server(row, escape_func):
         if tipe.startswith("image/"):
             return (
                 '<div class="chat-attachment">'
-                '<a href="' + url + '" target="_blank" rel="noopener">'
+                '<a href="javascript:void(0)" rel="noopener">'
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">'
                 '</a>'
                 '<div class="chat-attachment-name">📷 ' + nama + '</div>'
                 '<a class="chat-attachment-download" href="' + url +
-                '" target="_blank" rel="noopener" download>'
+                '" rel="noopener" download>'
                 '⬇️ Simpan'
                 '</a>'
                 '</div>'
@@ -4954,7 +4954,7 @@ def _render_lampiran_server(row, escape_func):
             '<div class="chat-file-info">'
             '<div class="chat-attachment-name">' + nama + '</div>'
             '<a class="chat-attachment-download" href="' + url +
-            '" target="_blank" rel="noopener" download>'
+            '" rel="noopener" download>'
             '⬇️ Simpan / Buka'
             '</a>'
             '</div>'
@@ -8299,7 +8299,7 @@ window.toggleAdminChatMenu = function() {{
 
         if (tipe.startsWith("image/")) {{
             return '<div class="chat-attachment">' +
-                '<a href="' + url + '" target="_blank" rel="noopener">' +
+                '<a href="javascript:void(0)" rel="noopener">' +
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
@@ -8307,7 +8307,7 @@ window.toggleAdminChatMenu = function() {{
                 nama +
                 '</div>' +
                 '<a class="chat-attachment-download" href="' + url +
-                '" target="_blank" rel="noopener" download>' +
+                '" rel="noopener" download>' +
                 '⬇️ Simpan' +
                 '</a>' +
                 '</div>';
@@ -8339,7 +8339,7 @@ window.toggleAdminChatMenu = function() {{
             '</div>' +
             '<a class="chat-attachment-download" href="' +
             url +
-            '" target="_blank" rel="noopener" download>' +
+            '" rel="noopener" download>' +
             '⬇️ Simpan / Buka' +
             '</a>' +
             '</div>' +
@@ -9921,7 +9921,7 @@ def obrolan_guru_detail(nis):
 
         if (tipe.startsWith("image/")) {{
             return '<div class="chat-attachment">' +
-                '<a href="' + url + '" target="_blank" rel="noopener">' +
+                '<a href="javascript:void(0)" rel="noopener">' +
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
@@ -9929,7 +9929,7 @@ def obrolan_guru_detail(nis):
                 nama +
                 '</div>' +
                 '<a class="chat-attachment-download" href="' + url +
-                '" target="_blank" rel="noopener" download>' +
+                '" rel="noopener" download>' +
                 '⬇️ Simpan' +
                 '</a>' +
                 '</div>';
@@ -9961,7 +9961,7 @@ def obrolan_guru_detail(nis):
             '</div>' +
             '<a class="chat-attachment-download" href="' +
             url +
-            '" target="_blank" rel="noopener" download>' +
+            '" rel="noopener" download>' +
             '⬇️ Simpan / Buka' +
             '</a>' +
             '</div>' +
@@ -11647,7 +11647,7 @@ def obrolan_orangtua():
 
         if (tipe.startsWith("image/")) {{
             return '<div class="chat-attachment">' +
-                '<a href="' + url + '" target="_blank" rel="noopener">' +
+                '<a href="javascript:void(0)" rel="noopener">' +
                 '<img class="chat-attachment-image" style="width:100px;height:100px;max-width:100px;max-height:100px;object-fit:contain;display:block;border-radius:10px;" src="' + url +
                 '" alt="' + nama + '">' +
                 '</a>' +
@@ -11655,7 +11655,7 @@ def obrolan_orangtua():
                 nama +
                 '</div>' +
                 '<a class="chat-attachment-download" href="' + url +
-                '" target="_blank" rel="noopener" download>' +
+                '" rel="noopener" download>' +
                 '⬇️ Simpan' +
                 '</a>' +
                 '</div>';
@@ -11687,7 +11687,7 @@ def obrolan_orangtua():
             '</div>' +
             '<a class="chat-attachment-download" href="' +
             url +
-            '" target="_blank" rel="noopener" download>' +
+            '" rel="noopener" download>' +
             '⬇️ Simpan / Buka' +
             '</a>' +
             '</div>' +
