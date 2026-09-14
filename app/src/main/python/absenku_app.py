@@ -169,6 +169,24 @@ class SupabaseDB:
             )
             return False
 
+    def _ambil_lampiran_valid(self, request):
+        files = request.files.getlist("lampiran")
+        for f in reversed(files):
+            if f is None:
+                continue
+            nama = str(f.filename or "").strip()
+            ukuran = 0
+            try:
+                posisi = f.stream.tell()
+                f.stream.seek(0, 2)
+                ukuran = f.stream.tell()
+                f.stream.seek(posisi)
+            except Exception:
+                pass
+            if nama or ukuran > 0:
+                return f
+        return None
+
     def upload_chat_attachment(self, file_storage, nis, sesi_id):
         """Upload satu attachment chat ke Supabase Storage."""
         import mimetypes
@@ -5919,7 +5937,7 @@ def obrolan_admin_detail(nis):
             import time
 
             pesan_baru = request.form.get("pesan", "").strip()
-            file_lampiran = request.files.get("lampiran")
+            file_lampiran = self._ambil_lampiran_valid(request)
             print("[CHAT FILE RAW] filename=" + repr(file_lampiran.filename if file_lampiran else None) + " | mimetype=" + repr(file_lampiran.mimetype if file_lampiran else None) + " | content_length=" + repr(file_lampiran.content_length if file_lampiran else None))
             print("[CHAT REQUEST DEBUG] files=" + repr(list(request.files.keys())) + " | form=" + repr(dict(request.form)))
 
@@ -8511,7 +8529,7 @@ def obrolan_guru_detail(nis):
             import json
 
             pesan_baru = request.form.get("pesan", "").strip()
-            file_lampiran = request.files.get("lampiran")
+            file_lampiran = self._ambil_lampiran_valid(request)
 
             ada_lampiran = bool(
                 file_lampiran
@@ -10090,7 +10108,7 @@ def obrolan_orangtua():
             import json
 
             pesan_baru = request.form.get("pesan", "").strip()
-            file_lampiran = request.files.get("lampiran")
+            file_lampiran = self._ambil_lampiran_valid(request)
 
             ada_lampiran = bool(
                 file_lampiran
