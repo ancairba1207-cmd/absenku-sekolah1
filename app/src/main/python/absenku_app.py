@@ -5937,7 +5937,7 @@ def obrolan_admin_detail(nis):
             import time
 
             pesan_baru = request.form.get("pesan", "").strip()
-            file_lampiran = self._ambil_lampiran_valid(request)
+            file_lampiran = c._ambil_lampiran_valid(request)
             print("[CHAT FILE RAW] filename=" + repr(file_lampiran.filename if file_lampiran else None) + " | mimetype=" + repr(file_lampiran.mimetype if file_lampiran else None) + " | content_length=" + repr(file_lampiran.content_length if file_lampiran else None))
             print("[CHAT REQUEST DEBUG] files=" + repr(list(request.files.keys())) + " | form=" + repr(dict(request.form)))
 
@@ -8529,7 +8529,7 @@ def obrolan_guru_detail(nis):
             import json
 
             pesan_baru = request.form.get("pesan", "").strip()
-            file_lampiran = self._ambil_lampiran_valid(request)
+            file_lampiran = c._ambil_lampiran_valid(request)
 
             ada_lampiran = bool(
                 file_lampiran
@@ -10108,7 +10108,7 @@ def obrolan_orangtua():
             import json
 
             pesan_baru = request.form.get("pesan", "").strip()
-            file_lampiran = self._ambil_lampiran_valid(request)
+            file_lampiran = c._ambil_lampiran_valid(request)
 
             ada_lampiran = bool(
                 file_lampiran
