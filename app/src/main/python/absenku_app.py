@@ -9659,6 +9659,29 @@ def obrolan_guru_detail(nis):
             background: #eff6ff;
         }}
 
+        /* Samakan icon menu Chat Guru dengan menu Chat Administrator */
+        .chat-attach-menu .admin-menu-item .admin-menu-icon {{
+            width: 30px !important;
+            height: 30px !important;
+            min-width: 30px !important;
+            max-width: 30px !important;
+            min-height: 30px !important;
+            max-height: 30px !important;
+            object-fit: contain !important;
+            display: block !important;
+            flex: 0 0 30px !important;
+        }}
+
+        .chat-attach-menu .admin-menu-item {{
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            min-height: 42px !important;
+            padding: 6px 10px !important;
+            box-sizing: border-box !important;
+        }}
+
+
         @media (max-width: 600px) {{
             #chat-box .chat-attachment .chat-attachment-image {{
             display: block !important;
