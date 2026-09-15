@@ -8847,25 +8847,25 @@ def obrolan_guru_detail(nis):
 
                         <button type="button" class="admin-menu-item"
                                 onclick="if(confirm('Akhiri chat ini? Setelah diakhiri, percakapan ini akan ditutup.')) {{ this.closest('form').action='/akhiri_obrolan/{escape(nis)}'; this.closest('form').submit(); }}">
-                            <img src="/static/images/icon_akhiri_chat.png" alt="" class="admin-menu-icon">
+                            <img src="/static/images/icon_akhiri_chat.png" alt="" class="admin-menu-icon" style="width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;min-height:30px!important;max-height:30px!important;object-fit:contain!important;display:block!important;">
                             <span>Akhiri Chat</span>
                         </button>
 
                         <button type="button" class="admin-menu-item"
                                 onclick="pilihChatKamera(this);">
-                            <img src="/static/images/icon_kamera.png" alt="" class="admin-menu-icon">
+                            <img src="/static/images/icon_kamera.png" alt="" class="admin-menu-icon" style="width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;min-height:30px!important;max-height:30px!important;object-fit:contain!important;display:block!important;">
                             <span>Kamera</span>
                         </button>
 
                         <button type="button" class="admin-menu-item"
                                 onclick="pilihChatFoto(this);">
-                            <img src="/static/images/icon_foto.png" alt="" class="admin-menu-icon">
+                            <img src="/static/images/icon_foto.png" alt="" class="admin-menu-icon" style="width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;min-height:30px!important;max-height:30px!important;object-fit:contain!important;display:block!important;">
                             <span>Foto</span>
                         </button>
 
                         <button type="button" class="admin-menu-item"
                                 onclick="pilihChatFile(this);">
-                            <img src="/static/images/icon_file.png" alt="" class="admin-menu-icon">
+                            <img src="/static/images/icon_file.png" alt="" class="admin-menu-icon" style="width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important;min-height:30px!important;max-height:30px!important;object-fit:contain!important;display:block!important;">
                             <span>File</span>
                         </button>
 
