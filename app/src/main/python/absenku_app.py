@@ -8784,16 +8784,6 @@ def obrolan_guru_detail(nis):
             tombol_alih = ""
 
         tombol_akhiri = ""
-        if sesi_id_aktif:
-            tombol_akhiri = f"""
-            <form method="post" action="/akhiri_obrolan/{escape(nis)}"
-                  onsubmit="return confirm('Akhiri chat ini? Setelah diakhiri, percakapan ini akan ditutup.');"
-                  style="margin-top:12px">
-                <button class="btn" type="submit">
-                    🛑 Akhiri Chat
-                </button>
-            </form>
-            """
 
         body = f"""
         <div class="card chat-card">
@@ -8853,10 +8843,32 @@ def obrolan_guru_detail(nis):
                         rows="1"
                         placeholder="Tulis pesan di sini..."></textarea>
 
-                    <div class="chat-attach-menu">
-                        <button type="button" onclick="pilihChatKamera(this)">📷 Kamera</button>
-                        <button type="button" onclick="pilihChatFoto(this)">🖼️ Foto</button>
-                        <button type="button" onclick="pilihChatFile(this)">📎 File</button>
+                    <div class="chat-attach-menu" id="guruChatMenu">
+
+                        <button type="button" class="admin-menu-item"
+                                onclick="if(confirm('Akhiri chat ini? Setelah diakhiri, percakapan ini akan ditutup.')) {{ this.closest('form').action='/akhiri_obrolan/{escape(nis)}'; this.closest('form').submit(); }}">
+                            <img src="/static/images/icon_akhiri_chat.png" alt="" class="admin-menu-icon">
+                            <span>Akhiri Chat</span>
+                        </button>
+
+                        <button type="button" class="admin-menu-item"
+                                onclick="pilihChatKamera(this);">
+                            <img src="/static/images/icon_kamera.png" alt="" class="admin-menu-icon">
+                            <span>Kamera</span>
+                        </button>
+
+                        <button type="button" class="admin-menu-item"
+                                onclick="pilihChatFoto(this);">
+                            <img src="/static/images/icon_foto.png" alt="" class="admin-menu-icon">
+                            <span>Foto</span>
+                        </button>
+
+                        <button type="button" class="admin-menu-item"
+                                onclick="pilihChatFile(this);">
+                            <img src="/static/images/icon_file.png" alt="" class="admin-menu-icon">
+                            <span>File</span>
+                        </button>
+
                     </div>
 
                     <input type="file"
