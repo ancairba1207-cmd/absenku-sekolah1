@@ -8866,9 +8866,9 @@ def obrolan_guru_detail(nis):
                             class="chat-attach"
                             aria-label="Lampiran"
                             onclick="toggleChatAttachMenu(this)"
-                            style="width:40px;height:40px;min-width:40px;max-width:40px;padding:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">
+                            style="width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;border:0!important;border-radius:50%!important;background:#2563eb!important;box-shadow:0 3px 8px rgba(37,99,235,.25)!important;">
                         <img src="/static/images/icon_plus.png" alt="" class="chat-attach-icon"
-                             style="width:20px;height:20px;min-width:20px;max-width:20px;min-height:20px;max-height:20px;object-fit:contain;display:block;">
+                             style="width:24px!important;height:24px!important;min-width:24px!important;max-width:24px!important;min-height:24px!important;max-height:24px!important;object-fit:contain!important;display:block!important;">
                     </button>
 
                     <textarea
@@ -9011,6 +9011,85 @@ def obrolan_guru_detail(nis):
             margin-top:2px;
             color:#64748b;
             font-size:12px;
+        }}
+
+        /* LAYOUT FINAL CHAT GURU */
+        .chat-card {{
+            display:flex !important;
+            flex-direction:column !important;
+            min-height:0 !important;
+            overflow:hidden !important;
+        }}
+
+        .chat-card .guru-student-info {{
+            flex:0 0 auto !important;
+        }}
+
+        .chat-card #chat-box {{
+            flex:1 1 0 !important;
+            min-height:0 !important;
+            height:0 !important;
+            max-height:none !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+            -webkit-overflow-scrolling:touch !important;
+            overscroll-behavior:contain !important;
+        }}
+
+        .chat-card #kontrol-chat-guru {{
+            flex:0 0 auto !important;
+            width:100% !important;
+            min-height:0 !important;
+            margin:0 !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-form {{
+            margin:10px 0 0 0 !important;
+            flex:0 0 auto !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-composer {{
+            width:100% !important;
+            box-sizing:border-box !important;
+        }}
+
+        /* Tombol + Guru */
+        .chat-card #kontrol-chat-guru .chat-attach {{
+            flex:0 0 44px !important;
+            width:44px !important;
+            height:44px !important;
+            min-width:44px !important;
+            max-width:44px !important;
+            min-height:44px !important;
+            max-height:44px !important;
+            padding:0 !important;
+            border:0 !important;
+            border-radius:50% !important;
+            background:#2563eb !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            box-sizing:border-box !important;
+            box-shadow:0 3px 8px rgba(37,99,235,.25) !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-attach-icon {{
+            width:24px !important;
+            height:24px !important;
+            min-width:24px !important;
+            max-width:24px !important;
+            min-height:24px !important;
+            max-height:24px !important;
+            object-fit:contain !important;
+            display:block !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-attach-menu {{
+            z-index:1500 !important;
+        }}
+
+        #tombol-akhiri-chat-guru {{
+            display:none !important;
         }}
 
 
