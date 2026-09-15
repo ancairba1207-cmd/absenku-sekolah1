@@ -8842,8 +8842,10 @@ def obrolan_guru_detail(nis):
                     <button type="button"
                             class="chat-attach"
                             aria-label="Lampiran"
-                            onclick="toggleChatAttachMenu(this)">
-                        <img src="/static/images/icon_plus.png" alt="" class="chat-attach-icon">
+                            onclick="toggleChatAttachMenu(this)"
+                            style="width:40px;height:40px;min-width:40px;max-width:40px;padding:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box;">
+                        <img src="/static/images/icon_plus.png" alt="" class="chat-attach-icon"
+                             style="width:20px;height:20px;min-width:20px;max-width:20px;min-height:20px;max-height:20px;object-fit:contain;display:block;">
                     </button>
 
                     <textarea
