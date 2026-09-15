@@ -7833,6 +7833,39 @@ html, body {
             cursor: pointer;
         }}
 
+        /* TOMBOL + CHAT GURU/ORANG TUA */
+        .chat-form .chat-composer .chat-attach {{
+            flex:0 0 44px !important;
+            width:44px !important;
+            height:44px !important;
+            min-width:44px !important;
+            min-height:44px !important;
+            max-width:44px !important;
+            max-height:44px !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            box-sizing:border-box !important;
+            padding:0 !important;
+            margin:0 !important;
+            border:0 !important;
+            border-radius:50% !important;
+            background:#2563eb !important;
+            cursor:pointer !important;
+            box-shadow:0 3px 8px rgba(37,99,235,.25) !important;
+        }}
+
+        .chat-form .chat-composer .chat-attach .chat-attach-icon {{
+            width:24px !important;
+            height:24px !important;
+            min-width:24px !important;
+            min-height:24px !important;
+            max-width:24px !important;
+            max-height:24px !important;
+            object-fit:contain !important;
+            display:block !important;
+        }}
+
         /* Menu attachment Guru/Orang Tua */
         .chat-attach-menu {{
             display: none;
@@ -9009,7 +9042,20 @@ def obrolan_guru_detail(nis):
                 margin-right:auto;
                 padding-bottom:max(8px,env(safe-area-inset-bottom));
             }}
+            .chat-card {{
+                display:flex !important;
+                flex-direction:column !important;
+                min-height:0 !important;
+                overflow:hidden !important;
+            }}
+
             .chat-card #chat-box {{
+                flex:1 1 auto !important;
+                min-height:0 !important;
+                height:auto !important;
+                max-height:none !important;
+                overflow-y:auto !important;
+                overflow-x:hidden !important;
                 padding:8px;
                 min-width:0;
             }}
@@ -10926,9 +10972,12 @@ def obrolan_orangtua():
         }}
 
         .chat-box {{
-            flex:1;
-            min-height:0;
-            overflow-y:auto;
+            flex:1 1 auto !important;
+            min-height:0 !important;
+            height:auto !important;
+            max-height:none !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
             -webkit-overflow-scrolling:touch;
             background-color:#e8f3ff;
             background-image:url("/static/backgrounobrolan.png");
