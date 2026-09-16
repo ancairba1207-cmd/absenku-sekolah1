@@ -8823,16 +8823,19 @@ def obrolan_guru_detail(nis):
         tombol_akhiri = ""
 
         body = f"""
-        <div class="card admin-chat-card">
-            <h2 style="display:flex;align-items:center;gap:10px;margin:0 0 16px 0;">
-                <img
-                    class="menu-chat-icon"
-                    src="/static/images/iconobrolanchatt.png"
-                    alt=""
-                    style="width:42px;height:42px;object-fit:contain;flex:0 0 42px;"
-                >
-                <span>Obrolan Guru</span>
-            </h2>
+        <div class="card chat-card-guru">
+            <div class="chat-header">
+            <a class="chat-back" href="/obrolan_guru" aria-label="Kembali">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14.7 5.3a1 1 0 0 1 0 1.4L10.41 11H20a1 1 0 1 1 0 2h-9.59l4.29 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/>
+                </svg>
+                <span>Kembali</span>
+            </a>
+            <div class="chat-title">
+                <strong><img class="chat-title-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan ABSENKU</strong>
+                <small>Pesan dengan Orang Tua</small>
+            </div>
+        </div>
 
             <div class="admin-chat-topbar">
                 <a class="admin-chat-back" href="/obrolan_guru" aria-label="Kembali">← Kembali</a>
@@ -9020,189 +9023,125 @@ def obrolan_guru_detail(nis):
             font-size:12px;
         }}
 
-        /* LAYOUT FINAL CHAT GURU */
-        .chat-card {{
-            display:flex !important;
-            flex-direction:column !important;
-            min-height:0 !important;
-            overflow:hidden !important;
-            position:relative !important;
-        }}
-
-        /* HEADER DAN IDENTITAS SISWA TETAP DI TEMPAT */
-        .chat-card .chat-header {{
-            flex:0 0 auto !important;
-            position:relative !important;
-            z-index:20 !important;
-            background:#ffffff !important;
-        }}
-
-        .chat-card .guru-student-info {{
-            flex:0 0 auto !important;
-            position:relative !important;
-            z-index:19 !important;
-            background:#ffffff !important;
-        }}
-
-        .chat-card #chat-box {{
-            flex:1 1 0 !important;
-            min-height:0 !important;
-            height:0 !important;
-            max-height:none !important;
-            overflow-y:auto !important;
-            overflow-x:hidden !important;
-            -webkit-overflow-scrolling:touch !important;
-            overscroll-behavior:contain !important;
-        }}
-
-        .chat-card #kontrol-chat-guru {{
-            flex:0 0 auto !important;
-            width:100% !important;
-            min-height:0 !important;
-            margin:0 !important;
-            position:relative !important;
-            z-index:40 !important;
-            background:#fff !important;
-        }}
-
-        .chat-card #kontrol-chat-guru .chat-form {{
-            margin:10px 0 0 0 !important;
-            flex:0 0 auto !important;
-        }}
-
-        .chat-card #kontrol-chat-guru .chat-composer {{
-            width:100% !important;
-            box-sizing:border-box !important;
-        }}
-
-        /* Tombol + Guru */
-        /* Tombol + Guru = sama dengan Admin */
-        .chat-card #kontrol-chat-guru .chat-attach {{
-            flex:0 0 34px !important;
-            width:34px !important;
-            height:34px !important;
-            min-width:34px !important;
-            min-height:34px !important;
-            max-width:34px !important;
-            max-height:34px !important;
-            padding:0 !important;
-            margin:0 !important;
-            border:0 !important;
-            border-radius:50% !important;
-            background:#eef2ff !important;
-            color:#2563eb !important;
-            display:flex !important;
-            align-items:center !important;
-            justify-content:center !important;
-            box-sizing:border-box !important;
-            font-size:0 !important;
-            line-height:0 !important;
-            appearance:none !important;
-            -webkit-appearance:none !important;
-            box-shadow:none !important;
-            cursor:pointer !important;
-        }}
-
-        .chat-card #kontrol-chat-guru .chat-attach:active {{
-            transform:scale(.94) !important;
-        }}
-
-        .chat-card #kontrol-chat-guru .chat-attach-icon {{
-            width:19px !important;
-            height:19px !important;
-            min-width:19px !important;
-            min-height:19px !important;
-            max-width:19px !important;
-            max-height:19px !important;
-            object-fit:contain !important;
-            display:block !important;
-        }}
-
-        .chat-card #kontrol-chat-guru .chat-attach-menu {{
-            position:absolute !important;
-            left:12px !important;
-            bottom:70px !important;
-            z-index:1500 !important;
-            width:220px !important;
-            padding:7px !important;
-            box-sizing:border-box !important;
-            background:#fff !important;
-            border-radius:16px !important;
-            box-shadow:0 10px 30px rgba(15,23,42,.20) !important;
-            border:1px solid #e2e8f0 !important;
-        }}
-
-        #tombol-akhiri-chat-guru {{
-            display:none !important;
-        }}
-
-
-        html, body {{
-            overflow:hidden;
-            height:100%;
-        }}
-
-        .chat-card {{
+        .chat-card-guru {
             width:min(100%,760px);
             max-width:760px;
             margin:0 auto;
-            height:calc(100dvh - 180px - env(safe-area-inset-bottom));
-            max-height:calc(100dvh - 180px - env(safe-area-inset-bottom));
+            height:0;
             min-height:0;
+            flex:1 1 0;
             display:flex;
             flex-direction:column;
             box-sizing:border-box;
             overflow:hidden;
             padding-bottom:max(8px,env(safe-area-inset-bottom));
-        }}
-        @media (max-width:600px) {{
-            .chat-card {{
+        }
+
+        .chat-card-guru .chat-header,
+        .chat-card-guru .guru-student-info {
+            flex:0 0 auto;
+        }
+
+        .chat-card-guru #chat-box {
+            flex:1 1 0;
+            min-height:0;
+            height:0;
+            max-height:none;
+            overflow-y:auto;
+            overflow-x:hidden;
+            -webkit-overflow-scrolling:touch;
+            overscroll-behavior:contain;
+        }
+
+        .chat-card-guru #kontrol-chat-guru {
+            flex:0 0 auto;
+            width:100%;
+            min-height:0;
+            position:relative;
+            box-sizing:border-box;
+        }
+
+        .chat-card-guru #kontrol-chat-guru .chat-form {
+            margin:10px 0 0 0;
+        }
+
+        .chat-card-guru #kontrol-chat-guru .chat-composer {
+            width:100%;
+            box-sizing:border-box;
+        }
+
+        .chat-card-guru #kontrol-chat-guru .chat-attach {
+            flex:0 0 34px;
+            width:34px;
+            height:34px;
+            min-width:34px;
+            min-height:34px;
+            max-width:34px;
+            max-height:34px;
+            padding:0;
+            margin:0;
+            border:0;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-sizing:border-box;
+            font-size:0;
+        }
+
+        .chat-card-guru #kontrol-chat-guru .chat-attach-icon {
+            width:19px;
+            height:19px;
+            min-width:19px;
+            min-height:19px;
+            max-width:19px;
+            max-height:19px;
+            object-fit:contain;
+            display:block;
+        }
+
+        .chat-card-guru #kontrol-chat-guru .chat-attach-menu {
+            position:absolute;
+            left:12px;
+            bottom:70px;
+            z-index:1500;
+            width:220px;
+            padding:7px;
+            box-sizing:border-box;
+            background:#fff;
+            border-radius:16px;
+            box-shadow:0 10px 30px rgba(15,23,42,.20);
+            border:1px solid #e2e8f0;
+        }
+
+        @media (max-width:600px) {
+            .chat-card-guru {
                 width:calc(100% - 16px);
                 max-width:none;
-                height:calc(100dvh - 155px - env(safe-area-inset-bottom));
-                max-height:calc(100dvh - 155px - env(safe-area-inset-bottom));
-                margin-left:auto;
-                margin-right:auto;
-                padding-bottom:max(8px,env(safe-area-inset-bottom));
-            }}
-            .chat-card {{
-                display:flex !important;
-                flex-direction:column !important;
-                min-height:0 !important;
-                overflow:hidden !important;
-            }}
+                height:0;
+                min-height:0;
+                flex:1 1 0;
+            }
 
-            .chat-card #chat-box {{
-                flex:1 1 0 !important;
-                min-height:0 !important;
-                height:0 !important;
-                max-height:none !important;
-                overflow-y:auto !important;
-                overflow-x:hidden !important;
+            .chat-card-guru #chat-box {
                 padding:8px;
+            }
+
+            .chat-card-guru .chat-row,
+            .chat-card-guru .chat-bubble {
                 min-width:0;
-                -webkit-overflow-scrolling:touch !important;
-                overscroll-behavior:contain !important;
-            }}
-            .chat-card .chat-row,
-            .chat-card .chat-bubble {{
-                min-width:0;
-            }}
-            .chat-card .chat-bubble {{
+            }
+
+            .chat-card-guru .chat-bubble {
                 max-width:calc(100% - 44px);
-            }}
-        }}
-        .chat-card .guru-student-info {{
-            flex:0 0 auto !important;
-            display:flex !important;
-            align-items:center !important;
-            gap:8px;
-            padding:1px 2px 6px 2px;
-            position:relative !important;
-            z-index:30 !important;
-            background:#fff !important;
-            overflow:visible !important;
-        }}
+            }
+
+            .chat-card-guru #kontrol-chat-guru .chat-attach-menu {
+                left:8px;
+                bottom:64px;
+                width:205px;
+            }
+        }
 
         .guru-student-photo,
         .guru-student-photo-fallback {{
