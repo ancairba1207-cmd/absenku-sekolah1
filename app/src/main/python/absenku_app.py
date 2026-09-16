@@ -9196,19 +9196,21 @@ def obrolan_guru_detail(nis):
         .guru-chat-page-scroll > .chat-card {{
             flex:1 1 0 !important;
             width:min(100%,760px) !important;
-            height:0 !important;
+            height:100% !important;
             min-height:0 !important;
             max-height:none !important;
             display:flex !important;
             flex-direction:column !important;
+            position:relative !important;
             box-sizing:border-box !important;
             overflow:hidden !important;
+            padding-bottom:58px !important;
         }}
 
         .guru-chat-page-scroll > .chat-card #chat-box {{
             flex:1 1 0 !important;
             width:100% !important;
-            height:0 !important;
+            height:auto !important;
             min-height:0 !important;
             max-height:none !important;
             overflow-y:auto !important;
@@ -9219,18 +9221,32 @@ def obrolan_guru_detail(nis):
         }}
 
         .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
-            flex:0 0 auto !important;
+            position:absolute !important;
+            left:0 !important;
+            right:0 !important;
+            bottom:0 !important;
             width:100% !important;
-            min-height:0 !important;
+            min-height:50px !important;
+            height:50px !important;
+            z-index:20 !important;
             box-sizing:border-box !important;
         }}
 
         .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
-            flex:0 0 auto !important;
             position:static !important;
             width:100% !important;
-            margin:8px 0 0 0 !important;
+            height:50px !important;
+            min-height:50px !important;
+            margin:0 !important;
             padding:0 !important;
+            box-sizing:border-box !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+            width:100% !important;
+            height:50px !important;
+            min-height:50px !important;
+            max-height:50px !important;
             box-sizing:border-box !important;
         }}
 
