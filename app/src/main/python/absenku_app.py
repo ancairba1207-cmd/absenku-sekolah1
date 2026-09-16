@@ -9027,9 +9027,9 @@ def obrolan_guru_detail(nis):
             width:min(100%,760px);
             max-width:760px;
             margin:0 auto;
-            height:0;
+            height:calc(100dvh - 180px - env(safe-area-inset-bottom));
+            max-height:calc(100dvh - 180px - env(safe-area-inset-bottom));
             min-height:0;
-            flex:1 1 0;
             display:flex;
             flex-direction:column;
             box-sizing:border-box;
@@ -9038,7 +9038,7 @@ def obrolan_guru_detail(nis):
         }}
 
         .chat-card-guru .chat-header,
-        .chat-card-guru .guru-student-info {{
+        .chat-card-guru .student-chat-info {{
             flex:0 0 auto;
         }}
 
