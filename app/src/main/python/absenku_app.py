@@ -8823,37 +8823,40 @@ def obrolan_guru_detail(nis):
         tombol_akhiri = ""
 
         body = f"""
-        <div class="card chat-card">
-            <div class="chat-header">
-            <a class="chat-back" href="/obrolan_guru" aria-label="Kembali">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M14.7 5.3a1 1 0 0 1 0 1.4L10.41 11H20a1 1 0 1 1 0 2h-9.59l4.29 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/>
-                </svg>
-                <span>Kembali</span>
-            </a>
-            <div class="chat-title">
-                <strong><img class="chat-title-icon" src="/static/images/iconobrolanchatt.png" alt=""> Obrolan ABSENKU</strong>
-                <small>Pesan dengan Orang Tua</small>
-            </div>
-        </div>
+        <div class="card admin-chat-card">
+            <h2 style="display:flex;align-items:center;gap:10px;margin:0 0 16px 0;">
+                <img
+                    class="menu-chat-icon"
+                    src="/static/images/iconobrolanchatt.png"
+                    alt=""
+                    style="width:42px;height:42px;object-fit:contain;flex:0 0 42px;"
+                >
+                <span>Obrolan Guru</span>
+            </h2>
 
-            <div class="guru-student-info">
+            <div class="admin-chat-topbar">
+                <a class="admin-chat-back" href="/obrolan_guru" aria-label="Kembali">← Kembali</a>
+            </div>
+
+            <div class="student-chat-info">
                 {(
-                    f'<img class="guru-student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
+                    f'<img class="student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
                     if foto_siswa
-                    else '<div class="guru-student-photo-fallback">👤</div>'
+                    else '<div class="student-photo-fallback">👤</div>'
                 )}
-                <div class="guru-student-main">
-                    <div class="guru-student-name">{nama_anak}</div>
-                    <div class="guru-student-meta">
-                        NIS: {escape(nis)} • Kelas: {kelas_anak}
+                <div class="student-info-main">
+                    <div class="student-name">{nama_anak}</div>
+                    <div class="student-meta">
+                        NIS: {escape(nis)}<br>
+                        Kelas: {kelas_anak}
                     </div>
                 </div>
-                <div class="guru-student-status">
-                    <div class="guru-status-badge{' selesai' if not chat_aktif else ''}">
+
+                <div class="student-chat-status">
+                    <div class="status-badge{' selesai' if not chat_aktif else ''}">
                         {status_chat}
                     </div>
-                    <div class="guru-last-seen">
+                    <div class="last-seen">
                         Terakhir: {waktu_terakhir}
                     </div>
                 </div>
@@ -9116,7 +9119,17 @@ def obrolan_guru_detail(nis):
         }}
 
         .chat-card #kontrol-chat-guru .chat-attach-menu {{
+            position:absolute !important;
+            left:12px !important;
+            bottom:70px !important;
             z-index:1500 !important;
+            width:220px !important;
+            padding:7px !important;
+            box-sizing:border-box !important;
+            background:#fff !important;
+            border-radius:16px !important;
+            box-shadow:0 10px 30px rgba(15,23,42,.20) !important;
+            border:1px solid #e2e8f0 !important;
         }}
 
         #tombol-akhiri-chat-guru {{
