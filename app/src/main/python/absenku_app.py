@@ -8866,9 +8866,9 @@ def obrolan_guru_detail(nis):
                             class="chat-attach"
                             aria-label="Lampiran"
                             onclick="toggleChatAttachMenu(this)"
-                            style="width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important;min-height:44px!important;max-height:44px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;border:0!important;border-radius:50%!important;background:#2563eb!important;box-shadow:0 3px 8px rgba(37,99,235,.25)!important;">
+>
                         <img src="/static/images/icon_plus.png" alt="" class="chat-attach-icon"
-                             style="width:24px!important;height:24px!important;min-width:24px!important;max-width:24px!important;min-height:24px!important;max-height:24px!important;object-fit:contain!important;display:block!important;">
+>
                     </button>
 
                     <textarea
@@ -9054,32 +9054,44 @@ def obrolan_guru_detail(nis):
         }}
 
         /* Tombol + Guru */
+        /* Tombol + Guru = sama dengan Admin */
         .chat-card #kontrol-chat-guru .chat-attach {{
-            flex:0 0 44px !important;
-            width:44px !important;
-            height:44px !important;
-            min-width:44px !important;
-            max-width:44px !important;
-            min-height:44px !important;
-            max-height:44px !important;
+            flex:0 0 34px !important;
+            width:34px !important;
+            height:34px !important;
+            min-width:34px !important;
+            min-height:34px !important;
+            max-width:34px !important;
+            max-height:34px !important;
             padding:0 !important;
+            margin:0 !important;
             border:0 !important;
             border-radius:50% !important;
-            background:#2563eb !important;
+            background:#eef2ff !important;
+            color:#2563eb !important;
             display:flex !important;
             align-items:center !important;
             justify-content:center !important;
             box-sizing:border-box !important;
-            box-shadow:0 3px 8px rgba(37,99,235,.25) !important;
+            font-size:0 !important;
+            line-height:0 !important;
+            appearance:none !important;
+            -webkit-appearance:none !important;
+            box-shadow:none !important;
+            cursor:pointer !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-attach:active {{
+            transform:scale(.94) !important;
         }}
 
         .chat-card #kontrol-chat-guru .chat-attach-icon {{
-            width:24px !important;
-            height:24px !important;
-            min-width:24px !important;
-            max-width:24px !important;
-            min-height:24px !important;
-            max-height:24px !important;
+            width:19px !important;
+            height:19px !important;
+            min-width:19px !important;
+            min-height:19px !important;
+            max-width:19px !important;
+            max-height:19px !important;
             object-fit:contain !important;
             display:block !important;
         }}
