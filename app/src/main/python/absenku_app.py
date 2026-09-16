@@ -9023,7 +9023,7 @@ def obrolan_guru_detail(nis):
             font-size:12px;
         }}
 
-        .chat-card-guru {
+        .chat-card-guru {{
             width:min(100%,760px);
             max-width:760px;
             margin:0 auto;
@@ -9035,14 +9035,14 @@ def obrolan_guru_detail(nis):
             box-sizing:border-box;
             overflow:hidden;
             padding-bottom:max(8px,env(safe-area-inset-bottom));
-        }
+        }}
 
         .chat-card-guru .chat-header,
-        .chat-card-guru .guru-student-info {
+        .chat-card-guru .guru-student-info {{
             flex:0 0 auto;
-        }
+        }}
 
-        .chat-card-guru #chat-box {
+        .chat-card-guru #chat-box {{
             flex:1 1 0;
             min-height:0;
             height:0;
@@ -9051,26 +9051,26 @@ def obrolan_guru_detail(nis):
             overflow-x:hidden;
             -webkit-overflow-scrolling:touch;
             overscroll-behavior:contain;
-        }
+        }}
 
-        .chat-card-guru #kontrol-chat-guru {
+        .chat-card-guru #kontrol-chat-guru {{
             flex:0 0 auto;
             width:100%;
             min-height:0;
             position:relative;
             box-sizing:border-box;
-        }
+        }}
 
-        .chat-card-guru #kontrol-chat-guru .chat-form {
+        .chat-card-guru #kontrol-chat-guru .chat-form {{
             margin:10px 0 0 0;
-        }
+        }}
 
-        .chat-card-guru #kontrol-chat-guru .chat-composer {
+        .chat-card-guru #kontrol-chat-guru .chat-composer {{
             width:100%;
             box-sizing:border-box;
-        }
+        }}
 
-        .chat-card-guru #kontrol-chat-guru .chat-attach {
+        .chat-card-guru #kontrol-chat-guru .chat-attach {{
             flex:0 0 34px;
             width:34px;
             height:34px;
@@ -9087,9 +9087,9 @@ def obrolan_guru_detail(nis):
             justify-content:center;
             box-sizing:border-box;
             font-size:0;
-        }
+        }}
 
-        .chat-card-guru #kontrol-chat-guru .chat-attach-icon {
+        .chat-card-guru #kontrol-chat-guru .chat-attach-icon {{
             width:19px;
             height:19px;
             min-width:19px;
@@ -9098,9 +9098,9 @@ def obrolan_guru_detail(nis):
             max-height:19px;
             object-fit:contain;
             display:block;
-        }
+        }}
 
-        .chat-card-guru #kontrol-chat-guru .chat-attach-menu {
+        .chat-card-guru #kontrol-chat-guru .chat-attach-menu {{
             position:absolute;
             left:12px;
             bottom:70px;
@@ -9112,36 +9112,36 @@ def obrolan_guru_detail(nis):
             border-radius:16px;
             box-shadow:0 10px 30px rgba(15,23,42,.20);
             border:1px solid #e2e8f0;
-        }
+        }}
 
-        @media (max-width:600px) {
-            .chat-card-guru {
+        @media (max-width:600px) {{
+            .chat-card-guru {{
                 width:calc(100% - 16px);
                 max-width:none;
                 height:0;
                 min-height:0;
                 flex:1 1 0;
-            }
+            }}
 
-            .chat-card-guru #chat-box {
+            .chat-card-guru #chat-box {{
                 padding:8px;
-            }
+            }}
 
             .chat-card-guru .chat-row,
-            .chat-card-guru .chat-bubble {
+            .chat-card-guru .chat-bubble {{
                 min-width:0;
-            }
+            }}
 
-            .chat-card-guru .chat-bubble {
+            .chat-card-guru .chat-bubble {{
                 max-width:calc(100% - 44px);
-            }
+            }}
 
-            .chat-card-guru #kontrol-chat-guru .chat-attach-menu {
+            .chat-card-guru #kontrol-chat-guru .chat-attach-menu {{
                 left:8px;
                 bottom:64px;
                 width:205px;
-            }
-        }
+            }}
+        }}
 
         .guru-student-photo,
         .guru-student-photo-fallback {{
