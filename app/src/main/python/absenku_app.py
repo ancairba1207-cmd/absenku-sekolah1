@@ -9224,7 +9224,7 @@ def obrolan_guru_detail(nis):
             position:absolute !important;
             left:0 !important;
             right:0 !important;
-            bottom:0 !important;
+            bottom:var(--bottom-nav-height) !important;
             width:100% !important;
             min-height:50px !important;
             height:50px !important;
