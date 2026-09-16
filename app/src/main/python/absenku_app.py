@@ -2414,7 +2414,7 @@ document.addEventListener("DOMContentLoaded", function() {{
 <div style="width:44px"></div>
 </div>
 
-<div class="page-scroll{' admin-chat-page-scroll' if ('admin-chat-card' in body or 'chat-card' in body) else ''}">
+<div class="page-scroll{' admin-chat-page-scroll' if ('admin-chat-card' in body) else ''}">
 {body}
 </div>
 
