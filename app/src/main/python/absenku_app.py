@@ -2414,7 +2414,7 @@ document.addEventListener("DOMContentLoaded", function() {{
 <div style="width:44px"></div>
 </div>
 
-<div class="page-scroll{' admin-chat-page-scroll' if 'admin-chat-card' in body else ''}">
+<div class="page-scroll{' admin-chat-page-scroll' if ('admin-chat-card' in body or 'chat-card' in body) else ''}">
 {body}
 </div>
 
@@ -6873,7 +6873,8 @@ html, body {
 }
 
 /* Kartu mengisi seluruh ruang yang diberikan parent */
-.admin-chat-page-scroll > .admin-chat-card {
+.admin-chat-page-scroll > .admin-chat-card,
+.admin-chat-page-scroll > .chat-card {
     flex: 1 1 0 !important;
 
     width: min(100%, 760px) !important;
@@ -6891,7 +6892,8 @@ html, body {
 }
 
 /* Chat box mengambil semua ruang kosong */
-.admin-chat-page-scroll > .admin-chat-card #chat-box {
+.admin-chat-page-scroll > .admin-chat-card #chat-box,
+.admin-chat-page-scroll > .chat-card #chat-box {
     flex: 1 1 0 !important;
 
     width: 100% !important;
@@ -6910,7 +6912,8 @@ html, body {
 }
 
 /* Composer selalu menjadi elemen terakhir */
-.admin-chat-page-scroll > .admin-chat-card .chat-form {
+.admin-chat-page-scroll > .admin-chat-card .chat-form,
+.admin-chat-page-scroll > .chat-card .chat-form {
     flex: 0 0 auto !important;
 
     position: static !important;
@@ -6925,7 +6928,8 @@ html, body {
 }
 
 /* Ukuran composer tetap */
-.admin-chat-page-scroll > .admin-chat-card .chat-composer {
+.admin-chat-page-scroll > .admin-chat-card .chat-composer,
+.admin-chat-page-scroll > .chat-card .chat-composer {
     flex: 0 0 50px !important;
 
     width: 100% !important;
