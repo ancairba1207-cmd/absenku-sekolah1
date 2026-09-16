@@ -9104,6 +9104,75 @@ def obrolan_guru_detail(nis):
             display:none !important;
         }}
 
+        /* FINAL: composer Guru dikunci seperti Admin */
+        .chat-card #kontrol-chat-guru {{
+            flex:0 0 auto !important;
+            width:100% !important;
+            min-height:50px !important;
+            position:relative !important;
+            box-sizing:border-box !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-form {{
+            margin:8px 0 0 0 !important;
+            padding:0 !important;
+            width:100% !important;
+            flex:0 0 50px !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-composer {{
+            display:flex !important;
+            align-items:center !important;
+            gap:8px !important;
+            width:100% !important;
+            height:50px !important;
+            min-height:50px !important;
+            max-height:50px !important;
+            box-sizing:border-box !important;
+        }}
+
+        /* + Guru: ukuran dan posisi presisi */
+        .chat-card #kontrol-chat-guru .chat-attach {{
+            flex:0 0 38px !important;
+            width:38px !important;
+            height:38px !important;
+            min-width:38px !important;
+            min-height:38px !important;
+            max-width:38px !important;
+            max-height:38px !important;
+            padding:0 !important;
+            margin:0 !important;
+            border:0 !important;
+            border-radius:50% !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            box-sizing:border-box !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-attach-icon {{
+            width:18px !important;
+            height:18px !important;
+            min-width:18px !important;
+            min-height:18px !important;
+            max-width:18px !important;
+            max-height:18px !important;
+            object-fit:contain !important;
+            display:block !important;
+        }}
+
+        /* Pesan saja yang boleh scroll */
+        .chat-card #chat-box {{
+            flex:1 1 auto !important;
+            min-height:0 !important;
+            height:auto !important;
+            max-height:none !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+            -webkit-overflow-scrolling:touch !important;
+            overscroll-behavior:contain !important;
+        }}
+
 
         html, body {{
             overflow:hidden;
