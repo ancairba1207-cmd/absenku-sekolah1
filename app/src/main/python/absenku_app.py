@@ -2414,7 +2414,7 @@ document.addEventListener("DOMContentLoaded", function() {{
 <div style="width:44px"></div>
 </div>
 
-<div class="page-scroll{' admin-chat-page-scroll' if ('admin-chat-card' in body) else ''}">
+<div class="page-scroll{' admin-chat-page-scroll' if 'admin-chat-card' in body else ''}">
 {body}
 </div>
 
@@ -6873,8 +6873,7 @@ html, body {
 }
 
 /* Kartu mengisi seluruh ruang yang diberikan parent */
-.admin-chat-page-scroll > .admin-chat-card,
-.admin-chat-page-scroll > .chat-card {
+.admin-chat-page-scroll > .admin-chat-card {
     flex: 1 1 0 !important;
 
     width: min(100%, 760px) !important;
@@ -6892,8 +6891,7 @@ html, body {
 }
 
 /* Chat box mengambil semua ruang kosong */
-.admin-chat-page-scroll > .admin-chat-card #chat-box,
-.admin-chat-page-scroll > .chat-card #chat-box {
+.admin-chat-page-scroll > .admin-chat-card #chat-box {
     flex: 1 1 0 !important;
 
     width: 100% !important;
@@ -6912,8 +6910,7 @@ html, body {
 }
 
 /* Composer selalu menjadi elemen terakhir */
-.admin-chat-page-scroll > .admin-chat-card .chat-form,
-.admin-chat-page-scroll > .chat-card .chat-form {
+.admin-chat-page-scroll > .admin-chat-card .chat-form {
     flex: 0 0 auto !important;
 
     position: static !important;
@@ -6928,8 +6925,7 @@ html, body {
 }
 
 /* Ukuran composer tetap */
-.admin-chat-page-scroll > .admin-chat-card .chat-composer,
-.admin-chat-page-scroll > .chat-card .chat-composer {
+.admin-chat-page-scroll > .admin-chat-card .chat-composer {
     flex: 0 0 50px !important;
 
     width: 100% !important;
@@ -8823,7 +8819,7 @@ def obrolan_guru_detail(nis):
         tombol_akhiri = ""
 
         body = f"""
-        <div class="card chat-card-guru">
+        <div class="card chat-card">
             <div class="chat-header">
             <a class="chat-back" href="/obrolan_guru" aria-label="Kembali">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -8837,29 +8833,23 @@ def obrolan_guru_detail(nis):
             </div>
         </div>
 
-            <div class="admin-chat-topbar">
-                <a class="admin-chat-back" href="/obrolan_guru" aria-label="Kembali">← Kembali</a>
-            </div>
-
-            <div class="student-chat-info">
+            <div class="guru-student-info">
                 {(
-                    f'<img class="student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
+                    f'<img class="guru-student-photo" src="{escape(foto_siswa)}" alt="Foto {nama_anak}">'
                     if foto_siswa
-                    else '<div class="student-photo-fallback">👤</div>'
+                    else '<div class="guru-student-photo-fallback">👤</div>'
                 )}
-                <div class="student-info-main">
-                    <div class="student-name">{nama_anak}</div>
-                    <div class="student-meta">
-                        NIS: {escape(nis)}<br>
-                        Kelas: {kelas_anak}
+                <div class="guru-student-main">
+                    <div class="guru-student-name">{nama_anak}</div>
+                    <div class="guru-student-meta">
+                        NIS: {escape(nis)} • Kelas: {kelas_anak}
                     </div>
                 </div>
-
-                <div class="student-chat-status">
-                    <div class="status-badge{' selesai' if not chat_aktif else ''}">
+                <div class="guru-student-status">
+                    <div class="guru-status-badge{' selesai' if not chat_aktif else ''}">
                         {status_chat}
                     </div>
-                    <div class="last-seen">
+                    <div class="guru-last-seen">
                         Terakhir: {waktu_terakhir}
                     </div>
                 </div>
@@ -9023,7 +9013,104 @@ def obrolan_guru_detail(nis):
             font-size:12px;
         }}
 
-        .chat-card-guru {{
+        /* LAYOUT FINAL CHAT GURU */
+        .chat-card {{
+            display:flex !important;
+            flex-direction:column !important;
+            min-height:0 !important;
+            overflow:hidden !important;
+        }}
+
+        .chat-card .guru-student-info {{
+            flex:0 0 auto !important;
+        }}
+
+        .chat-card #chat-box {{
+            flex:1 1 0 !important;
+            min-height:0 !important;
+            height:0 !important;
+            max-height:none !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+            -webkit-overflow-scrolling:touch !important;
+            overscroll-behavior:contain !important;
+        }}
+
+        .chat-card #kontrol-chat-guru {{
+            flex:0 0 auto !important;
+            width:100% !important;
+            min-height:0 !important;
+            margin:0 !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-form {{
+            margin:10px 0 0 0 !important;
+            flex:0 0 auto !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-composer {{
+            width:100% !important;
+            box-sizing:border-box !important;
+        }}
+
+        /* Tombol + Guru */
+        /* Tombol + Guru = sama dengan Admin */
+        .chat-card #kontrol-chat-guru .chat-attach {{
+            flex:0 0 34px !important;
+            width:34px !important;
+            height:34px !important;
+            min-width:34px !important;
+            min-height:34px !important;
+            max-width:34px !important;
+            max-height:34px !important;
+            padding:0 !important;
+            margin:0 !important;
+            border:0 !important;
+            border-radius:50% !important;
+            background:#eef2ff !important;
+            color:#2563eb !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            box-sizing:border-box !important;
+            font-size:0 !important;
+            line-height:0 !important;
+            appearance:none !important;
+            -webkit-appearance:none !important;
+            box-shadow:none !important;
+            cursor:pointer !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-attach:active {{
+            transform:scale(.94) !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-attach-icon {{
+            width:19px !important;
+            height:19px !important;
+            min-width:19px !important;
+            min-height:19px !important;
+            max-width:19px !important;
+            max-height:19px !important;
+            object-fit:contain !important;
+            display:block !important;
+        }}
+
+        .chat-card #kontrol-chat-guru .chat-attach-menu {{
+            z-index:1500 !important;
+        }}
+
+        #tombol-akhiri-chat-guru {{
+            display:none !important;
+        }}
+
+
+        html, body {{
+            overflow:hidden;
+            height:100%;
+        }}
+
+        .chat-card {{
             width:min(100%,760px);
             max-width:760px;
             margin:0 auto;
@@ -9036,111 +9123,46 @@ def obrolan_guru_detail(nis):
             overflow:hidden;
             padding-bottom:max(8px,env(safe-area-inset-bottom));
         }}
-
-        .chat-card-guru .chat-header,
-        .chat-card-guru .student-chat-info {{
-            flex:0 0 auto;
-        }}
-
-        .chat-card-guru #chat-box {{
-            flex:1 1 0;
-            min-height:0;
-            height:0;
-            max-height:none;
-            overflow-y:auto;
-            overflow-x:hidden;
-            -webkit-overflow-scrolling:touch;
-            overscroll-behavior:contain;
-        }}
-
-        .chat-card-guru #kontrol-chat-guru {{
-            flex:0 0 auto;
-            width:100%;
-            min-height:0;
-            position:relative;
-            box-sizing:border-box;
-        }}
-
-        .chat-card-guru #kontrol-chat-guru .chat-form {{
-            margin:10px 0 0 0;
-        }}
-
-        .chat-card-guru #kontrol-chat-guru .chat-composer {{
-            width:100%;
-            box-sizing:border-box;
-        }}
-
-        .chat-card-guru #kontrol-chat-guru .chat-attach {{
-            flex:0 0 34px;
-            width:34px;
-            height:34px;
-            min-width:34px;
-            min-height:34px;
-            max-width:34px;
-            max-height:34px;
-            padding:0;
-            margin:0;
-            border:0;
-            border-radius:50%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            box-sizing:border-box;
-            font-size:0;
-        }}
-
-        .chat-card-guru #kontrol-chat-guru .chat-attach-icon {{
-            width:19px;
-            height:19px;
-            min-width:19px;
-            min-height:19px;
-            max-width:19px;
-            max-height:19px;
-            object-fit:contain;
-            display:block;
-        }}
-
-        .chat-card-guru #kontrol-chat-guru .chat-attach-menu {{
-            position:absolute;
-            left:12px;
-            bottom:70px;
-            z-index:1500;
-            width:220px;
-            padding:7px;
-            box-sizing:border-box;
-            background:#fff;
-            border-radius:16px;
-            box-shadow:0 10px 30px rgba(15,23,42,.20);
-            border:1px solid #e2e8f0;
-        }}
-
         @media (max-width:600px) {{
-            .chat-card-guru {{
+            .chat-card {{
                 width:calc(100% - 16px);
                 max-width:none;
-                height:0;
-                min-height:0;
-                flex:1 1 0;
+                height:calc(100dvh - 155px - env(safe-area-inset-bottom));
+                max-height:calc(100dvh - 155px - env(safe-area-inset-bottom));
+                margin-left:auto;
+                margin-right:auto;
+                padding-bottom:max(8px,env(safe-area-inset-bottom));
+            }}
+            .chat-card {{
+                display:flex !important;
+                flex-direction:column !important;
+                min-height:0 !important;
+                overflow:hidden !important;
             }}
 
-            .chat-card-guru #chat-box {{
+            .chat-card #chat-box {{
+                flex:1 1 auto !important;
+                min-height:0 !important;
+                height:auto !important;
+                max-height:none !important;
+                overflow-y:auto !important;
+                overflow-x:hidden !important;
                 padding:8px;
-            }}
-
-            .chat-card-guru .chat-row,
-            .chat-card-guru .chat-bubble {{
                 min-width:0;
             }}
-
-            .chat-card-guru .chat-bubble {{
+            .chat-card .chat-row,
+            .chat-card .chat-bubble {{
+                min-width:0;
+            }}
+            .chat-card .chat-bubble {{
                 max-width:calc(100% - 44px);
             }}
-
-            .chat-card-guru #kontrol-chat-guru .chat-attach-menu {{
-                left:8px;
-                bottom:64px;
-                width:205px;
-            }}
+        }}
+        .guru-student-info {{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:1px 2px 6px 2px;
         }}
 
         .guru-student-photo,
