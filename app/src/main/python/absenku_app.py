@@ -9019,10 +9019,22 @@ def obrolan_guru_detail(nis):
             flex-direction:column !important;
             min-height:0 !important;
             overflow:hidden !important;
+            position:relative !important;
+        }}
+
+        /* HEADER DAN IDENTITAS SISWA TETAP DI TEMPAT */
+        .chat-card .chat-header {{
+            flex:0 0 auto !important;
+            position:relative !important;
+            z-index:20 !important;
+            background:#ffffff !important;
         }}
 
         .chat-card .guru-student-info {{
             flex:0 0 auto !important;
+            position:relative !important;
+            z-index:19 !important;
+            background:#ffffff !important;
         }}
 
         .chat-card #chat-box {{
@@ -9041,6 +9053,9 @@ def obrolan_guru_detail(nis):
             width:100% !important;
             min-height:0 !important;
             margin:0 !important;
+            position:relative !important;
+            z-index:40 !important;
+            background:#fff !important;
         }}
 
         .chat-card #kontrol-chat-guru .chat-form {{
@@ -9141,14 +9156,16 @@ def obrolan_guru_detail(nis):
             }}
 
             .chat-card #chat-box {{
-                flex:1 1 auto !important;
+                flex:1 1 0 !important;
                 min-height:0 !important;
-                height:auto !important;
+                height:0 !important;
                 max-height:none !important;
                 overflow-y:auto !important;
                 overflow-x:hidden !important;
                 padding:8px;
                 min-width:0;
+                -webkit-overflow-scrolling:touch !important;
+                overscroll-behavior:contain !important;
             }}
             .chat-card .chat-row,
             .chat-card .chat-bubble {{
@@ -9158,11 +9175,16 @@ def obrolan_guru_detail(nis):
                 max-width:calc(100% - 44px);
             }}
         }}
-        .guru-student-info {{
-            display:flex;
-            align-items:center;
+        .chat-card .guru-student-info {{
+            flex:0 0 auto !important;
+            display:flex !important;
+            align-items:center !important;
             gap:8px;
             padding:1px 2px 6px 2px;
+            position:relative !important;
+            z-index:30 !important;
+            background:#fff !important;
+            overflow:visible !important;
         }}
 
         .guru-student-photo,
