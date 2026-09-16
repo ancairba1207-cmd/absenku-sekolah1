@@ -2414,7 +2414,7 @@ document.addEventListener("DOMContentLoaded", function() {{
 <div style="width:44px"></div>
 </div>
 
-<div class="page-scroll{' admin-chat-page-scroll' if 'admin-chat-card' in body else ''}">
+<div class="page-scroll{' admin-chat-page-scroll' if 'admin-chat-card' in body else ('guru-chat-page-scroll' if 'chat-card' in body else '')}">
 {body}
 </div>
 
@@ -9177,6 +9177,72 @@ def obrolan_guru_detail(nis):
         html, body {{
             overflow:hidden;
             height:100%;
+        }}
+
+        /* FINAL: wrapper halaman chat Guru */
+        .guru-chat-page-scroll {{
+            flex:1 1 0 !important;
+            width:100% !important;
+            height:0 !important;
+            min-height:0 !important;
+            max-height:none !important;
+            display:flex !important;
+            flex-direction:column !important;
+            box-sizing:border-box !important;
+            overflow:hidden !important;
+            padding-bottom:var(--bottom-nav-height) !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card {{
+            flex:1 1 0 !important;
+            width:min(100%,760px) !important;
+            height:0 !important;
+            min-height:0 !important;
+            max-height:none !important;
+            display:flex !important;
+            flex-direction:column !important;
+            box-sizing:border-box !important;
+            overflow:hidden !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #chat-box {{
+            flex:1 1 0 !important;
+            width:100% !important;
+            height:0 !important;
+            min-height:0 !important;
+            max-height:none !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+            box-sizing:border-box !important;
+            -webkit-overflow-scrolling:touch !important;
+            overscroll-behavior:contain !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+            flex:0 0 auto !important;
+            width:100% !important;
+            min-height:0 !important;
+            box-sizing:border-box !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+            flex:0 0 auto !important;
+            position:static !important;
+            width:100% !important;
+            margin:8px 0 0 0 !important;
+            padding:0 !important;
+            box-sizing:border-box !important;
+        }}
+
+        @media (max-width:600px) {{
+            .guru-chat-page-scroll {{
+                padding-bottom:var(--bottom-nav-height) !important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card {{
+                width:calc(100% - 16px) !important;
+                max-width:none !important;
+            }}
         }}
 
         .chat-card {{
