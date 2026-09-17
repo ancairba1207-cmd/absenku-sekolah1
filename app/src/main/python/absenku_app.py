@@ -9333,11 +9333,31 @@ def obrolan_guru_detail(nis):
         @media (max-width:600px) {{
             .guru-chat-page-scroll {{
                 padding-bottom:var(--bottom-nav-height) !important;
+                box-sizing:border-box !important;
             }}
 
             .guru-chat-page-scroll > .chat-card {{
                 width:calc(100% - 16px) !important;
                 max-width:none !important;
+                height:calc(100dvh - 155px - var(--bottom-nav-height) - env(safe-area-inset-bottom)) !important;
+                max-height:calc(100dvh - 155px - var(--bottom-nav-height) - env(safe-area-inset-bottom)) !important;
+                min-height:0 !important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #chat-box {{
+                flex:1 1 auto !important;
+                min-height:0 !important;
+                overflow-y:auto !important;
+                overflow-x:hidden !important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+                flex:0 0 58px !important;
+                height:58px !important;
+                min-height:58px !important;
+                max-height:58px !important;
+                position:relative !important;
+                z-index:200 !important;
             }}
         }}
 
