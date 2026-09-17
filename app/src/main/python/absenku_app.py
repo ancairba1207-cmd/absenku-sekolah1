@@ -8859,7 +8859,7 @@ def obrolan_guru_detail(nis):
                 {isi_pesan}
             </div>
 
-            <div id="kontrol-chat-guru" style="display:{"" if sesi_id_aktif else "none"}">
+            <div id="kontrol-chat-guru" data-chat-aktif="{'1' if sesi_id_aktif else '0'}" style="display:{'block' if sesi_id_aktif else 'none'}">
 <form method="post" enctype="multipart/form-data" class="chat-form">
                 <div class="chat-composer">
                     <button type="button"
@@ -10464,7 +10464,12 @@ def obrolan_guru_detail(nis):
         const kontrol = document.getElementById("kontrol-chat-guru");
 
         if (kontrol) {{
-            kontrol.style.display = aktif ? "" : "none";
+            if (aktif) {{
+                kontrol.dataset.chatAktif = "1";
+                kontrol.style.display = "block";
+            }} else if (kontrol.dataset.chatAktif !== "1") {{
+                kontrol.style.display = "none";
+            }}
         }}
     }}
 
