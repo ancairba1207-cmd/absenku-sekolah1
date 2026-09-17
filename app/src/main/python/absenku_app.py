@@ -9105,7 +9105,7 @@ def obrolan_guru_detail(nis):
         }}
 
         /* FINAL: composer Guru sebagai baris terakhir chat */
-        .chat-card #kontrol-chat-guru {
+        .chat-card #kontrol-chat-guru {{
             position:static !important;
             flex:0 0 auto !important;
             width:100% !important;
@@ -9118,9 +9118,9 @@ def obrolan_guru_detail(nis):
             visibility:visible !important;
             opacity:1 !important;
             box-sizing:border-box !important;
-        }
+        }}
 
-        .chat-card #kontrol-chat-guru .chat-form {
+        .chat-card #kontrol-chat-guru .chat-form {{
             display:block !important;
             width:100% !important;
             height:50px !important;
@@ -9128,9 +9128,9 @@ def obrolan_guru_detail(nis):
             margin:0 !important;
             padding:0 !important;
             box-sizing:border-box !important;
-        }
+        }}
 
-        .chat-card #kontrol-chat-guru .chat-composer {
+        .chat-card #kontrol-chat-guru .chat-composer {{
             display:flex !important;
             align-items:center !important;
             gap:8px !important;
@@ -9139,16 +9139,16 @@ def obrolan_guru_detail(nis):
             min-height:50px !important;
             max-height:50px !important;
             box-sizing:border-box !important;
-        }
+        }}
 
-        .chat-card #kontrol-chat-guru .chat-composer textarea {
+        .chat-card #kontrol-chat-guru .chat-composer textarea {{
             display:block !important;
             flex:1 1 auto !important;
             min-width:0 !important;
             height:40px !important;
             min-height:40px !important;
             max-height:40px !important;
-        }
+        }}
 
         /* FINAL: composer Guru tampil tepat di atas navigation */
         .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
