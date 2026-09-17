@@ -9063,7 +9063,7 @@ def obrolan_guru_detail(nis):
         }}
 
         .chat-card #kontrol-chat-guru {{
-            flex:0 0 auto !important;
+            flex:0 0 58px !important;
             width:100% !important;
             min-height:0 !important;
             margin:0 !important;
@@ -9132,8 +9132,8 @@ def obrolan_guru_detail(nis):
 
         /* FINAL: composer Guru sebagai baris terakhir chat */
         .chat-card #kontrol-chat-guru {{
-            position:static !important;
-            flex:0 0 auto !important;
+            position:relative !important;
+            flex:0 0 58px !important;
             width:100% !important;
             height:58px !important;
             min-height:58px !important;
@@ -9235,17 +9235,22 @@ def obrolan_guru_detail(nis):
         }}
 
         .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
-            display:flex !important;
-            flex:0 0 38px !important;
-            width:38px !important;
-            height:38px !important;
-            min-width:38px !important;
-            min-height:38px !important;
-            max-width:38px !important;
-            max-height:38px !important;
-            visibility:visible !important;
-            opacity:1 !important;
-        }}
+    display:flex !important;
+    flex:0 0 34px !important;
+    width:34px !important;
+    height:34px !important;
+    min-width:34px !important;
+    min-height:34px !important;
+    max-width:34px !important;
+    max-height:34px !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    padding:0 !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+    align-items:center !important;
+    justify-content:center !important;
+}}
 
         .guru-chat-page-scroll > .chat-card #chat-box {{
             flex:1 1 auto !important;
