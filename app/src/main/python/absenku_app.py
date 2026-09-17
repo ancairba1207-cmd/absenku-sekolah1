@@ -9013,6 +9013,32 @@ def obrolan_guru_detail(nis):
             font-size:12px;
         }}
 
+        /* FIX FINAL: ruang wrapper chat Guru */
+        .guru-chat-page-scroll {{
+            flex:1 1 auto !important;
+            width:100% !important;
+            min-height:0 !important;
+            height:auto !important;
+            max-height:none !important;
+            display:flex !important;
+            flex-direction:column !important;
+            overflow:hidden !important;
+            box-sizing:border-box !important;
+            padding-bottom:0 !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card {{
+            flex:1 1 auto !important;
+            width:min(100%,760px) !important;
+            min-height:0 !important;
+            height:auto !important;
+            max-height:none !important;
+            display:flex !important;
+            flex-direction:column !important;
+            overflow:hidden !important;
+            box-sizing:border-box !important;
+        }}
+
         /* LAYOUT FINAL CHAT GURU */
         .chat-card {{
             display:flex !important;
