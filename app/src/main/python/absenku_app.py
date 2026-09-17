@@ -9202,6 +9202,88 @@ def obrolan_guru_detail(nis):
             margin:0 !important;
         }}
 
+
+        /* FINAL FIX 2: COMPOSER GURU DI ATAS NAVIGATION */
+        @media (max-width:600px) {{
+            .guru-chat-page-scroll > .chat-card {{
+                position:relative!important;
+                overflow:hidden!important;
+                padding-bottom:0!important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #chat-box {{
+                padding-bottom:70px!important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+                position:absolute!important;
+                left:0!important;
+                right:0!important;
+                bottom:0!important;
+                width:100%!important;
+                height:58px!important;
+                min-height:58px!important;
+                max-height:58px!important;
+                margin:0!important;
+                padding:4px 8px!important;
+                background:#ffffff!important;
+                z-index:9999!important;
+                display:block!important;
+                visibility:visible!important;
+                opacity:1!important;
+                box-sizing:border-box!important;
+                border-top:1px solid #e2e8f0!important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+                width:100%!important;
+                height:50px!important;
+                min-height:50px!important;
+                margin:0!important;
+                padding:0!important;
+                display:block!important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+                width:100%!important;
+                height:50px!important;
+                min-height:50px!important;
+                max-height:50px!important;
+                display:flex!important;
+                align-items:center!important;
+                gap:8px!important;
+                box-sizing:border-box!important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{
+                flex:1 1 auto!important;
+                min-width:0!important;
+                height:40px!important;
+                min-height:40px!important;
+                max-height:40px!important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
+                flex:0 0 34px!important;
+                width:34px!important;
+                height:34px!important;
+                min-width:34px!important;
+                max-width:34px!important;
+                min-height:34px!important;
+                max-height:34px!important;
+            }}
+
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{
+                flex:0 0 44px!important;
+                width:44px!important;
+                height:44px!important;
+                min-width:44px!important;
+                max-width:44px!important;
+                min-height:44px!important;
+                max-height:44px!important;
+            }}
+        }}
+
         /* ABSOLUTE FINAL: COMPOSER GURU SELALU TERLIHAT */
         .guru-chat-page-scroll > .chat-card {{
             display:flex !important;
