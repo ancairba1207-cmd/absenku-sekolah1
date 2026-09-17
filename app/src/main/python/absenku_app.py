@@ -9211,7 +9211,7 @@ def obrolan_guru_detail(nis):
                 position:fixed!important;
                 left:28px!important;
                 right:28px!important;
-                bottom:var(--bottom-nav-height)!important;
+                bottom:calc(var(--bottom-nav-height) + env(safe-area-inset-bottom))!important;
                 width:auto!important;
                 height:58px!important;
                 min-height:58px!important;
