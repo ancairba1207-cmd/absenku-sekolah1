@@ -5985,7 +5985,11 @@ def obrolan_admin_detail(nis):
                 }.get(mime_fallback, "")
                 file_lampiran.filename = "lampiran_" + str(int(time.time() * 1000)) + ext_fallback
 
-            if (pesan_baru or ada_lampiran) and sesi_id_aktif:
+            if pesan_baru or ada_lampiran:
+                if not sesi_id_aktif:
+                    import uuid
+                    sesi_id_aktif = str(uuid.uuid4())
+
                 lampiran_metadata = None
 
                 if ada_lampiran:
@@ -8859,7 +8863,7 @@ def obrolan_guru_detail(nis):
                 {isi_pesan}
             </div>
 
-            <div id="kontrol-chat-guru" data-chat-aktif="{'1' if sesi_id_aktif else '0'}" style="display:{'block' if sesi_id_aktif else 'none'}">
+            <div id="kontrol-chat-guru" data-chat-aktif="{'1' if sesi_id_aktif else '0'}" style="display:block">
 <form method="post" enctype="multipart/form-data" class="chat-form">
                 <div class="chat-composer">
                     <button type="button"
