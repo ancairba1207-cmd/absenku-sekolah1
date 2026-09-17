@@ -10862,7 +10862,7 @@ def obrolan_guru_detail(nis):
                 kontrol.dataset.chatAktif = "1";
                 kontrol.style.display = "block";
             }} else if (kontrol.dataset.chatAktif !== "1") {{
-                kontrol.style.display = "none";
+                kontrol.style.display = "block";
             }}
         }}
     }}
