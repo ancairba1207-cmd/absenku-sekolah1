@@ -9250,6 +9250,51 @@ def obrolan_guru_detail(nis):
             box-sizing:border-box !important;
         }}
 
+        /* FINAL: composer Guru tampil tepat di atas navigation */
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+            position:fixed !important;
+            left:0 !important;
+            right:0 !important;
+            bottom:var(--bottom-nav-height) !important;
+            width:100% !important;
+            height:58px !important;
+            min-height:58px !important;
+            max-height:58px !important;
+            z-index:3000 !important;
+            display:block !important;
+            visibility:visible !important;
+            opacity:1 !important;
+            background:#ffffff !important;
+            box-sizing:border-box !important;
+            padding:4px 8px !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+            display:block !important;
+            width:100% !important;
+            height:50px !important;
+            min-height:50px !important;
+            margin:0 !important;
+            padding:0 !important;
+            box-sizing:border-box !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+            display:flex !important;
+            align-items:center !important;
+            width:100% !important;
+            height:50px !important;
+            min-height:50px !important;
+            max-height:50px !important;
+            visibility:visible !important;
+            opacity:1 !important;
+            box-sizing:border-box !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #chat-box {{
+            padding-bottom:58px !important;
+        }}
+
         @media (max-width:600px) {{
             .guru-chat-page-scroll {{
                 padding-bottom:var(--bottom-nav-height) !important;
