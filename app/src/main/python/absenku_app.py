@@ -9332,7 +9332,7 @@ def obrolan_guru_detail(nis):
 
         @media (max-width:600px) {{
             .guru-chat-page-scroll {{
-                padding-bottom:var(--bottom-nav-height) !important;
+                padding-bottom:0 !important;
                 box-sizing:border-box !important;
             }}
 
