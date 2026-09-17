@@ -9207,6 +9207,107 @@ def obrolan_guru_detail(nis):
 
         /* FINAL FINAL: COMPOSER GURU FIXED DI ATAS BOTTOM NAV */
 
+/* STRUKTURAL FIX FINAL: GURU CHAT COMPOSER */
+.guru-chat-page-scroll {
+    overflow:visible!important;
+    position:relative!important;
+    padding-bottom:calc(74px + 70px + env(safe-area-inset-bottom))!important;
+}
+
+.guru-chat-page-scroll > .chat-card {
+    overflow:visible!important;
+    position:relative!important;
+}
+
+.guru-chat-page-scroll > .chat-card #chat-box {
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    min-height:0!important;
+    flex:1 1 auto!important;
+}
+
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru {
+    position:fixed!important;
+    left:20px!important;
+    right:20px!important;
+    bottom:calc(74px + 8px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    height:58px!important;
+    min-height:58px!important;
+    max-height:58px!important;
+    margin:0!important;
+    padding:4px!important;
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    overflow:visible!important;
+    z-index:999999!important;
+    background:#fff!important;
+    border:1px solid #dbe3ef!important;
+    border-radius:18px!important;
+    box-shadow:0 4px 16px rgba(0,0,0,.18)!important;
+    box-sizing:border-box!important;
+}
+
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {
+    display:block!important;
+    width:100%!important;
+    height:50px!important;
+    min-height:50px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+}
+
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {
+    display:flex!important;
+    align-items:center!important;
+    width:100%!important;
+    height:50px!important;
+    min-height:50px!important;
+    max-height:50px!important;
+    gap:8px!important;
+    margin:0!important;
+    padding:2px!important;
+    overflow:visible!important;
+    box-sizing:border-box!important;
+}
+
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru textarea {
+    display:block!important;
+    flex:1 1 auto!important;
+    width:auto!important;
+    min-width:0!important;
+    height:40px!important;
+    min-height:40px!important;
+    max-height:40px!important;
+    box-sizing:border-box!important;
+}
+
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {
+    flex:0 0 36px!important;
+    width:36px!important;
+    height:36px!important;
+    min-width:36px!important;
+    max-width:36px!important;
+    min-height:36px!important;
+    max-height:36px!important;
+}
+
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {
+    flex:0 0 44px!important;
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+}
+
+
         /* ULTIMATE FIX: COMPOSER GURU - TANPA MEDIA QUERY */
         .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
             position:fixed!important;
