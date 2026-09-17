@@ -9208,25 +9208,25 @@ def obrolan_guru_detail(nis):
         /* FINAL FINAL: COMPOSER GURU FIXED DI ATAS BOTTOM NAV */
 
 /* STRUKTURAL FIX FINAL: GURU CHAT COMPOSER */
-.guru-chat-page-scroll {
+.guru-chat-page-scroll {{
     overflow:visible!important;
     position:relative!important;
     padding-bottom:calc(74px + 70px + env(safe-area-inset-bottom))!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card {
+.guru-chat-page-scroll > .chat-card {{
     overflow:visible!important;
     position:relative!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card #chat-box {
+.guru-chat-page-scroll > .chat-card #chat-box {{
     overflow-y:auto!important;
     overflow-x:hidden!important;
     min-height:0!important;
     flex:1 1 auto!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card #kontrol-chat-guru {
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
     position:fixed!important;
     left:20px!important;
     right:20px!important;
@@ -9247,9 +9247,9 @@ def obrolan_guru_detail(nis):
     border-radius:18px!important;
     box-shadow:0 4px 16px rgba(0,0,0,.18)!important;
     box-sizing:border-box!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
     display:block!important;
     width:100%!important;
     height:50px!important;
@@ -9257,9 +9257,9 @@ def obrolan_guru_detail(nis):
     margin:0!important;
     padding:0!important;
     overflow:visible!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
     display:flex!important;
     align-items:center!important;
     width:100%!important;
@@ -9271,9 +9271,9 @@ def obrolan_guru_detail(nis):
     padding:2px!important;
     overflow:visible!important;
     box-sizing:border-box!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card #kontrol-chat-guru textarea {
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru textarea {{
     display:block!important;
     flex:1 1 auto!important;
     width:auto!important;
@@ -9282,9 +9282,9 @@ def obrolan_guru_detail(nis):
     min-height:40px!important;
     max-height:40px!important;
     box-sizing:border-box!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
     flex:0 0 36px!important;
     width:36px!important;
     height:36px!important;
@@ -9292,9 +9292,9 @@ def obrolan_guru_detail(nis):
     max-width:36px!important;
     min-height:36px!important;
     max-height:36px!important;
-}
+}}
 
-.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {
+.guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{
     flex:0 0 44px!important;
     width:44px!important;
     height:44px!important;
@@ -9305,11 +9305,11 @@ def obrolan_guru_detail(nis):
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
-}
+}}
 
 
         /* ULTIMATE FIX: COMPOSER GURU - TANPA MEDIA QUERY */
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{{{
             position:fixed!important;
             left:28px!important;
             right:28px!important;
@@ -9329,9 +9329,9 @@ def obrolan_guru_detail(nis):
             visibility:visible!important;
             opacity:1!important;
             box-sizing:border-box!important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{{{
             display:block!important;
             width:100%!important;
             height:50px!important;
@@ -9339,9 +9339,9 @@ def obrolan_guru_detail(nis):
             margin:0!important;
             padding:0!important;
             box-sizing:border-box!important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{{{
             display:flex!important;
             align-items:center!important;
             gap:8px!important;
@@ -9350,18 +9350,18 @@ def obrolan_guru_detail(nis):
             min-height:50px!important;
             max-height:50px!important;
             box-sizing:border-box!important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru textarea {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru textarea {{{{
             display:block!important;
             flex:1 1 auto!important;
             min-width:0!important;
             height:40px!important;
             min-height:40px!important;
             max-height:40px!important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{{{
             flex:0 0 34px!important;
             width:34px!important;
             height:34px!important;
@@ -9369,9 +9369,9 @@ def obrolan_guru_detail(nis):
             max-width:34px!important;
             min-height:34px!important;
             max-height:34px!important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{{{
             flex:0 0 44px!important;
             width:44px!important;
             height:44px!important;
@@ -9382,10 +9382,10 @@ def obrolan_guru_detail(nis):
             display:flex!important;
             align-items:center!important;
             justify-content:center!important;
-        }}
+        }}}}
 
-        @media (max-width:600px) {{
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+        @media (max-width:600px) {{{{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{{{
                 position:fixed!important;
                 left:28px!important;
                 right:28px!important;
@@ -9405,9 +9405,9 @@ def obrolan_guru_detail(nis):
                 visibility:visible!important;
                 opacity:1!important;
                 box-sizing:border-box!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{{{
                 display:block!important;
                 width:100%!important;
                 height:50px!important;
@@ -9415,9 +9415,9 @@ def obrolan_guru_detail(nis):
                 margin:0!important;
                 padding:0!important;
                 box-sizing:border-box!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{{{
                 display:flex!important;
                 align-items:center!important;
                 gap:8px!important;
@@ -9426,9 +9426,9 @@ def obrolan_guru_detail(nis):
                 min-height:50px!important;
                 max-height:50px!important;
                 box-sizing:border-box!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{{{
                 display:block!important;
                 flex:1 1 auto!important;
                 min-width:0!important;
@@ -9437,9 +9437,9 @@ def obrolan_guru_detail(nis):
                 min-height:40px!important;
                 max-height:40px!important;
                 box-sizing:border-box!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{{{
                 flex:0 0 34px!important;
                 width:34px!important;
                 height:34px!important;
@@ -9447,9 +9447,9 @@ def obrolan_guru_detail(nis):
                 max-width:34px!important;
                 min-height:34px!important;
                 max-height:34px!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{{{
                 flex:0 0 44px!important;
                 width:44px!important;
                 height:44px!important;
@@ -9458,21 +9458,21 @@ def obrolan_guru_detail(nis):
                 min-height:44px!important;
                 max-height:44px!important;
                 display:flex!important;
-            }}
-        }}
+            }}}}
+        }}}}
 
-        @media (max-width:600px) {{
-            .guru-chat-page-scroll > .chat-card {{
+        @media (max-width:600px) {{{{
+            .guru-chat-page-scroll > .chat-card {{{{
                 position:relative!important;
                 overflow:hidden!important;
                 padding-bottom:0!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #chat-box {{
+            .guru-chat-page-scroll > .chat-card #chat-box {{{{
                 padding-bottom:70px!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{{{
                 position:absolute!important;
                 left:0!important;
                 right:0!important;
@@ -9490,18 +9490,18 @@ def obrolan_guru_detail(nis):
                 opacity:1!important;
                 box-sizing:border-box!important;
                 border-top:1px solid #e2e8f0!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{{{
                 width:100%!important;
                 height:50px!important;
                 min-height:50px!important;
                 margin:0!important;
                 padding:0!important;
                 display:block!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{{{
                 width:100%!important;
                 height:50px!important;
                 min-height:50px!important;
@@ -9510,17 +9510,17 @@ def obrolan_guru_detail(nis):
                 align-items:center!important;
                 gap:8px!important;
                 box-sizing:border-box!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{{{
                 flex:1 1 auto!important;
                 min-width:0!important;
                 height:40px!important;
                 min-height:40px!important;
                 max-height:40px!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{{{
                 flex:0 0 34px!important;
                 width:34px!important;
                 height:34px!important;
@@ -9528,9 +9528,9 @@ def obrolan_guru_detail(nis):
                 max-width:34px!important;
                 min-height:34px!important;
                 max-height:34px!important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-send {{{{
                 flex:0 0 44px!important;
                 width:44px!important;
                 height:44px!important;
@@ -9538,24 +9538,24 @@ def obrolan_guru_detail(nis):
                 max-width:44px!important;
                 min-height:44px!important;
                 max-height:44px!important;
-            }}
-        }}
+            }}}}
+        }}}}
 
         /* ABSOLUTE FINAL: COMPOSER GURU SELALU TERLIHAT */
-        .guru-chat-page-scroll > .chat-card {{
+        .guru-chat-page-scroll > .chat-card {{{{
             display:flex !important;
             flex-direction:column !important;
             overflow:hidden !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #chat-box {{
+        .guru-chat-page-scroll > .chat-card #chat-box {{{{
             flex:1 1 auto !important;
             min-height:0 !important;
             overflow-y:auto !important;
             overflow-x:hidden !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{{{
             position:relative !important;
             flex:0 0 58px !important;
             width:100% !important;
@@ -9568,18 +9568,18 @@ def obrolan_guru_detail(nis):
             z-index:100 !important;
             background:#ffffff !important;
             box-sizing:border-box !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{{{
             width:100% !important;
             height:50px !important;
             min-height:50px !important;
             display:block !important;
             margin:0 !important;
             padding:0 !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{{{
             display:flex !important;
             align-items:center !important;
             gap:8px !important;
@@ -9587,17 +9587,17 @@ def obrolan_guru_detail(nis):
             height:50px !important;
             min-height:50px !important;
             max-height:50px !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{{{
             flex:1 1 auto !important;
             min-width:0 !important;
             height:40px !important;
             min-height:40px !important;
             max-height:40px !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{{{
             flex:0 0 34px !important;
             width:34px !important;
             height:34px !important;
@@ -9605,10 +9605,10 @@ def obrolan_guru_detail(nis):
             min-height:34px !important;
             max-width:34px !important;
             max-height:34px !important;
-        }}
+        }}}}
 
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{{{
             display:block !important;
             position:static !important;
             width:100% !important;
@@ -9617,9 +9617,9 @@ def obrolan_guru_detail(nis):
             margin:0 !important;
             padding:0 !important;
             box-sizing:border-box !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{{{
             display:flex !important;
             align-items:center !important;
             gap:8px !important;
@@ -9630,9 +9630,9 @@ def obrolan_guru_detail(nis):
             visibility:visible !important;
             opacity:1 !important;
             box-sizing:border-box !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{{{
             display:block !important;
             flex:1 1 auto !important;
             min-width:0 !important;
@@ -9642,9 +9642,9 @@ def obrolan_guru_detail(nis):
             visibility:visible !important;
             opacity:1 !important;
             box-sizing:border-box !important;
-        }}
+        }}}}
 
-        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{{{
     display:flex !important;
     flex:0 0 34px !important;
     width:34px !important;
@@ -9660,47 +9660,47 @@ def obrolan_guru_detail(nis):
     box-sizing:border-box !important;
     align-items:center !important;
     justify-content:center !important;
-}}
+}}}}
 
-        .guru-chat-page-scroll > .chat-card #chat-box {{
+        .guru-chat-page-scroll > .chat-card #chat-box {{{{
             flex:1 1 auto !important;
             min-height:0 !important;
             overflow-y:auto !important;
             overflow-x:hidden !important;
-        }}
+        }}}}
 
-        @media (max-width:600px) {{
-            .guru-chat-page-scroll {{
+        @media (max-width:600px) {{{{
+            .guru-chat-page-scroll {{{{
                 padding-bottom:0 !important;
                 box-sizing:border-box !important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card {{
+            .guru-chat-page-scroll > .chat-card {{{{
                 width:calc(100% - 16px) !important;
                 max-width:none !important;
                 height:calc(100dvh - 155px - var(--bottom-nav-height) - env(safe-area-inset-bottom)) !important;
                 max-height:calc(100dvh - 155px - var(--bottom-nav-height) - env(safe-area-inset-bottom)) !important;
                 min-height:0 !important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #chat-box {{
+            .guru-chat-page-scroll > .chat-card #chat-box {{{{
                 flex:1 1 auto !important;
                 min-height:0 !important;
                 overflow-y:auto !important;
                 overflow-x:hidden !important;
-            }}
+            }}}}
 
-            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+            .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{{{
                 flex:0 0 58px !important;
                 height:58px !important;
                 min-height:58px !important;
                 max-height:58px !important;
                 position:relative !important;
                 z-index:200 !important;
-            }}
-        }}
+            }}}}
+        }}}}
 
-        .chat-card {{
+        .chat-card {{{{
             width:min(100%,760px);
             max-width:760px;
             margin:0 auto;
@@ -9712,9 +9712,9 @@ def obrolan_guru_detail(nis):
             box-sizing:border-box;
             overflow:hidden;
             padding-bottom:max(8px,env(safe-area-inset-bottom));
-        }}
-        @media (max-width:600px) {{
-            .chat-card {{
+        }}}}
+        @media (max-width:600px) {{{{
+            .chat-card {{{{
                 width:calc(100% - 16px);
                 max-width:none;
                 height:calc(100dvh - 155px - env(safe-area-inset-bottom));
@@ -9722,15 +9722,15 @@ def obrolan_guru_detail(nis):
                 margin-left:auto;
                 margin-right:auto;
                 padding-bottom:max(8px,env(safe-area-inset-bottom));
-            }}
-            .chat-card {{
+            }}}}
+            .chat-card {{{{
                 display:flex !important;
                 flex-direction:column !important;
                 min-height:0 !important;
                 overflow:hidden !important;
-            }}
+            }}}}
 
-            .chat-card #chat-box {{
+            .chat-card #chat-box {{{{
                 flex:1 1 auto !important;
                 min-height:0 !important;
                 height:auto !important;
@@ -9739,24 +9739,24 @@ def obrolan_guru_detail(nis):
                 overflow-x:hidden !important;
                 padding:8px;
                 min-width:0;
-            }}
+            }}}}
             .chat-card .chat-row,
-            .chat-card .chat-bubble {{
+            .chat-card .chat-bubble {{{{
                 min-width:0;
-            }}
-            .chat-card .chat-bubble {{
+            }}}}
+            .chat-card .chat-bubble {{{{
                 max-width:calc(100% - 44px);
-            }}
-        }}
-        .guru-student-info {{
+            }}}}
+        }}}}
+        .guru-student-info {{{{
             display:flex;
             align-items:center;
             gap:8px;
             padding:1px 2px 6px 2px;
-        }}
+        }}}}
 
         .guru-student-photo,
-        .guru-student-photo-fallback {{
+        .guru-student-photo-fallback {{{{
             width:45px;
             height:45px;
             min-width:45px;
@@ -9765,41 +9765,41 @@ def obrolan_guru_detail(nis):
             border:3px solid #fff;
             box-shadow:0 2px 7px rgba(0,0,0,.12);
             background:#eef3f8;
-        }}
+        }}}}
 
-        .guru-student-photo-fallback {{
+        .guru-student-photo-fallback {{{{
             display:flex;
             align-items:center;
             justify-content:center;
             font-size:22px;
-        }}
+        }}}}
 
-        .guru-student-main {{
+        .guru-student-main {{{{
             flex:1;
             min-width:0;
-        }}
+        }}}}
 
-        .guru-student-name {{
+        .guru-student-name {{{{
             font-size:17px;
             font-weight:700;
             margin-bottom:1px;
             color:#17233c;
-        }}
+        }}}}
 
-        .guru-student-meta {{
+        .guru-student-meta {{{{
             font-size:12px;
             line-height:1.25;
             color:#4b5563;
-        }}
+        }}}}
 
-        .guru-student-status {{
+        .guru-student-status {{{{
             min-width:175px;
             padding-left:8px;
             border-left:1px solid #e1e5eb;
             text-align:right;
-        }}
+        }}}}
 
-        .guru-status-badge {{
+        .guru-status-badge {{{{
             display:inline-block;
             padding:6px 10px;
             border-radius:20px;
@@ -9807,69 +9807,69 @@ def obrolan_guru_detail(nis):
             font-weight:700;
             background:#dcfce7;
             color:#15803d;
-        }}
+        }}}}
 
-        .guru-status-badge.selesai {{
+        .guru-status-badge.selesai {{{{
             background:#fee2e2;
             color:#b91c1c;
-        }}
+        }}}}
 
-        .guru-last-seen {{
+        .guru-last-seen {{{{
             margin-top:3px;
             font-size:11px;
             color:#777;
             line-height:1.3;
-        }}
+        }}}}
 
         /* Jarak aman tombol Akhiri Chat Guru */
-        #tombol-akhiri-chat-guru {{
+        #tombol-akhiri-chat-guru {{{{
             margin-bottom:max(20px,env(safe-area-inset-bottom)) !important;
-        }}
-        #tombol-akhiri-chat-guru form {{
+        }}}}
+        #tombol-akhiri-chat-guru form {{{{
             margin-bottom:0 !important;
-        }}
-        #tombol-akhiri-chat-guru .btn {{
+        }}}}
+        #tombol-akhiri-chat-guru .btn {{{{
             width:100%;
             box-sizing:border-box;
-        }}
+        }}}}
 
-        @media (max-width:600px) {{
-            .guru-student-info {{
+        @media (max-width:600px) {{{{
+            .guru-student-info {{{{
                 gap:8px;
                 padding:1px 2px 6px 2px;
-            }}
+            }}}}
 
             .guru-student-photo,
-            .guru-student-photo-fallback {{
+            .guru-student-photo-fallback {{{{
                 width:45px;
                 height:45px;
                 min-width:45px;
-            }}
+            }}}}
 
-            .guru-student-name {{
+            .guru-student-name {{{{
                 font-size:17px;
-            }}
+            }}}}
 
-            .guru-student-meta {{
+            .guru-student-meta {{{{
                 font-size:12px;
-            }}
+            }}}}
 
-            .guru-student-status {{
+            .guru-student-status {{{{
                 min-width:0;
                 padding-left:8px;
-            }}
+            }}}}
 
-            .guru-status-badge {{
+            .guru-status-badge {{{{
                 font-size:11px;
                 padding:5px 8px;
-            }}
+            }}}}
 
-            .guru-last-seen {{
+            .guru-last-seen {{{{
                 font-size:10px;
-            }}
-        }}
+            }}}}
+        }}}}
 
-        .ortu-student-info {{
+        .ortu-student-info {{{{
             display:grid !important;
             grid-template-columns:45px minmax(0,1fr) 215px !important;
             align-items:center !important;
@@ -9879,14 +9879,14 @@ def obrolan_guru_detail(nis):
             margin-bottom:8px !important;
             padding:1px 2px 6px 2px !important;
             box-sizing:border-box !important;
-        }}
+        }}}}
 
-        .ortu-student-main {{
+        .ortu-student-main {{{{
             grid-column:2 !important;
             min-width:0 !important;
-        }}
+        }}}}
 
-        .ortu-student-status {{
+        .ortu-student-status {{{{
             grid-column:3 !important;
             min-width:0 !important;
             width:100% !important;
@@ -9894,18 +9894,18 @@ def obrolan_guru_detail(nis):
             border-left:1px solid #e1e5eb !important;
             text-align:right !important;
             box-sizing:border-box !important;
-        }}
+        }}}}
 
-        .ortu-status-badge {{
+        .ortu-status-badge {{{{
             white-space:nowrap !important;
-        }}
+        }}}}
 
-        .ortu-last-seen {{
+        .ortu-last-seen {{{{
             white-space:nowrap !important;
-        }}
+        }}}}
 
         .ortu-student-photo,
-        .ortu-student-photo-fallback {{
+        .ortu-student-photo-fallback {{{{
             width:45px;
             height:45px;
             min-width:45px;
@@ -9914,29 +9914,29 @@ def obrolan_guru_detail(nis):
             border:3px solid #fff;
             box-shadow:0 2px 7px rgba(0,0,0,.12);
             background:#eef3f8;
-        }}
+        }}}}
 
-        .ortu-student-photo-fallback {{
+        .ortu-student-photo-fallback {{{{
             display:flex;
             align-items:center;
             justify-content:center;
             font-size:22px;
-        }}
+        }}}}
 
-        .ortu-student-name {{
+        .ortu-student-name {{{{
             font-size:17px;
             font-weight:700;
             margin-bottom:1px;
             color:#17233c;
-        }}
+        }}}}
 
-        .ortu-student-meta {{
+        .ortu-student-meta {{{{
             font-size:12px;
             line-height:1.25;
             color:#4b5563;
-        }}
+        }}}}
 
-        .ortu-status-badge {{
+        .ortu-status-badge {{{{
             display:inline-block;
             padding:6px 10px;
             border-radius:20px;
@@ -9944,67 +9944,67 @@ def obrolan_guru_detail(nis):
             font-weight:700;
             background:#dcfce7;
             color:#15803d;
-        }}
+        }}}}
 
-        .ortu-status-badge.selesai {{
+        .ortu-status-badge.selesai {{{{
             background:#fee2e2;
             color:#b91c1c;
-        }}
+        }}}}
 
-        .ortu-last-seen {{
+        .ortu-last-seen {{{{
             margin-top:3px;
             font-size:11px;
             color:#777;
             line-height:1.3;
-        }}
+        }}}}
 
-        @media (max-width:600px) {{
-            .ortu-student-info {{
+        @media (max-width:600px) {{{{
+            .ortu-student-info {{{{
                 gap:8px;
                 padding:1px 2px 6px 2px;
-            }}
+            }}}}
 
             .ortu-student-photo,
-            .ortu-student-photo-fallback {{
+            .ortu-student-photo-fallback {{{{
                 width:45px;
                 height:45px;
                 min-width:45px;
-            }}
+            }}}}
 
-            .ortu-student-name {{
+            .ortu-student-name {{{{
                 font-size:17px;
-            }}
+            }}}}
 
-            .ortu-student-meta {{
+            .ortu-student-meta {{{{
                 font-size:12px;
-            }}
+            }}}}
 
-            .ortu-student-info {{
+            .ortu-student-info {{{{
                 grid-template-columns:45px minmax(0,1fr) 180px !important;
                 column-gap:8px !important;
                 min-height:55px !important;
                 margin-bottom:8px !important;
-            }}
+            }}}}
 
-            .ortu-student-status {{
+            .ortu-student-status {{{{
                 grid-column:3 !important;
                 min-width:0 !important;
                 width:100% !important;
                 padding-left:8px !important;
                 border-left:1px solid #e1e5eb !important;
-            }}
+            }}}}
 
-            .ortu-status-badge {{
+            .ortu-status-badge {{{{
                 font-size:11px;
                 padding:5px 8px;
-            }}
+            }}}}
 
-            .ortu-last-seen {{
+            .ortu-last-seen {{{{
                 font-size:10px;
-            }}
-        }}
+            }}}}
+        }}}}
 
-        .chat-student {{
+        .chat-student {{{{
             display:flex;
             justify-content:space-between;
             gap:10px;
@@ -10012,15 +10012,15 @@ def obrolan_guru_detail(nis):
             margin:10px 0;
             border-radius:10px;
             background:#f5f5f5;
-        }}
-        .chat-info {{
+        }}}}
+        .chat-info {{{{
             padding:10px;
             margin-bottom:12px;
             border-radius:8px;
             background:#eef6ff;
             font-size:14px;
-        }}
-        .chat-box {{
+        }}}}
+        .chat-box {{{{
             flex:1;
             min-height:0;
             max-height:none;
@@ -10036,27 +10036,27 @@ def obrolan_guru_detail(nis):
             background-repeat:repeat;
             background-size:520px auto;
             background-position:center top;
-        }}
-        .chat-row {{
+        }}}}
+        .chat-row {{{{
             display:flex;
             align-items:flex-end;
             gap:8px;
             width:100%;
             box-sizing:border-box;
             margin:8px 0;
-        }}
+        }}}}
 
-        .chat-left {{
+        .chat-left {{{{
             justify-content:flex-start;
             flex-direction:row;
-        }}
+        }}}}
 
-        .chat-right {{
+        .chat-right {{{{
             justify-content:flex-start;
             flex-direction:row-reverse;
-        }}
+        }}}}
 
-        .chat-row .chat-avatar {{
+        .chat-row .chat-avatar {{{{
             width:40px;
             height:40px;
             min-width:40px;
@@ -10069,38 +10069,38 @@ def obrolan_guru_detail(nis):
             display:block;
             border:2px solid #ffffff;
             box-shadow:0 2px 6px rgba(0,0,0,.12);
-        }}
+        }}}}
 
-        .chat-row .chat-bubble {{
+        .chat-row .chat-bubble {{{{
             max-width:calc(100% - 48px);
             box-sizing:border-box;
             padding:10px 13px;
             border-radius:14px;
             background:#eeeeee;
-        }}
-        .chat-right .chat-bubble {{
+        }}}}
+        .chat-right .chat-bubble {{{{
             background:#dff5df;
-        }}
-        .chat-guru .chat-bubble {{
+        }}}}
+        .chat-guru .chat-bubble {{{{
             background:#e5efff;
-        }}
-        .chat-sender {{
+        }}}}
+        .chat-sender {{{{
             font-size:12px;
             font-weight:bold;
             margin-bottom:4px;
-        }}
-        .chat-text {{
+        }}}}
+        .chat-text {{{{
             line-height:1.45;
             word-break:break-word;
-        }}
-        .chat-form {{
+        }}}}
+        .chat-form {{{{
             margin-top:12px;
-        }}
-        .chat-form {{
+        }}}}
+        .chat-form {{{{
             margin-top:10px;
-        }}
+        }}}}
 
-        .chat-composer {{
+        .chat-composer {{{{
             display:flex;
             align-items:flex-end;
             gap:8px;
@@ -10109,9 +10109,9 @@ def obrolan_guru_detail(nis):
             border-radius:18px;
             padding:6px;
             box-shadow:0 3px 12px rgba(0,0,0,.08);
-        }}
+        }}}}
 
-        .chat-form textarea {{
+        .chat-form textarea {{{{
             flex:1;
             width:100%;
             min-height:42px;
@@ -10125,13 +10125,13 @@ def obrolan_guru_detail(nis):
             font-family:Arial,sans-serif;
             font-size:14px;
             line-height:20px;
-        }}
+        }}}}
 
-        .chat-form textarea:focus {{
+        .chat-form textarea:focus {{{{
             outline:none;
-        }}
+        }}}}
 
-        .chat-composer .chat-send {{
+        .chat-composer .chat-send {{{{
             flex:0 0 44px !important;
             width:44px !important;
             height:44px !important;
@@ -10152,21 +10152,21 @@ def obrolan_guru_detail(nis):
             margin:0 !important;
             box-shadow:0 3px 8px rgba(37,99,235,.35);
             transition:transform .15s ease, box-shadow .15s ease;
-        }}
+        }}}}
 
-        .chat-send:active {{
+        .chat-send:active {{{{
             transform:scale(.92);
-        }}
+        }}}}
 
-        .chat-composer .chat-send .send-icon {{
+        .chat-composer .chat-send .send-icon {{{{
             width:21px !important;
             height:21px !important;
             display:flex;
             align-items:center;
             justify-content:center;
-        }}
+        }}}}
 
-        .chat-composer .chat-send .send-icon svg {{
+        .chat-composer .chat-send .send-icon svg {{{{
             display:block;
             width:21px !important;
             height:21px !important;
@@ -10175,26 +10175,26 @@ def obrolan_guru_detail(nis):
             max-width:21px !important;
             max-height:21px !important;
             fill:#ffffff !important;
-        }}
+        }}}}
 
-        .send-icon {{
+        .send-icon {{{{
             display:flex;
             align-items:center;
             justify-content:center;
             width:100%;
             height:100%;
-        }}
+        }}}}
 
         /* ============================================================
            CHAT ATTACHMENT
            ============================================================ */
-        .chat-attachment {{
+        .chat-attachment {{{{
             margin-top: 8px;
             max-width: 100%;
             box-sizing: border-box;
-        }}
+        }}}}
 
-        #chat-box .chat-attachment .chat-attachment-image {{
+        #chat-box .chat-attachment .chat-attachment-image {{{{
             display: block !important;
             width: 120px !important;
             height: 120px !important;
@@ -10204,9 +10204,9 @@ def obrolan_guru_detail(nis):
             min-height: 120px !important;
             object-fit: contain !important;
             flex: 0 0 120px !important;
-        }}
+        }}}}
 
-        .chat-attachment-image {{
+        .chat-attachment-image {{{{
             display: block !important;
             width: 120px !important;
             height: 120px !important;
@@ -10220,26 +10220,26 @@ def obrolan_guru_detail(nis):
             border: 1px solid #dbe3ef !important;
             background: #f8fafc !important;
             box-sizing: border-box !important;
-        }}
+        }}}}
 
-        .chat-attachment-name {{
+        .chat-attachment-name {{{{
             margin-top: 5px;
             font-size: 12px;
             font-weight: 600;
             line-height: 1.35;
             word-break: break-word;
             overflow-wrap: anywhere;
-        }}
+        }}}}
 
-        .chat-attachment-download {{
+        .chat-attachment-download {{{{
             display: inline-block;
             margin-top: 5px;
             font-size: 12px;
             font-weight: 600;
             text-decoration: none;
-        }}
+        }}}}
 
-        .chat-file {{
+        .chat-file {{{{
             display: flex;
             align-items: center;
             gap: 10px;
@@ -10252,9 +10252,9 @@ def obrolan_guru_detail(nis):
             background: #ffffff;
             box-sizing: border-box;
             overflow: hidden;
-        }}
+        }}}}
 
-        .chat-file-icon {{
+        .chat-file-icon {{{{
             flex: 0 0 44px;
             width: 44px;
             height: 44px;
@@ -10267,19 +10267,19 @@ def obrolan_guru_detail(nis):
             text-align: center;
             border-radius: 10px;
             background: #eef4ff;
-        }}
+        }}}}
 
-        .chat-file-info {{
+        .chat-file-info {{{{
             min-width: 0;
             flex: 1 1 auto;
-        }}
+        }}}}
 
         /* Preview sebelum attachment dikirim */
-        .chat-attachment-preview {{
+        .chat-attachment-preview {{{{
             display: none !important;
-        }}
+        }}}}
 
-        .chat-attachment-preview-card {{
+        .chat-attachment-preview-card {{{{
             display: flex;
             align-items: center;
             gap: 8px;
@@ -10289,9 +10289,9 @@ def obrolan_guru_detail(nis):
             background: #f8fafc;
             width: 100%;
             box-sizing: border-box;
-        }}
+        }}}}
 
-        .chat-attachment-preview-image {{
+        .chat-attachment-preview-image {{{{
             display: block !important;
             width: 56px !important;
             height: 56px !important;
@@ -10305,36 +10305,36 @@ def obrolan_guru_detail(nis):
             border-radius: 8px !important;
             border: 1px solid #dbe3ef !important;
             box-sizing: border-box !important;
-        }}
+        }}}}
 
-        .chat-attachment-preview-icon {{
+        .chat-attachment-preview-icon {{{{
             width: 56px;
             min-width: 56px;
             font-size: 30px;
             line-height: 1;
             text-align: center;
-        }}
+        }}}}
 
-        .chat-attachment-preview-info {{
+        .chat-attachment-preview-info {{{{
             min-width: 0;
             flex: 1 1 auto;
-        }}
+        }}}}
 
-        .chat-attachment-preview-name {{
+        .chat-attachment-preview-name {{{{
             font-size: 12px;
             font-weight: 600;
             line-height: 1.35;
             word-break: break-word;
             overflow-wrap: anywhere;
-        }}
+        }}}}
 
-        .chat-attachment-preview-size {{
+        .chat-attachment-preview-size {{{{
             font-size: 11px;
             color: #64748b;
             margin-top: 2px;
-        }}
+        }}}}
 
-        .chat-attachment-preview-remove {{
+        .chat-attachment-preview-remove {{{{
             flex: 0 0 32px;
             width: 32px;
             height: 32px;
@@ -10346,10 +10346,10 @@ def obrolan_guru_detail(nis):
             line-height: 32px;
             text-align: center;
             cursor: pointer;
-        }}
+        }}}}
 
         /* Menu attachment Guru/Orang Tua */
-        .chat-attach-menu {{
+        .chat-attach-menu {{{{
             display: none;
             position: absolute;
             z-index: 1300;
@@ -10361,13 +10361,13 @@ def obrolan_guru_detail(nis):
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(15,23,42,.18);
             box-sizing: border-box;
-        }}
+        }}}}
 
-        .chat-attach-menu.show {{
+        .chat-attach-menu.show {{{{
             display: block;
-        }}
+        }}}}
 
-        .chat-attach-menu button {{
+        .chat-attach-menu button {{{{
             display: flex;
             align-items: center;
             width: 100%;
@@ -10380,14 +10380,14 @@ def obrolan_guru_detail(nis):
             font-size: 13px;
             text-align: left;
             cursor: pointer;
-        }}
+        }}}}
 
-        .chat-attach-menu button:active {{
+        .chat-attach-menu button:active {{{{
             background: #eff6ff;
-        }}
+        }}}}
 
         /* Samakan icon menu Chat Guru dengan menu Chat Administrator */
-        .chat-attach-menu .admin-menu-item .admin-menu-icon {{
+        .chat-attach-menu .admin-menu-item .admin-menu-icon {{{{
             width: 30px !important;
             height: 30px !important;
             min-width: 30px !important;
@@ -10397,20 +10397,20 @@ def obrolan_guru_detail(nis):
             object-fit: contain !important;
             display: block !important;
             flex: 0 0 30px !important;
-        }}
+        }}}}
 
-        .chat-attach-menu .admin-menu-item {{
+        .chat-attach-menu .admin-menu-item {{{{
             display: flex !important;
             align-items: center !important;
             gap: 10px !important;
             min-height: 42px !important;
             padding: 6px 10px !important;
             box-sizing: border-box !important;
-        }}
+        }}}}
 
 
-        @media (max-width: 600px) {{
-            #chat-box .chat-attachment .chat-attachment-image {{
+        @media (max-width: 600px) {{{{
+            #chat-box .chat-attachment .chat-attachment-image {{{{
             display: block !important;
             width: 120px !important;
             height: 120px !important;
@@ -10420,9 +10420,9 @@ def obrolan_guru_detail(nis):
             min-height: 120px !important;
             object-fit: contain !important;
             flex: 0 0 120px !important;
-        }}
+        }}}}
 
-        .chat-attachment-image {{
+        .chat-attachment-image {{{{
             display: block !important;
             width: 120px !important;
             height: 120px !important;
@@ -10436,16 +10436,16 @@ def obrolan_guru_detail(nis):
             border: 1px solid #dbe3ef !important;
             background: #f8fafc !important;
             box-sizing: border-box !important;
-        }}
+        }}}}
 
-            .chat-file {{
+            .chat-file {{{{
                 width: 100%;
-            }}
+            }}}}
 
-            .chat-attachment-preview-card {{
+            .chat-attachment-preview-card {{{{
                 min-height: 72px;
-            }}
-        }}
+            }}}}
+        }}}}
 
 </style>
 
