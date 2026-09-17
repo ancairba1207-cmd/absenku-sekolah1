@@ -9178,7 +9178,7 @@ def obrolan_guru_detail(nis):
 
         /* FINAL FIX: composer Guru berada di dalam card, tepat di bawah pesan */
         .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
-            position:static !important;
+            position:relative !important;
             left:auto !important;
             right:auto !important;
             bottom:auto !important;
@@ -9197,6 +9197,73 @@ def obrolan_guru_detail(nis):
             padding:4px 8px !important;
             margin:0 !important;
         }}
+
+        /* ABSOLUTE FINAL: COMPOSER GURU SELALU TERLIHAT */
+        .guru-chat-page-scroll > .chat-card {{
+            display:flex !important;
+            flex-direction:column !important;
+            overflow:hidden !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #chat-box {{
+            flex:1 1 auto !important;
+            min-height:0 !important;
+            overflow-y:auto !important;
+            overflow-x:hidden !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru {{
+            position:relative !important;
+            flex:0 0 58px !important;
+            width:100% !important;
+            height:58px !important;
+            min-height:58px !important;
+            max-height:58px !important;
+            display:block !important;
+            visibility:visible !important;
+            opacity:1 !important;
+            z-index:100 !important;
+            background:#ffffff !important;
+            box-sizing:border-box !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
+            width:100% !important;
+            height:50px !important;
+            min-height:50px !important;
+            display:block !important;
+            margin:0 !important;
+            padding:0 !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer {{
+            display:flex !important;
+            align-items:center !important;
+            gap:8px !important;
+            width:100% !important;
+            height:50px !important;
+            min-height:50px !important;
+            max-height:50px !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-composer textarea {{
+            flex:1 1 auto !important;
+            min-width:0 !important;
+            height:40px !important;
+            min-height:40px !important;
+            max-height:40px !important;
+        }}
+
+        .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-attach {{
+            flex:0 0 34px !important;
+            width:34px !important;
+            height:34px !important;
+            min-width:34px !important;
+            min-height:34px !important;
+            max-width:34px !important;
+            max-height:34px !important;
+        }}
+
 
         .guru-chat-page-scroll > .chat-card #kontrol-chat-guru .chat-form {{
             display:block !important;
